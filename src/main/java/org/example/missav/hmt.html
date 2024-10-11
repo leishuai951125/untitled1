@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<body style="background-color: sandybrown">
+输入a:<input id="inputA">
+输入b:<input id="inputB">
+输入c:<input id="inputC">
+<button onclick="ff()">点击计算面积</button>
+<div id="print" style="background-color: red">显示结果</div>
+<script>
+    function ff() {
+        var a = $("#inputA").val();
+        var b = $("#inputB").val()
+        var c = $("#inputC").val()
+
+        var p = (parseInt(a) + parseInt(b) + parseInt(c)) / 2
+        var s = Math.sqrt(p * (p - a) * (p - b) * (p - c))
+
+        //打印sum
+        $("#print").html("" + s)
+    }
+</script>
+</body>
+</html>

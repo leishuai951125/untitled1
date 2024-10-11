@@ -1,0 +1,15 @@
+curl 'https://m.ke.com/archer/api/apiProxy/channelApiProxy/api/index/secondhouse?city_id=420100&ucid=&month=1&district_id=420113&bizcircle_id=' \
+  -H 'Accept: application/json, text/plain, */*' \
+  -H 'Accept-Language: zh-CN,zh;q=0.9' \
+  -H 'Connection: keep-alive' \
+  -H 'Cookie: lianjia_uuid=325dfb98-ad7d-499b-baf3-29c00d2594cc; _smt_uid=64a85deb.2722612b; sajssdk_2015_cross_new_user=1; sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%2218931aee1cd1c2-000d84afdd84d3-1d525634-1764000-18931aee1ce102a%22%2C%22%24device_id%22%3A%2218931aee1cd1c2-000d84afdd84d3-1d525634-1764000-18931aee1ce102a%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E8%87%AA%E7%84%B6%E6%90%9C%E7%B4%A2%E6%B5%81%E9%87%8F%22%2C%22%24latest_referrer%22%3A%22https%3A%2F%2Fwww.baidu.com%2Flink%22%2C%22%24latest_referrer_host%22%3A%22www.baidu.com%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC%22%7D%7D; lianjia_ssid=03a2b8dd-20b2-4929-9da6-5eec2309c4ec; digData=%7B%22key%22%3A%22m_pages_beikezhishu%22%7D; select_city=420100; __s=45807; beikeBaseData=%7B%22parentSceneId%22%3A%221090748989963984641%22%7D' \
+  -H 'DUID;' \
+  -H 'Referer: https://m.ke.com/archer/wh/zhishu?channel=ershou&district=420113&bizcircle=420113' \
+  -H 'Sec-Fetch-Dest: empty' \
+  -H 'Sec-Fetch-Mode: cors' \
+  -H 'Sec-Fetch-Site: same-origin' \
+  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36' \
+  -H 'sec-ch-ua: "Chromium";v="112", "Google Chrome";v="112", "Not:A-Brand";v="99"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "macOS"' \
+  --compressed

@@ -1,3 +1,34 @@
+
+
+
+
+exit 0
+export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890
+cookiePath="/Users/leishuai/IdeaProjects/untitled1/src/main/java/org/example/missav/cookie.txt"
+baidu=https://www.baidu.com/
+#curl -c $cookiePath -b $cookiePath $baidu
+#exit 0
+
+
+
+curl -c $cookiePath -b $cookiePath 'https://missav.com/makers/Crystal-Eizou2' \
+  -H 'authority: missav.com' \
+  -H 'accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7' \
+  -H 'accept-language: zh-CN,zh;q=0.9' \
+  -H 'sec-ch-ua: "Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "macOS"' \
+  -H 'sec-fetch-dest: document' \
+  -H 'sec-fetch-mode: navigate' \
+  -H 'sec-fetch-site: none' \
+  -H 'sec-fetch-user: ?1' \
+  -H 'upgrade-insecure-requests: 1' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36' \
+  --compressed
+
+#curl --location 'https://missav.com/makers/Crystal-Eizou2'
+
+
 #curl --location --request POST 'https://orion-http.gw.postman.co/v1/request' \
 #--header 'authority: orion-http.gw.postman.co' \
 #--header 'accept: */*' \
@@ -16,19 +47,3 @@
 #--header 'sec-fetch-mode: cors' \
 #--header 'sec-fetch-site: same-site' \
 #--header 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
-
-
-curl 'https://missav.com/makers/Crystal-Eizou2' \
-  -H 'authority: missav.com' \
-  -H 'accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7' \
-  -H 'accept-language: zh-CN,zh;q=0.9' \
-  -H 'sec-ch-ua: "Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"' \
-  -H 'sec-ch-ua-mobile: ?0' \
-  -H 'sec-ch-ua-platform: "macOS"' \
-  -H 'sec-fetch-dest: document' \
-  -H 'sec-fetch-mode: navigate' \
-  -H 'sec-fetch-site: none' \
-  -H 'sec-fetch-user: ?1' \
-  -H 'upgrade-insecure-requests: 1' \
-  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36' \
-  --compressed
