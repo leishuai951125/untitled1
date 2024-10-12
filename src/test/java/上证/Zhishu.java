@@ -95,17 +95,17 @@ public class Zhishu {
                     boolean needLog = true;
                     if (sum > sumLevel) { //
                         needLog = true;
-                        color = oneData.last2StartDiff > 0 ? ANSI_GREEN : ANSI_RED;
-                        shouyi.add(oneData.last2StartDiff);
+                        color = oneData.last2EndDiff > 0 ? ANSI_GREEN : ANSI_RED;
+                        shouyi.add(oneData.last2EndDiff);
                     }
                     if (needLog && inputNeedLog) {
-                        System.out.println(color + String.format("\t日期：%s  \t上日开涨：%.2f  \t上日收涨：%.2f  \t上日波动：%.2f  \t开比上收：%.2f  \t当日开涨：%.2f  \t指数：%.2f ",
+                        System.out.println(color + String.format("\t日期：%s  \t上日开涨：%.2f  \t上日收涨：%.2f  \t上日波动：%.2f  \t开比上收：%.2f  \t当日收涨：%.2f  \t指数：%.2f ",
                                 oneData.date,
                                 lastOneData.last2StartDiff,
                                 lastOneData.last2EndDiff,
                                 lastOneData.startEndDiff,
                                 Math.abs(oneData.last2StartDiff / lastOneData.last2EndDiff),
-                                oneData.last2StartDiff,
+                                oneData.last2EndDiff,
                                 sum
 //                            oneData.last2EndDiff
                         ) + ANSI_RESET);
