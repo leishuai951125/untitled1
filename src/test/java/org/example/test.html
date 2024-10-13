@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<canvas width="200px" height="200px" style="background-color: rebeccapurple">
+    <div style="background-color: red;width: 100px;height: 100px">123</div>
+</canvas>
+https://nlv08.videosection.com/8/6/5/8657bac7e3e89905a2b9d4796d40b9de/stream/720p/seg-51-f1-v1-a1.ts?e=1683487500&h=48b323992d832467a1374d9d0627729c
+https://nlv08.videosection.com/8/6/5/8657bac7e3e89905a2b9d4796d40b9de/stream/720p/seg-52-f1-v1-a1.ts?e=1683487500&h=48b323992d832467a1374d9d0627729c
+<video width="320" height="240" controls>
+    <!--    <source src="https://nlv08.videosection.com/8/6/5/8657bac7e3e89905a2b9d4796d40b9de/stream/720p/seg-51-f1-v1-a1.ts?e=1683487500&h=48b323992d832467a1374d9d0627729c" type="video/mp4">-->
+    <source src="./seg-63-f1-v1-a1.ts" type="video/ts">
+    <!--    <source src="movie.ogg" type="video/ogg">-->
+</video>
+<script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script>
+    function append(msg) {
+        $("body").append(`<h1>${msg}</h1>`)
+    }
+
+    // let p = new Promise(function (resolve, reject) {
+    //     setTimeout(() => {
+    //         resolve("niaho")
+    //     }, 1000)
+    // })
+    // p.then(function (msg) {
+    //     append(msg)
+    // })
+    // p.then(function (msg) {
+    //     append(msg)
+    // })
+
+    //
+    // new Promise(function (resolve, reject) {
+    //     setTimeout(() => {
+    //         resolve("niaho")
+    //     }, 3000)
+    // }).then(function (msg) {
+    //     append(msg)
+    //     return new Promise(function (resolve, reject) {
+    //         setTimeout(() => {
+    //             resolve("nihao2")
+    //         }, 2000)
+    //     })
+    // }).then(function (msg) {
+    //     append(msg)
+    //     console.log(msg)
+    // })
+    // async function test3() {
+    //     let msg = await new Promise(function (resolve, reject) {
+    //         setTimeout(() => {
+    //             resolve("niaho")
+    //         }, 3000)
+    //     })
+    //     append(msg)
+    //     return "nihaoba"
+    // }
+    async function test3() {
+        throw "nihao"
+        // try {
+        let msg = await new Promise(function (resolve, reject) {
+            setTimeout(() => {
+                // resolve("niaho")
+                reject("error")
+            }, 3000)
+        })
+        // } catch (e) {
+        //     console.log(e)
+        //     // throw e
+        // }
+        // append(msg)
+        // return "nihaoba"
+    }
+
+    test3().catch(e => console.log(e))
+
+    // try {
+    //     test3()
+    // } catch (e) {
+    //     console.log(e)
+    // }
+
+    // test3().then(function (msg) {
+    //     append(msg)
+    // })
+</script>
+</body>
+</html>
+
+/*
+一个promise可以被多次消费，也可以在 resolve 之前定义then或者之后定义then
+then 可以链式调用（多个异步请求同步执行)
+await 只能在 async 函数内部，await 后面接 promise,遇到异常会自动 throw,需要被 catch ，或者被外层catch
+async 函数返回 promise 对象
+*/
