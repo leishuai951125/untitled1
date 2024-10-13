@@ -44,7 +44,7 @@ public class Data {
         Response response = client.newCall(request).execute();
         JSONObject resp = JSON.parseObject(response.body().string());
         AtomicInteger atomicInteger = new AtomicInteger(0);
-        Map<String, List<Stock>> allStock = resp.getJSONObject("data").getJSONArray("items").stream().map(e -> {
+        Map<String, List<Stock>> allStock = resp.getJSONObject("上证/data").getJSONArray("items").stream().map(e -> {
             Stock stock = new Stock();
             JSONObject quote = ((JSONObject) e).getJSONObject("quote");
             stock.setName(quote.getString("name"));
@@ -53,7 +53,7 @@ public class Data {
 //            if (atomicInteger.incrementAndGet() < 10) {
             try {
                 stock.setSubType("");
-//                stock.setSubType(ff3(stock.getCode()));
+                stock.setSubType(ff3(stock.getCode()));
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
@@ -96,7 +96,7 @@ public class Data {
                 .build();
         Response response = client.newCall(request).execute();
         JSONObject resp = JSON.parseObject(response.body().string());
-        return resp.getJSONObject("result").getJSONArray("data").getJSONObject(0).getString("BELONG_INDUSTRY");
+        return resp.getJSONObject("result").getJSONArray("上证/data").getJSONObject(0).getString("BELONG_INDUSTRY");
     }
 
 
