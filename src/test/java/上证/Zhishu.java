@@ -1,6 +1,7 @@
 package 上证;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.junit.Test;
@@ -38,6 +39,39 @@ public class Zhishu {
         }
     }
 
+    static long getTs(String date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            return formatter.parse(date).getTime() / 1000 / (24 * 3600);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static Map<String/*dayOffset */, QiInfo> qihuoMap;
+
+    @AllArgsConstructor
+    static class QiInfo {
+        long ts;
+        String dateFormmat;
+        String timeFormat;
+        long kaipan;
+        long shoupan;
+        double zhangdie;
+    }
+
+    {
+        qihuoMap = JSON.parseArray(getDataByFileName("a50_qihuo")).stream().map(o -> {
+            JSONArray jsonArray = (JSONArray) o;
+            long ts = jsonArray.getLong(9);
+            String timeFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss").format(new Date(ts * 1000));
+            String dateFormmat = new SimpleDateFormat("yyyy-MM-dd").format(new Date(ts * 1000));
+            long kaipan = jsonArray.getLong(0);
+            long shoupan = jsonArray.getLong(1);
+            return new QiInfo(ts, dateFormmat, timeFormat, kaipan, shoupan, (shoupan - kaipan) * 1.0 / kaipan);
+        }).filter(e -> e.timeFormat.endsWith("09-00-00")).collect(Collectors.toMap(e -> e.dateFormmat, e -> e));
+    }
+
     final static String ali_gang = getDataByFileName("ali_gang");
     final static String ali_mei = getDataByFileName("ali_mei");
 
@@ -49,36 +83,72 @@ public class Zhishu {
     static boolean qufan = false;//不能用 true
     //当日开盘价
 //    static Function<OneData, Boolean> yijuFunc = (oneData) -> Optional.ofNullable(yijuDataInfoMap.get(oneData.date)).map(OneData::getLast2StartDiff).map(kkk2 -> kkk2 > 0).orElse(null);
-//    //当日收盘价
+    //当日收盘价
 //    static Function<OneData, Boolean> yijuFunc = (oneData) -> Optional.ofNullable(yijuDataInfoMap.get(oneData.date)) //当日
 //            .map(OneData::getLast2EndDiff).map(kkk2 -> kkk2 > 0).orElse(null); //收盘涨
-
-    //上一日整体涨跌
-//    static Function<OneData, Boolean> yijuFunc = (oneData) -> Optional.ofNullable(yijuDataInfoMap.get(getLastDate(oneData.date))) //当日
-//            .map(OneData::getLast2EndDiff).map(kkk2 -> kkk2 > 0).orElse(null); //收盘涨
-
     static Map<String, OneData> yijuDataInfoMap = null;
     static Map<String, OneData> testDataInfoMap = null;
-    //上一日开盘后涨跌
+    //上一日整体涨跌
     static Function<OneData, Boolean> yijuFunc = (oneData) -> Optional.ofNullable(yijuDataInfoMap.get(getLastDate(oneData.date))) //当日
-            .map(e -> {
-                String today = e.getDate();
-                if (testDataInfoMap.containsKey(getLastDate(today)) && yijuDataInfoMap.containsKey(getLastDate(today)) &&
-                        yijuDataInfoMap.containsKey(getLastDate(getLastDate(today)))) {
-                    return yijuDataInfoMap.get(getLastDate(today)).getLast2EndDiff();
-                }
-                return null;
-            }).map(kkk2 -> kkk2 > 0).orElse(null); //收盘涨
+            .map(OneData::getLast2EndDiff).map(kkk2 -> kkk2 > 0).orElse(null); //收盘涨
+
+//    static Function<OneData, Boolean> yijuFunc = (oneData) -> Optional.ofNullable(qihuoMap.get(oneData.date)) //当日
+//            .map(e -> e.zhangdie > 0).orElse(null);
+
+
+    //上一日开盘后涨跌
+//    static Function<OneData, Boolean> yijuFunc = (oneData) -> Optional.ofNullable(oneData) //当日
+//            .map(e -> {
+//                String today = e.getDate();
+//                if (testDataInfoMap.containsKey(getLastDate(today)) && yijuDataInfoMap.containsKey(getLastDate(today)) &&
+//                        yijuDataInfoMap.containsKey(getLastDate(getLastDate(today)))) { //此时才准
+//
+//                    double yujizhang = yijuDataInfoMap.get(getLastDate(today)).getLast2EndDiff();
+//                    double kaipan = oneData.last2StartDiff;
+//                    double quezhangfu = yujizhang - kaipan;
+//                    double xishu = 1.5;
+//                    OneData lastData = testDataInfoMap.get(getLastDate(today));
+//                    if ((
+//                            Math.abs(lastData.getStartEndDiff()) > 0.00
+//                                    ||
+//                                    Math.abs(lastData.getLast2EndDiff()) > 0.00
+//                    )) {
+////                        System.out.println("买入");
+//                        if (quezhangfu * yujizhang > 0) { // //zhang && 同号
+//                            if (yujizhang > 0) { //涨
+//                                if (Math.abs(quezhangfu) < Math.abs(yujizhang) / xishu) {
+//                                    //没涨够
+//                                    return true;
+//                                }
+//                                if (Math.abs(quezhangfu) > Math.abs(yujizhang) * xishu) {
+//                                    //涨多了
+//                                    return false;
+//                                }
+//                            } else { //跌
+//                                if (Math.abs(quezhangfu) < Math.abs(yujizhang) / xishu) {
+//                                    return false;
+//                                }
+//                                if (Math.abs(quezhangfu) > Math.abs(yujizhang) * xishu) {
+//                                    return true;
+//                                }
+//                            }
+//                        }
+//                        return true;
+//                    }
+//                }
+//                return null;
+//            }).orElse(null); //收盘涨
 
 
     @Test
     public void test2() {
+        System.out.println(new Date(1728667800000L));
 //        System.out.println(getLastDate("2022-02-02"));
 //        System.out.println("中概股etf");
 
-        testZhangDie(ali_gang, ali_mei);
+//        testZhangDie(ali_gang, ali_mei);
 
-//        testZhangDie(dapan, dapan);
+        testZhangDie(dapan, dapan);
 
 //        testZhangDie(dapan, ali_mei);
 
@@ -107,7 +177,9 @@ public class Zhishu {
 
     private static void test(String json) {
         List<String> jsonArray = JSON.parseArray(json, String.class);
-        jsonArray = jsonArray.subList(0, jsonArray.size() - 15);
+//        jsonArray = jsonArray.subList(0, jsonArray.size() - 20);
+//        jsonArray = jsonArray.subList(20, 50);
+        jsonArray = jsonArray.subList(0, 22);
         if (qufan) {
             List<String> jsonArray2 = new ArrayList<>(jsonArray);
             Collections.reverse(jsonArray2);
@@ -145,7 +217,8 @@ public class Zhishu {
                     //当的开盘涨跌
                     Boolean yiJu = yijuFunc.apply(oneData);
 
-                    if (yiJu != null) {
+                    if (yiJu != null) { //有买入
+
                         //无脑买入，有脑卖出
                         if (yiJu) { //当日整体涨幅
                             shouyi.add(oneData.last2EndDiff);//预计涨就持有
@@ -190,35 +263,34 @@ public class Zhishu {
                                 shouyi6.add(oneData.last2StartDiff - shouxufei);//预计跌就卖出 , todo 考虑手续费
                             }
                         }
+                        //无脑买入，无脑收盘卖出
+                        shouyiDuiZhao1.add(oneData.last2EndDiff - shouxufei);
+                        //无脑买入，无脑开盘卖出
+                        shouyiDuiZhao2.add(oneData.last2StartDiff - shouxufei);
                     }
-
-
-                    //无脑买入，无脑收盘卖出
-                    shouyiDuiZhao1.add(oneData.last2EndDiff - shouxufei);
-                    //无脑买入，无脑开盘卖出
-                    shouyiDuiZhao2.add(oneData.last2StartDiff - shouxufei);
                 }
             }
             list.add(oneData);
         });
 
 
-        System.out.printf("整体涨跌：%.2f%%\n", (list.get(list.size() - 1).end - list.get(2).start) / list.get(2).start * 100);
-
         String spletPrefix = "";
 
         List<ShouyiSumTmp> shouyiSumTmpList = new ArrayList<>();
         getShouyiSum(shouyiDuiZhao1, "对照1，无脑买，收盘卖" + spletPrefix, shouyiSumTmpList);
-        getShouyiSum(shouyiDuiZhao2, "对照2，无脑买，开盘卖" + spletPrefix, shouyiSumTmpList);
+//        getShouyiSum(shouyiDuiZhao2, "对照2，无脑买，开盘卖" + spletPrefix, shouyiSumTmpList);
         getShouyiSum(shouyi, "实验1，无脑买入，依据卖" + spletPrefix, shouyiSumTmpList);//1
         getShouyiSum(shouyi2, "实验2，上日涨买入，依据卖" + spletPrefix, shouyiSumTmpList); //依据卖：决定收盘还是开盘卖
-        getShouyiSum(shouyi4, "实验4，上日跌买入，依据卖" + spletPrefix, shouyiSumTmpList);
-        getShouyiSum(shouyi3, "实验3，上日涨且阳买入，依据卖" + spletPrefix, shouyiSumTmpList);
-        getShouyiSum(shouyi5, "实验5，非【上日涨且阳买入】，依据卖" + spletPrefix, shouyiSumTmpList);
-        getShouyiSum(shouyi6, "实验6，上日跌且阴买入，依据卖" + spletPrefix, shouyiSumTmpList);
+//        getShouyiSum(shouyi4, "实验4，上日跌买入，依据卖" + spletPrefix, shouyiSumTmpList);
+//        getShouyiSum(shouyi3, "实验3，上日涨且阳买入，依据卖" + spletPrefix, shouyiSumTmpList);
+//        getShouyiSum(shouyi5, "实验5，非【上日涨且阳买入】，依据卖" + spletPrefix, shouyiSumTmpList);
+//        getShouyiSum(shouyi6, "实验6，上日跌且阴买入，依据卖" + spletPrefix, shouyiSumTmpList);
         shouyiSumTmpList.sort((a, b) -> (int) ((a.shouyi - b.shouyi) * -10000));
+
+        System.out.printf("整体涨跌：%.2f%%\n", (list.get(list.size() - 1).end - list.get(2).start) / list.get(2).start * 100);
         System.out.printf("最大收益：%.2f%%\n", shouyiSumTmpList.get(0).shouyi * 100);
-        System.out.printf("平均年华收益：%.2f%%\n", Math.pow(shouyiSumTmpList.get(0).shouyi + 1, 200.0 / shouyiSumTmpList.get(0).jiaoyicishu) * 100 - 100);
+        System.out.printf("平均年化收益：%.2f%%\n", Math.pow(shouyiSumTmpList.get(0).shouyi + 1, 200.0 / shouyiSumTmpList.get(0).jiaoyicishu) * 100 - 100);
+
         shouyiSumTmpList.forEach(e -> System.out.println(e.log));
     }
 
