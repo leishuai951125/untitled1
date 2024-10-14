@@ -38,7 +38,7 @@ public class Main {
     //当日收盘价
 //    static Function<OneData, Boolean> yijuFunc = (oneData) -> oneData.getLast2StartDiff() > 0;
 
-    static Map<String/*dayOffset */, Utils.QiInfo> qihuoMap = Utils.parseA50QiHuo();
+//    static Map<String/*dayOffset */, Utils.QiInfo> qihuoMap = Utils.parseA50QiHuo();
 //    final static String ali_gang = Utils.getDataByFileName("ali_gang");
 //    final static String ali_mei = Utils.getDataByFileName("ali_mei");
 //    final static String zhonggaiUs = Utils.getDataByFileName("zhonggai_us");
@@ -54,11 +54,15 @@ public class Main {
 
     @Test
     public void test2() {
-        System.out.println(new Date(1728667800000L));
+        Object o = Utils.parseA50QiHuo();
+        System.out.println(JSON.toJSONString(o));
+
+
+//        System.out.println(new Date(1728667800000L));
 
 //        testZhangDie(shangZhengZhishu);
 
-        testZhangDie(keChuang50ZhiShu);
+//        testZhangDie(keChuang50ZhiShu);
 
 //        System.out.println("大盘");
 //        test(dapan);

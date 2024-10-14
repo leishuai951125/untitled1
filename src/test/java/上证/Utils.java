@@ -3,6 +3,8 @@ package 上证;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -50,8 +52,9 @@ public class Utils {
     }
 
     @AllArgsConstructor
+    @Data
+    @NoArgsConstructor
     static class QiInfo {
-        long ts;
         String dateFormmat;
         String timeFormat;
         long kaipan;
@@ -60,15 +63,20 @@ public class Utils {
     }
 
     public static Map<String/*dayOffset */, QiInfo> parseA50QiHuo() {
-        return JSON.parseArray(Utils.getDataByFileName("a50_qihuo")).stream().map(o -> {
-            JSONArray jsonArray = (JSONArray) o;
-            long ts = jsonArray.getLong(9);
-            String timeFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss").format(new Date(ts * 1000));
-            String dateFormmat = new SimpleDateFormat("yyyy-MM-dd").format(new Date(ts * 1000));
-            long kaipan = jsonArray.getLong(0);
-            long shoupan = jsonArray.getLong(1);
-            return new QiInfo(ts, dateFormmat, timeFormat, kaipan, shoupan, (shoupan - kaipan) * 1.0 / kaipan);
-        }).filter(e -> e.timeFormat.endsWith("09-00-00")).collect(Collectors.toMap(e -> e.dateFormmat, e -> e));
+        return JSON.parseObject(Utils.getDataByFileName("a50_qihuo"))
+                .getJSONObject("data")
+                .getJSONObject("candle")
+                .getJSONObject("CNA50F.OTC")
+                .getJSONArray("lines")
+                .stream().map(o -> {
+                    JSONArray jsonArray = (JSONArray) o;
+                    long ts = jsonArray.getLong(9);
+                    String timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(ts * 1000));
+                    String dateFormmat = new SimpleDateFormat("yyyy-MM-dd").format(new Date(ts * 1000));
+                    long kaipan = jsonArray.getLong(0);
+                    long shoupan = jsonArray.getLong(1);
+                    return new QiInfo(dateFormmat, timeFormat, kaipan, shoupan, (shoupan - kaipan) * 1.0 / kaipan);
+                }).filter(e -> e.timeFormat.endsWith("09:00:00")).collect(Collectors.toMap(e -> e.dateFormmat, e -> e));
     }
 
     // 东方财富
