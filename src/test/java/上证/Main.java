@@ -30,15 +30,21 @@ public class Main {
     static Map<String, OneData> testDataInfoMap = null;
 
     //当日阴阳线
-    static Function<OneData, Boolean> yijuFunc = (oneData) -> oneData.getStartEndDiff() > 0;
-
+//    static Function<OneData, Boolean> yijuFunc = (oneData) -> oneData.getStartEndDiff() > 0;
     //当日收盘价
 //    static Function<OneData, Boolean> yijuFunc = (oneData) -> oneData.getLast2EndDiff() > 0;
 
     //当日收盘价
 //    static Function<OneData, Boolean> yijuFunc = (oneData) -> oneData.getLast2StartDiff() > 0;
 
-//    static Map<String/*dayOffset */, Utils.QiInfo> qihuoMap = Utils.parseA50QiHuo();
+    static Map<String, Utils.QiInfo> qihuoMap = Utils.parseA50QiHuo();
+    static Function<OneData, Boolean> yijuFunc = (oneData) -> {
+        if (qihuoMap.containsKey(oneData.date)) {
+            return qihuoMap.get(oneData.date).zhangdie > 0;
+        }
+        return null;
+    };
+
 //    final static String ali_gang = Utils.getDataByFileName("ali_gang");
 //    final static String ali_mei = Utils.getDataByFileName("ali_mei");
 //    final static String zhonggaiUs = Utils.getDataByFileName("zhonggai_us");
@@ -54,7 +60,10 @@ public class Main {
 
     @Test
     public void test2() {
-        Object o = Utils.parseA50QiHuo();
+
+        Map<String/*dayOffset */, Utils.QiInfo> o = Utils.parseA50QiHuo();
+        o = new TreeMap<>(o);
+
         System.out.println(JSON.toJSONString(o));
 
 
@@ -80,7 +89,7 @@ public class Main {
     private static void test(String json) {
         List<String> jsonArray = JSON.parseArray(json, String.class);
 //        jsonArray = jsonArray.subList(0, jsonArray.size() - 10);
-        jsonArray = jsonArray.subList(0, 111);
+//        jsonArray = jsonArray.subList(0, 111);
 //        jsonArray = jsonArray.subList(20, 50);
         if (qufan) {
             List<String> jsonArray2 = new ArrayList<>(jsonArray);
