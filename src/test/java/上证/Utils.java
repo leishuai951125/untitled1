@@ -99,4 +99,24 @@ public class Utils {
         });
         return list.stream().collect(Collectors.toMap(e -> e.getDate(), e -> e));
     }
+
+    public static List<Main.OneData> parseDongFangCaiFuList(List<String> jsonArray) {
+        List<Main.OneData> list = new ArrayList<>(jsonArray.size());
+        jsonArray.forEach(e -> {
+            String arr[] = e.split(",");
+            Main.OneData oneData = new Main.OneData();
+            oneData.date = arr[0];
+            oneData.start = Double.parseDouble(arr[1]);
+            oneData.end = Double.parseDouble(arr[2]);
+            oneData.startEndDiff = (oneData.end - oneData.start) / oneData.start;
+            if (list.size() != 0) {
+                Main.OneData lastOneData = list.get(list.size() - 1);
+                oneData.last2StartDiff = (oneData.start - lastOneData.end) / lastOneData.end;
+                oneData.last2EndDiff = (oneData.end - lastOneData.end) / lastOneData.end;
+                oneData.setLasOneData(lastOneData);
+            }
+            list.add(oneData);//jisuan
+        });
+        return list;
+    }
 }
