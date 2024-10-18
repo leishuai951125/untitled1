@@ -122,86 +122,89 @@ public class Main {
         bili(Utils.getDataByFileName("fangdichan"), shangZhengZhishu);
     }
 
+    public static double avgBoDong(List<Main.OneData> list) {
+        return list.stream().mapToDouble(e -> Math.abs(e.startEndDiff)).sum() / list.size();
+    }
+
+    public static double avgBoDongV2(List<Main.OneData> list) {
+        return list.stream().mapToDouble(e -> e.last2EndDiff == null ? 0 : Math.abs(e.last2StartDiff)).sum() / list.size();
+    }
+    //https://push2his.eastmoney.com/api/qt/stock/kline/get?cb=jQuery35105388667892147085_1729285290503&secid=1.000001&ut=fa5fd1943c7b386f172d6893dbfba10b&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61&klt=101&fqt=1&end=20500101&lmt=1360&_=1729285290508
+
     public void bili(String test, String base) {
         List<Main.OneData> kechuangList = Utils.parseDongFangCaiFuList(JSON.parseArray(test, String.class));
         fillAvg(kechuangList);
         List<Main.OneData> baseList = Utils.parseDongFangCaiFuList(JSON.parseArray(base, String.class));
         fillAvg(baseList);
         Map<String, Main.OneData> baseMap = baseList.stream().collect(Collectors.toMap(e -> e.date, e -> e));
-
+        System.out.printf("波动幅度比例：%.2f:1\n", avgBoDong(kechuangList) / avgBoDong(baseList));
+        System.out.printf("波动幅度比例：%.2f:1\n", avgBoDongV2(kechuangList) / avgBoDongV2(baseList));
         System.out.println("========");
-        kechuangList.forEach(e -> {
+        double testShouyi = 0;
+        double dapanShouyi = 0;
+        for (Main.OneData e : kechuangList) {
+//            if (e.last30dayEndAvg != null) {
+//                double billi = e.getLasOneData().end / e.last30dayEndAvg;
+//
+//                Main.OneData baseOneData = baseMap.get(e.date);
+//                double baseBilli = baseOneData.getLasOneData().end / baseOneData.last30dayEndAvg;
+//                double beishu = 0;
+//                String colordiffDapan = ANSI_RESET;
+//                if (billi < 1) {//大盘亏钱
+//                    beishu = Math.abs(billi - 1) / Math.max(Math.abs(baseBilli - 1), 0.01);
+//                    //比大盘亏的多
+//                    colordiffDapan = beishu > 4.0 ? ANSI_RED : ANSI_RESET; //红色表示盈利方向反向
+//                } else if (billi > 1) { //大盘挣钱
+//                    beishu = (baseBilli - 1) / Math.max(billi - 1, 0.01);
+//                    //没大盘挣的多
+//                    colordiffDapan = beishu >= 1 ? ANSI_RED : ANSI_RESET; //红色表示盈利方向反向
+//                }
+//
+//                //昨日多涨
+//                double diffDapanLast2EndDiff = (e.last2EndDiff - baseOneData.last2EndDiff) * 100;
+//
+//                System.out.printf(colordiffDapan + "日期：%s,30日，上日大盘比例:%.3f，  上日板块比例:%.3f，     " +
+//                                " \t上日板块比大盘比值:%.3f,   上日板块多余倍数:%.1f     " +
+//                                "  \t今日大盘涨跌:%.3f，今日板块涨跌:%.3f，\t今日板块比大盘多涨:%.3f,\n",
+//                        e.date, baseBilli * 100 - 100, billi * 100 - 100, billi / baseBilli * 100 - 100, beishu,
+//                        baseOneData.last2EndDiff * 100, e.last2EndDiff * 100, diffDapanLast2EndDiff);
+//            }
+
             if (e.last30dayEndAvg != null) {
                 double billi = e.getLasOneData().end / e.last30dayEndAvg;
 
                 Main.OneData baseOneData = baseMap.get(e.date);
                 double baseBilli = baseOneData.getLasOneData().end / baseOneData.last30dayEndAvg;
-
-                //昨日多涨
-                double diffDapanLast2EndDiff = (e.last2EndDiff - baseOneData.last2EndDiff) * 100;
-
-//                String colordiffDapan = diffDapanLast2EndDiff > 1 ? ANSI_RED : ANSI_RESET;
-
-//                double beishu = (billi - baseBilli) / Math.max(Math.abs(baseBilli - 1), 0.01);
-//                String colordiffDapan = beishu >= 3 ? ANSI_RED : ANSI_RESET;
-
                 double beishu = 0;
                 String colordiffDapan = ANSI_RESET;
                 if (billi < 1) {//亏钱
                     beishu = Math.abs(billi - 1) / Math.max(Math.abs(baseBilli - 1), 0.01);
                     //比大盘亏的多
-                    colordiffDapan = beishu > 4 ? ANSI_RED : ANSI_RESET; //红色表示盈利方向反向
-                } else if (billi > 1 && baseBilli > 1) { //挣钱
+                    colordiffDapan = beishu > 4.0 ? ANSI_RED : ANSI_RESET; //红色表示盈利方向反向
+                    if (colordiffDapan == ANSI_RED) {
+                        testShouyi += e.getLast2EndDiff();
+                        dapanShouyi += baseOneData.getLast2EndDiff();
+                        System.out.printf("计算收益,testShouyi :%.2f%%,dapanShouyi %.2f%%\n", testShouyi * 100, dapanShouyi * 100);
+                    }
+                } else if (billi > 1) { //挣钱
                     beishu = (baseBilli - 1) / Math.max(billi - 1, 0.01);
                     //没大盘挣的多
-                    colordiffDapan = beishu > 3 ? ANSI_RED : ANSI_RESET; //红色表示盈利方向反向
+                    colordiffDapan = beishu >= 0.7 ? ANSI_YELLOW : ANSI_RESET; //红色表示盈利方向反向
                 }
 
+                //昨日多涨
+                double diffDapanLast2EndDiff = (e.last2EndDiff - baseOneData.last2EndDiff) * 100;
 
-                System.out.printf(colordiffDapan + "日期：%s,30日，上日大盘比例:%.3f，  上日板块比例:%.3f，     " +
+                System.out.printf(colordiffDapan + "日期：%s,20日，上日大盘比例:%.3f，  上日板块比例:%.3f，     " +
                                 " \t上日板块比大盘比值:%.3f,   上日板块多余倍数:%.1f     " +
                                 "  \t今日大盘涨跌:%.3f，今日板块涨跌:%.3f，\t今日板块比大盘多涨:%.3f,\n",
                         e.date, baseBilli * 100 - 100, billi * 100 - 100, billi / baseBilli * 100 - 100, beishu,
                         baseOneData.last2EndDiff * 100, e.last2EndDiff * 100, diffDapanLast2EndDiff);
             }
-        });
 
-//        kechuangList.forEach(e -> {
-//            if (e.last5dayEndAvg != null) {
-//                double billi = e.start / e.last5dayEndAvg;
-//                Main.OneData baseOneData = baseMap.get(e.date);
-//                double baseBilli = baseOneData.start / baseOneData.last5dayEndAvg;
-//                System.out.printf("日期：%s,5日，大盘比例:%.3f%%，大盘涨跌:%.3f%%， \t板块比例:%.3f%%，板块涨跌:%.3f%%，\t板块比大盘:%.3f%%，板块比大盘多涨:%.3f\n",
-//                        e.date, baseBilli * 100 - 100, baseOneData.last2EndDiff * 100, billi * 100 - 100, e.last2EndDiff * 100, billi / baseBilli * 100 - 100,
-//                        (e.last2EndDiff - baseOneData.last2EndDiff) * 100);
-//            }
-//        });
-//
-//        System.out.println("========");
-//        kechuangList.forEach(e -> {
-//            if (e.last10dayEndAvg != null) {
-//                double billi = e.start / e.last10dayEndAvg;
-//                Main.OneData baseOneData = baseMap.get(e.date);
-//                double baseBilli = baseOneData.start / baseOneData.last10dayEndAvg;
-//                System.out.printf("日期：%s,10日，大盘比例:%.3f，大盘涨跌:%.3f， \t板块比例:%.3f，板块涨跌:%.3f，\t板块比大盘:%.3f，板块比大盘多涨:%.3f\n",
-//                        e.date, baseBilli * 100 - 100, baseOneData.last2EndDiff * 100, billi * 100 - 100, e.last2EndDiff * 100, billi / baseBilli * 100 - 100,
-//                        (e.last2EndDiff - baseOneData.last2EndDiff) * 100);
-//            }
-//        });
-//
-//        System.out.println("========");
-//        kechuangList.forEach(e -> {
-//            if (e.last20dayEndAvg != null) {
-//                double billi = e.start / e.last20dayEndAvg;
-//                Main.OneData baseOneData = baseMap.get(e.date);
-//                double baseBilli = baseOneData.start / baseOneData.last20dayEndAvg;
-//                System.out.printf("日期：%s,20日，大盘比例:%.3f，大盘涨跌:%.3f， \t板块比例:%.3f，板块涨跌:%.3f，\t板块比大盘:%.3f，板块比大盘多涨:%.3f\n",
-//                        e.date, baseBilli * 100 - 100, baseOneData.last2EndDiff * 100, billi * 100 - 100, e.last2EndDiff * 100, billi / baseBilli * 100 - 100,
-//                        (e.last2EndDiff - baseOneData.last2EndDiff) * 100);
-//            }
-//        });
-
-
+        }
+//        System.out.println(testShouyi * 100);
+//        System.out.println(dapanShouyi * 100);
     }
 
     private void fillAvg(List<OneData> kechuangList) {
