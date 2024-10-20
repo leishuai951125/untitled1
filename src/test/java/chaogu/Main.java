@@ -17,12 +17,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Main {
-    static String lastDate = "2024-10-17";
-    static double lastDapanStar2EndDiff = -1.05 / 100;//上日大盘涨跌
+//    static String lastDate = "2024-10-17";
+//    static double lastDapanStar2EndDiff = -1.05 / 100;//上日大盘涨跌
 
-//    static String lastDate = "2024-10-18";
-//    static double lastDapanStar2EndDiff = 2.91 / 100;
-//    原则：1 min 涨越多越好  2 有反弹更好 3 早上涨幅不能太高
+    static String lastDate = "2024-10-18";
+    static double lastDapanStar2EndDiff = 2.91 / 100;
+
+//    原则：1 min 涨越多越好  2 有反弹更好 3 早上涨幅不能太高  4 非科技板块*2
 
     @Test
     public void main() throws IOException {
@@ -48,13 +49,16 @@ public class Main {
 //            }
 //            return -(int) ((a.getTodayMinuteDataList().get(1).startEndDiff - b.getTodayMinuteDataList().get(1).startEndDiff) * 10000);
         }).map(e -> String.format("板块：%-7s,  \t 今日一分钟涨跌：%.3f%%， \t  " +
-                        " 上日相比大盘涨跌：%.2f%%  [即:%.2f%%]，  \t  今日开盘涨跌:%.3f%% \t  ",
+                        " 上日相比大盘涨跌：%.2f%%  [即:%.2f%%]，  \t  今日开盘涨跌:%.3f%% " +
+                        "\t  时间：%s",
                 e.getBankuaiName(), e.todayMinuteDataList.get(1).startEndDiff * 100,
                 (e.lastDayData.startEndDiff - lastDapanStar2EndDiff) * 100, e.lastDayData.startEndDiff * 100,
-                e.last2StartDiff * 100
+                e.last2StartDiff * 100,
+                e.todayMinuteDataList.get(1).dateTime
         )).collect(Collectors.toList());
         long endMs = System.currentTimeMillis();
-        System.out.printf("开始时间：%s, 花费时间：%.2f s\n", new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0);
+        System.out.printf("开始时间：%s, 花费时间：%.2f s , 昨日大盘涨跌：%.2f%%\n",
+                new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0, lastDapanStar2EndDiff * 100);
         System.out.println("===========");
         resultListt.forEach(System.out::println);
     }
@@ -71,7 +75,7 @@ public class Main {
     private static List<OneData> getTodayMinuteDataList(String bankuaiName) throws IOException {
         String jqueryString = getMinuteData(bankuaiName);
         String arr[] = jqueryString.split("\\(|\\)");
-        List<OneData> oneDataList = JSON.parseObject(arr[1]).getJSONObject("data").getJSONArray("trends").subList(0, 6) //前 6 分钟，第一分钟为开盘
+        List<OneData> oneDataList = JSON.parseObject(arr[1]).getJSONObject("data").getJSONArray("trends").subList(0, 2) //前 6 分钟，第一分钟为开盘
                 .stream().map(e -> {
                     String one = (String) e;
                     String[] tmp = one.split(",");
