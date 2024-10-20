@@ -17,9 +17,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Main {
+    static String lastDate = "2024-10-17";
+    static double lastDapanStar2EndDiff = -1.05 / 100;//上日大盘涨跌
 
-
-    static String lastDate = "2024-10-18";
+//    static String lastDate = "2024-10-18";
+//    static double lastDapanStar2EndDiff = 2.91 / 100;
+//    原则：1 min 涨越多越好  2 有反弹更好 3 早上涨幅不能太高
 
     @Test
     public void main() throws IOException {
@@ -33,23 +36,35 @@ public class Main {
             try {
                 bankuaiWithData.setTodayMinuteDataList(getTodayMinuteDataList(e.getCode()));
                 bankuaiWithData.setLastDayData(getLastDayData(e.getCode()));
+                bankuaiWithData.setLast2StartDiff(bankuaiWithData.getTodayMinuteDataList().get(0).start / bankuaiWithData.getLastDayData().end - 1);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
             return bankuaiWithData;
         }).sorted((a, b) -> {
-            if (a.getLastDayData().startEndDiff * b.getLastDayData().startEndDiff < 0) {
-                return -(int) (a.getLastDayData().startEndDiff * 10000);
-            }
-            return -(int) ((a.getTodayMinuteDataList().get(1).startEndDiff - b.getTodayMinuteDataList().get(1).startEndDiff) * 10000);
-        }).map(e -> String.format("板块：%s,今日一分钟涨跌：%.3f，上日涨跌：%.3f",
+            return (int) ((getSortValue(b) - getSortValue(a)) * 10000);
+//            if ((a.getLastDayData().startEndDiff - lastDapanStar2EndDiff) * (b.getLastDayData().startEndDiff - lastDapanStar2EndDiff) < 0) {
+//                return (int) ((a.getLastDayData().startEndDiff - lastDapanStar2EndDiff) * 10000);
+//            }
+//            return -(int) ((a.getTodayMinuteDataList().get(1).startEndDiff - b.getTodayMinuteDataList().get(1).startEndDiff) * 10000);
+        }).map(e -> String.format("板块：%-7s,  \t 今日一分钟涨跌：%.3f%%， \t  " +
+                        " 上日相比大盘涨跌：%.2f%%  [即:%.2f%%]，  \t  今日开盘涨跌:%.3f%% \t  ",
                 e.getBankuaiName(), e.todayMinuteDataList.get(1).startEndDiff * 100,
-                e.lastDayData.startEndDiff
+                (e.lastDayData.startEndDiff - lastDapanStar2EndDiff) * 100, e.lastDayData.startEndDiff * 100,
+                e.last2StartDiff * 100
         )).collect(Collectors.toList());
         long endMs = System.currentTimeMillis();
         System.out.printf("开始时间：%s, 花费时间：%.2f s\n", new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0);
         System.out.println("===========");
         resultListt.forEach(System.out::println);
+    }
+
+    double getSortValue(BankuaiWithData bankuaiWithData) {
+//        double lastGuiYiHua = bankuaiWithData.lastDayData.startEndDiff * (0.1 / Math.abs(lastDapanStar2EndDiff));//昨日涨跌归一化
+//        double kaiPanGuiYiHua = bankuaiWithData.getLast2StartDiff() * (0.1 / Math.abs(lastDapanStar2EndDiff));//开盘归一化
+//        double todayGuiYiHua = bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * 20;
+//        return todayGuiYiHua - (lastGuiYiHua + kaiPanGuiYiHua);
+        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
     }
 
     //分钟级别
@@ -94,7 +109,7 @@ public class Main {
     public static class BankuaiWithData {
         String bankuaiName;
         List<OneData> todayMinuteDataList;
-        double last2StartDiff;
+        double last2StartDiff;//今日开盘涨跌
         OneData lastDayData;
     }
 
