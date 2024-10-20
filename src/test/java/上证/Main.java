@@ -27,6 +27,7 @@ public class Main {
         Double last10dayEndAvg;
         Double last20dayEndAvg;
         Double last30dayEndAvg;
+        Double last30dayBoDong;
     }
 
     public static final String ANSI_RESET = "\u001B[0m";
@@ -119,7 +120,13 @@ public class Main {
     public void ff2() {
 //        bili(keChuang50ZhiShu, shangZhengZhishu);
         System.out.println("=========");
-        bili(Utils.getDataByFileName("fangdichan"), shangZhengZhishu);
+//        bili(Utils.getDataByFileName("fangdichan"), shangZhengZhishu);
+//        bili(Utils.getDataByFileName("huazai"), shangZhengZhishu);
+//        bili(Utils.getDataByFileName("shengwu"), shangZhengZhishu);
+//        bili(Utils.getDataByFileName("dianli"), shangZhengZhishu);
+//        bili(Utils.getDataByFileName("xiangcun_zhenxing"), shangZhengZhishu);
+//        bili(Utils.getDataByFileName("xiangcun_zhenxing"), shangZhengZhishu);
+        bili(keChuang50ZhiShu, shangZhengZhishu);
     }
 
     public static double avgBoDong(List<Main.OneData> list) {
@@ -177,29 +184,48 @@ public class Main {
                 double baseBilli = baseOneData.getLasOneData().end / baseOneData.last30dayEndAvg;
                 double beishu = 0;
                 String colordiffDapan = ANSI_RESET;
+//                if (billi < 1) {//亏钱
+//                    beishu = Math.abs(billi - 1) / Math.max(Math.abs(baseBilli - 1), 0.01);
+//                    //比大盘亏的多
+//                    colordiffDapan = beishu > e.last30dayBoDong / baseOneData.last30dayBoDong * 2 ? ANSI_RED : ANSI_RESET; //红色表示盈利方向反向
+//                    if (colordiffDapan == ANSI_RED) {
+//                        testShouyi += e.getLast2EndDiff();
+//                        dapanShouyi += baseOneData.getLast2EndDiff();
+//                        System.out.printf(ANSI_RESET + "计算收益,beishu:%.2f,beishu:%.2f,testShouyi :%.2f%%,dapanShouyi %.2f%%\n",
+//                                e.last30dayBoDong / baseOneData.last30dayBoDong, Math.abs(billi - 1) / e.last30dayBoDong,
+//                                testShouyi * 100, dapanShouyi * 100);
+//                    }
+//                } else if (billi > 1) { //挣钱
+//                    beishu = (baseBilli - 1) / Math.max(billi - 1, 0.01);
+//                    //没大盘挣的多
+//                    colordiffDapan = beishu >= 0.7 ? ANSI_YELLOW : ANSI_RESET; //红色表示盈利方向反向
+//                }
+
+
                 if (billi < 1) {//亏钱
-                    beishu = Math.abs(billi - 1) / Math.max(Math.abs(baseBilli - 1), 0.01);
                     //比大盘亏的多
-                    colordiffDapan = beishu > 4.0 ? ANSI_RED : ANSI_RESET; //红色表示盈利方向反向
+                    colordiffDapan = Math.abs(billi - 1) / e.last30dayBoDong >= 30 ? ANSI_RED : ANSI_RESET; //红色表示盈利方向反向
                     if (colordiffDapan == ANSI_RED) {
                         testShouyi += e.getLast2EndDiff();
                         dapanShouyi += baseOneData.getLast2EndDiff();
-                        System.out.printf("计算收益,testShouyi :%.2f%%,dapanShouyi %.2f%%\n", testShouyi * 100, dapanShouyi * 100);
+                        System.out.printf(ANSI_RESET + "计算收益,beishu:%.2f,beishu:%.2f,testShouyi :%.2f%%,dapanShouyi %.2f%%\n",
+                                e.last30dayBoDong / baseOneData.last30dayBoDong, (billi - 1) / e.last30dayBoDong,
+                                testShouyi * 100, dapanShouyi * 100);
                     }
-                } else if (billi > 1) { //挣钱
-                    beishu = (baseBilli - 1) / Math.max(billi - 1, 0.01);
-                    //没大盘挣的多
-                    colordiffDapan = beishu >= 0.7 ? ANSI_YELLOW : ANSI_RESET; //红色表示盈利方向反向
                 }
 
                 //昨日多涨
-                double diffDapanLast2EndDiff = (e.last2EndDiff - baseOneData.last2EndDiff) * 100;
+                double diffDapanLast2EndDiff = (e.last2EndDiff - baseOneData.last2EndDiff) * 100;//todo
+//                double diffDapanLast2EndDiff = (e.startEndDiff - baseOneData.startEndDiff) * 100;
 
                 System.out.printf(colordiffDapan + "日期：%s,20日，上日大盘比例:%.3f，  上日板块比例:%.3f，     " +
-                                " \t上日板块比大盘比值:%.3f,   上日板块多余倍数:%.1f     " +
-                                "  \t今日大盘涨跌:%.3f，今日板块涨跌:%.3f，\t今日板块比大盘多涨:%.3f,\n",
-                        e.date, baseBilli * 100 - 100, billi * 100 - 100, billi / baseBilli * 100 - 100, beishu,
-                        baseOneData.last2EndDiff * 100, e.last2EndDiff * 100, diffDapanLast2EndDiff);
+                                " \t上日板块比大盘比值:%.3f,  " +
+//                                " 上日板块多余倍数:%.1f   ,比波动倍数:%.2f " +
+                                "  \t今日大盘涨跌:%.3f，今日日内大盘涨跌:%.3f，今日板块日内涨跌:%.3f,今日板块涨跌:%.3f，\t今日板块比大盘多涨:%.3f,\n",
+                        e.date, baseBilli * 100 - 100, billi * 100 - 100,
+                        billi / baseBilli * 100 - 100,
+//                        beishu, Math.abs(billi - 1) / e.last30dayBoDong,
+                        baseOneData.last2EndDiff * 100, baseOneData.startEndDiff * 100, e.startEndDiff * 100, e.last2EndDiff * 100, diffDapanLast2EndDiff);
             }
 
         }
@@ -221,6 +247,7 @@ public class Main {
             }
             if (i >= 30) {
                 kechuangOneData.last30dayEndAvg = getLastAvg(kechuangList, i, 30);
+                kechuangOneData.last30dayBoDong = avgBoDongV2(kechuangList.subList(i - 30, i));
             }
         }
     }
@@ -420,3 +447,5 @@ public class Main {
 
 
 }
+
+//猜测：处于均价历史低位、前5分钟涨势凶
