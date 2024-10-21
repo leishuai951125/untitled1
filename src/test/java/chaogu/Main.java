@@ -23,7 +23,7 @@ public class Main {
     static double lastDapanStar2EndDiff = 2.91 / 100;
 
 //    static String lastDate = "2024-10-21";
-//    static double lastDapanStar2EndDiff = 0.25 / 100;
+//    static double lastDapanStar2EndDiff = -0.25 / 100;
 
 //    原则：1 min 涨越多越好  2 有反弹更好 3 早上涨幅不能太高  4 非科技板块*2
 
@@ -42,20 +42,28 @@ public class Main {
 //            }
 //            return -(int) ((a.getTodayMinuteDataList().get(1).startEndDiff - b.getTodayMinuteDataList().get(1).startEndDiff) * 10000);
         }).map(e -> String.format("板块：%-7s  " +
+                        //今日一分钟
                         "\t 今日一分钟相对涨跌：%.3f%% " +
                         "[即:%.3f%%]， \t  " +
-                        " 上日相比大盘涨跌：%.2f%%" +
-                        " [即:%.2f%%]，  \t  " +
+                        //今日开盘
                         "今日开盘相对涨跌:%.3f%%" +
-                        " [即:%.3f%%]" +
+                        " [即:%.3f%%] \t  " +
+                        //昨日
+                        " 上日相比大盘涨跌：%.2f%%" +
+                        " [即:%.2f%%]， " +
+                        //时间
                         "\t  时间：%s",
                 fillName(e.getBankuaiName()),
+                //今日一分钟
                 e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300TodayWithData.todayMinuteDataList.get(1).startEndDiff * 100,
                 e.todayMinuteDataList.get(1).startEndDiff * 100,
-                (e.lastDayData.startEndDiff - lastDapanStar2EndDiff) * 100,
-                e.lastDayData.startEndDiff * 100,
+                //今日开盘
                 e.last2StartDiff * 100 - hushen300TodayWithData.last2StartDiff * 100,
                 e.last2StartDiff * 100,
+                //昨日
+                (e.lastDayData.startEndDiff - lastDapanStar2EndDiff) * 100,
+                e.lastDayData.startEndDiff * 100,
+                //时间
                 e.todayMinuteDataList.get(1).dateTime
         )).collect(Collectors.toList());
         long endMs = System.currentTimeMillis();
