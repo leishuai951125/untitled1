@@ -29,6 +29,9 @@ public class Main {
 
     @Test
     public void main() throws IOException {
+        getBankuaiWithData(new BanKuai("沪深300", "90.BK0740"));
+
+
         List<BanKuai> banKuaiList = parseAllBanKuai();
 //        System.out.println(JSON.toJSONString(banKuaiList));
         long starMs = System.currentTimeMillis();

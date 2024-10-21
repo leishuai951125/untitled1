@@ -126,7 +126,8 @@ public class Main {
 //        bili(Utils.getDataByFileName("dianli"), shangZhengZhishu);
 //        bili(Utils.getDataByFileName("xiangcun_zhenxing"), shangZhengZhishu);
 //        bili(Utils.getDataByFileName("xiangcun_zhenxing"), shangZhengZhishu);
-        bili(keChuang50ZhiShu, shangZhengZhishu);
+//        bili(Utils.getDataByFileName("jiudian"), shangZhengZhishu);
+        bili(Utils.getDataByFileName("jiaoyu"), shangZhengZhishu);
     }
 
     public static double avgBoDong(List<Main.OneData> list) {
