@@ -15,52 +15,80 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
-//    static String lastDate = "2024-10-17";
-//    static double lastDapanStar2EndDiff = -1.05 / 100;//上日大盘涨跌
 
     static String lastDate = "2024-10-18";
     static double lastDapanStar2EndDiff = 2.91 / 100;
+
+//    static String lastDate = "2024-10-21";
+//    static double lastDapanStar2EndDiff = 0.25 / 100;
 
 //    原则：1 min 涨越多越好  2 有反弹更好 3 早上涨幅不能太高  4 非科技板块*2
 
     @Test
     public void main() throws IOException {
-//        System.out.println(getLastDayData("BK0474"));
         List<BanKuai> banKuaiList = parseAllBanKuai();
 //        System.out.println(JSON.toJSONString(banKuaiList));
         long starMs = System.currentTimeMillis();
+        BankuaiWithData hushen300TodayWithData = getBankuaiWithData(new BanKuai("沪深300", "1.000300"));
         List<String> resultListt = banKuaiList.stream().parallel().map(e -> {
-            BankuaiWithData bankuaiWithData = new BankuaiWithData();
-            bankuaiWithData.setBankuaiName(e.getName());
-            try {
-                bankuaiWithData.setTodayMinuteDataList(getTodayMinuteDataList(e.getCode()));
-                bankuaiWithData.setLastDayData(getLastDayData(e.getCode()));
-                bankuaiWithData.setLast2StartDiff(bankuaiWithData.getTodayMinuteDataList().get(0).start / bankuaiWithData.getLastDayData().end - 1);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-            return bankuaiWithData;
+            return getBankuaiWithData(e);
         }).sorted((a, b) -> {
             return (int) ((getSortValue(b) - getSortValue(a)) * 10000);
 //            if ((a.getLastDayData().startEndDiff - lastDapanStar2EndDiff) * (b.getLastDayData().startEndDiff - lastDapanStar2EndDiff) < 0) {
 //                return (int) ((a.getLastDayData().startEndDiff - lastDapanStar2EndDiff) * 10000);
 //            }
 //            return -(int) ((a.getTodayMinuteDataList().get(1).startEndDiff - b.getTodayMinuteDataList().get(1).startEndDiff) * 10000);
-        }).map(e -> String.format("板块：%-7s,  \t 今日一分钟涨跌：%.3f%%， \t  " +
-                        " 上日相比大盘涨跌：%.2f%%  [即:%.2f%%]，  \t  今日开盘涨跌:%.3f%% " +
+        }).map(e -> String.format("板块：%-7s  " +
+                        "\t 今日一分钟相对涨跌：%.3f%% " +
+                        "[即:%.3f%%]， \t  " +
+                        " 上日相比大盘涨跌：%.2f%%" +
+                        " [即:%.2f%%]，  \t  " +
+                        "今日开盘相对涨跌:%.3f%%" +
+                        " [即:%.3f%%]" +
                         "\t  时间：%s",
-                e.getBankuaiName(), e.todayMinuteDataList.get(1).startEndDiff * 100,
-                (e.lastDayData.startEndDiff - lastDapanStar2EndDiff) * 100, e.lastDayData.startEndDiff * 100,
+                fillName(e.getBankuaiName()),
+                e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300TodayWithData.todayMinuteDataList.get(1).startEndDiff * 100,
+                e.todayMinuteDataList.get(1).startEndDiff * 100,
+                (e.lastDayData.startEndDiff - lastDapanStar2EndDiff) * 100,
+                e.lastDayData.startEndDiff * 100,
+                e.last2StartDiff * 100 - hushen300TodayWithData.last2StartDiff * 100,
                 e.last2StartDiff * 100,
                 e.todayMinuteDataList.get(1).dateTime
         )).collect(Collectors.toList());
         long endMs = System.currentTimeMillis();
-        System.out.printf("开始时间：%s, 花费时间：%.2f s , 昨日大盘涨跌：%.2f%%\n",
-                new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0, lastDapanStar2EndDiff * 100);
+        System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
+                        "昨日大盘涨跌：%.2f%% \n" +
+                        "今日大盘开盘涨跌：%.2f%%,今日大盘一分钟涨跌：%.2f%%\n",
+                new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0,
+                lastDapanStar2EndDiff * 100,
+                hushen300TodayWithData.last2StartDiff * 100, hushen300TodayWithData.todayMinuteDataList.get(1).startEndDiff * 100);
         System.out.println("===========");
         resultListt.forEach(System.out::println);
+    }
+
+    static String fillName(String name) {
+        if (name.length() == 2) {
+            return name.charAt(0) + "   " + name.charAt(1);
+//            return name + "    ";
+        }
+        return name;
+    }
+
+    @NotNull
+    private static BankuaiWithData getBankuaiWithData(BanKuai e) {
+        BankuaiWithData bankuaiWithData = new BankuaiWithData();
+        bankuaiWithData.setBankuaiName(e.getName());
+        try {
+            bankuaiWithData.setTodayMinuteDataList(getTodayMinuteDataList(e.getCode()));
+            bankuaiWithData.setLastDayData(getLastDayData(e.getCode()));
+            bankuaiWithData.setLast2StartDiff(bankuaiWithData.getTodayMinuteDataList().get(0).start / bankuaiWithData.getLastDayData().end - 1);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+        return bankuaiWithData;
     }
 
     double getSortValue(BankuaiWithData bankuaiWithData) {
@@ -132,7 +160,8 @@ public class Main {
             JSONObject jsonObject = (JSONObject) e;
             BanKuai banKuai = new BanKuai();
             banKuai.setName(jsonObject.getString("f14"));
-            banKuai.setCode(jsonObject.getString("f12"));
+            banKuai.setCode(jsonObject.getString("f13") +
+                    "." + jsonObject.getString("f12"));
             return banKuai;
         }).collect(Collectors.toList());
         return banKuaiList;
@@ -146,18 +175,18 @@ public class Main {
         Double startEndDiff;//当日波动
     }
 
-    private static String getMinuteData(String bankuaiName) throws IOException {
+    private static String getMinuteData(String bankuaiCode) throws IOException {
         long ms = System.currentTimeMillis();
-        String url = "https://push2his.eastmoney.com/api/qt/stock/trends2/get?fields1=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13&fields2=f51,f52,f53,f54,f55,f56,f57,f58&ut=fa5fd1943c7b386f172d6893dbfba10b&iscr=0&ndays=1&secid=90." +
-                bankuaiName + "&cb=jQuery35109680847083872344_" +
+        String url = "https://push2his.eastmoney.com/api/qt/stock/trends2/get?fields1=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13&fields2=f51,f52,f53,f54,f55,f56,f57,f58&ut=fa5fd1943c7b386f172d6893dbfba10b&iscr=0&ndays=1&secid=" +
+                bankuaiCode + "&cb=jQuery35109680847083872344_" +
                 ms + "&_=" + (ms + 50);
         return getData(url);
     }
 
-    private static String getDayData(String bankuaiName) throws IOException {
+    private static String getDayData(String bankuaiCode) throws IOException {
         long ms = System.currentTimeMillis();
         String url = "https://push2his.eastmoney.com/api/qt/stock/kline/get?cb=jQuery35105715717072793236_"
-                + ms + "&secid=90." + bankuaiName +
+                + ms + "&secid=" + bankuaiCode +
                 "&ut=fa5fd1943c7b386f172d6893dbfba10b&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61&klt=101&fqt=1&end=20500101&lmt=120&_="
                 + (ms + 50);
         return getData(url);
