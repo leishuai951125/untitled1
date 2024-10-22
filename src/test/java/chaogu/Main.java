@@ -24,13 +24,13 @@ public class Main {
 
     static String lastDate = "2024-10-21";
     static String todayDate = "2024-10-23";
-
     static double lastDapanStar2EndDiff = -0.25 / 100;
-    //    static boolean needFilter = true;
+
     static boolean needFilter = false;
-    static boolean isSimpleMode = true;//简要模式
+    static boolean isSimpleMode = false;//简要模式
 
 //    原则：1 min 涨越多越好  2 有反弹更好 3 早上涨幅不能太高  4 非科技板块*2
+    //处于低位，但是归一化分数高
 
 
     @Test
@@ -51,7 +51,7 @@ public class Main {
             System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
                             "昨日大盘涨跌：%.2f%% \n" +
                             "今日大盘开盘涨跌：%.2f%%\n" +
-                            "归一化分数范围 0～10，分数越高越值得购买\n",
+                            "归一化分数范围 0～10，分数在4～8分的值得购买 \n",
                     new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0,
                     lastDapanStar2EndDiff * 100,
                     hushen300BanKuaiData.last2StartDiff * 100);
@@ -99,15 +99,13 @@ public class Main {
         sb.append(String.format("过去十天：%s  |", xiangDuiBiLiList10Day.stream().map(v -> String.format("%.2f", v * 100 - 100)).collect(Collectors.toList())));
         double zuoRiGuiYiHua = zuoRiGuiYiHua(xiangDuiBiLiMap.get(lastDate), maxXiangDuiBiLi, minXiangDuiBiLi);
         String color = ANSI_RESET;
-        if (zuoRiGuiYiHua >= 7) {
+        if (zuoRiGuiYiHua <= 8 && zuoRiGuiYiHua >= 4) {
             color = ANSI_RED;
-        } else if (zuoRiGuiYiHua >= 4) {
-            color = ANSI_YELLOW;
         }
         if (isSimpleMode) {
             return String.format(color + "归一化分数：%.1f " + ANSI_RESET, zuoRiGuiYiHua);
         }
-        sb.append(String.format(color + "归一化分数：%.0f  |  ", zuoRiGuiYiHua));
+        sb.append(String.format(color + "归一化分数：%.1f  |  ", zuoRiGuiYiHua));
         sb.append(String.format("昨日：%.2f  |  " + ANSI_RESET, xiangDuiBiLiMap.get(lastDate) * 100 - 100));
         sb.append(String.format("过去最大：%.2f  |  ", maxXiangDuiBiLi * 100 - 100));
         sb.append(String.format("过去最小：%.2f  |  ", minXiangDuiBiLi * 100 - 100));
