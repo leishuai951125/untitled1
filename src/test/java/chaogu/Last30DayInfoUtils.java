@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class GetXiangDuiBiLi {
+public class Last30DayInfoUtils {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
