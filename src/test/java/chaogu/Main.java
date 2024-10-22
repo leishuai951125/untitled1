@@ -63,7 +63,7 @@ public class Main {
             System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
                             "昨日大盘涨跌：%.2f%% \n" +
                             "今日大盘开盘涨跌：%.2f%%,今日大盘一分钟涨跌：%.2f%%\n" +
-                            "归一化分数范围 0～10，分数越高越值得购买\n",
+                            "归一化分数范围 0～10，分数在 4～7 分的值得购买 \n",
                     new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0,
                     lastDapanStar2EndDiff * 100,
                     hushen300BanKuaiData.last2StartDiff * 100, hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100);
@@ -75,8 +75,8 @@ public class Main {
     public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData(new BanKuai("沪深300", "1.000300"));
 
     double getSortValue(BankuaiWithData bankuaiWithData) {
-//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
+        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+//        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
     }
 
     //归一化 0～10 ，越大越值得买
