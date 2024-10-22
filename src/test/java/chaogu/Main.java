@@ -26,7 +26,9 @@ public class Main {
     static String todayDate = "2024-10-23";
 
     static double lastDapanStar2EndDiff = -0.25 / 100;
-    static boolean needFilter = true;
+    //    static boolean needFilter = true;
+    static boolean needFilter = false;
+    static boolean isSimpleMode = true;//简要模式
 
 //    原则：1 min 涨越多越好  2 有反弹更好 3 早上涨幅不能太高  4 非科技板块*2
 
@@ -45,12 +47,23 @@ public class Main {
             return ret + getLastDayDesc(e);
         }).collect(Collectors.toList());
         long endMs = System.currentTimeMillis();
-        System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
-                        "昨日大盘涨跌：%.2f%% \n" +
-                        "今日大盘开盘涨跌：%.2f%%,今日大盘一分钟涨跌：%.2f%%\n",
-                new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0,
-                lastDapanStar2EndDiff * 100,
-                hushen300BanKuaiData.last2StartDiff * 100, hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100);
+        if (isSimpleMode) {
+            System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
+                            "昨日大盘涨跌：%.2f%% \n" +
+                            "今日大盘开盘涨跌：%.2f%%\n" +
+                            "归一化分数范围 0～10，分数越高越值得购买\n",
+                    new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0,
+                    lastDapanStar2EndDiff * 100,
+                    hushen300BanKuaiData.last2StartDiff * 100);
+        } else {
+            System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
+                            "昨日大盘涨跌：%.2f%% \n" +
+                            "今日大盘开盘涨跌：%.2f%%,今日大盘一分钟涨跌：%.2f%%\n" +
+                            "归一化分数范围 0～10，分数越高越值得购买\n",
+                    new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0,
+                    lastDapanStar2EndDiff * 100,
+                    hushen300BanKuaiData.last2StartDiff * 100, hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100);
+        }
         System.out.println("===========");
         resultListt.forEach(System.out::println);
     }
@@ -85,7 +98,15 @@ public class Main {
         List<Double> xiangDuiBiLiList10Day = xiangDuiBiLiList.subList(xiangDuiBiLiList.size() - 10, xiangDuiBiLiList.size());
         sb.append(String.format("过去十天：%s  |", xiangDuiBiLiList10Day.stream().map(v -> String.format("%.2f", v * 100 - 100)).collect(Collectors.toList())));
         double zuoRiGuiYiHua = zuoRiGuiYiHua(xiangDuiBiLiMap.get(lastDate), maxXiangDuiBiLi, minXiangDuiBiLi);
-        String color = zuoRiGuiYiHua >= 5 ? ANSI_RED : ANSI_YELLOW;
+        String color = ANSI_RESET;
+        if (zuoRiGuiYiHua >= 7) {
+            color = ANSI_RED;
+        } else if (zuoRiGuiYiHua >= 4) {
+            color = ANSI_YELLOW;
+        }
+        if (isSimpleMode) {
+            return String.format(color + "归一化分数：%.1f " + ANSI_RESET, zuoRiGuiYiHua);
+        }
         sb.append(String.format(color + "归一化分数：%.0f  |  ", zuoRiGuiYiHua));
         sb.append(String.format("昨日：%.2f  |  " + ANSI_RESET, xiangDuiBiLiMap.get(lastDate) * 100 - 100));
         sb.append(String.format("过去最大：%.2f  |  ", maxXiangDuiBiLi * 100 - 100));
@@ -112,16 +133,19 @@ public class Main {
     }
 
     private static String todayOneMinutteDesc(BankuaiWithData e) {
+        if (isSimpleMode) {
+            return "板块： " + fillName(e.getBankuaiName()) + "  \t";
+        }
         return String.format("板块：%-7s  " +
                         //今日一分钟
                         ANSI_GREEN + "\t 今日一分钟相对涨跌：%.3f%% " +
                         "[即:%.3f%%]， \t  " +
                         //今日开盘
                         "今日开盘相对涨跌:%.3f%%" +
-                        " [即:%.3f%%] \t  " + ANSI_RESET +
+                        " [即:%.3f%%] \t  " +
                         //昨日
                         " 上日相比大盘涨跌：%.2f%%" +
-                        " [即:%.2f%%]， " +
+                        " [即:%.2f%%]， " + ANSI_RESET +
                         //时间
                         "\t  时间：%s",
                 fillName(e.getBankuaiName()),
