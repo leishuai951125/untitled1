@@ -83,8 +83,9 @@ public class Main {
         StringBuilder sb = new StringBuilder();
         sb.append("\n");
         List<Double> xiangDuiBiLiList10Day = xiangDuiBiLiList.subList(xiangDuiBiLiList.size() - 10, xiangDuiBiLiList.size());
-        sb.append(String.format("过去十天： %s  |", xiangDuiBiLiList10Day.stream().map(v -> String.format("%.2f", v * 100 - 100)).collect(Collectors.toList())));
-        sb.append(String.format("昨日：%.2f  |  ", xiangDuiBiLiMap.get(lastDate) * 100 - 100));
+        sb.append(String.format("过去十天：%s  |", xiangDuiBiLiList10Day.stream().map(v -> String.format("%.2f", v * 100 - 100)).collect(Collectors.toList())));
+        sb.append(String.format(ANSI_RED + "归一化分数：%.0f  |  ", zuoRiGuiYiHua(xiangDuiBiLiMap.get(lastDate), maxXiangDuiBiLi, minXiangDuiBiLi)));
+        sb.append(String.format("昨日：%.2f  |  " + ANSI_RESET, xiangDuiBiLiMap.get(lastDate) * 100 - 100));
         sb.append(String.format("过去最大：%.2f  |  ", maxXiangDuiBiLi * 100 - 100));
         sb.append(String.format("过去最小：%.2f  |  ", minXiangDuiBiLi * 100 - 100));
         sb.append(String.format("过去平均：%.2f  |  ", avgXiangDuiBiLi * 100 - 100));
@@ -92,6 +93,10 @@ public class Main {
         return sb.toString();
     }
 
+    //归一化 0～10 ，越大越值得买
+    static double zuoRiGuiYiHua(double zuoRi, double max, double min) {
+        return 10 - (zuoRi - min) / (max - min) * 10;
+    }
 
     private static boolean filter(BankuaiWithData e) {
         if (!needFilter) {
@@ -105,18 +110,18 @@ public class Main {
     }
 
     private static String todayOneMinutteDesc(BankuaiWithData e) {
-        return String.format(ANSI_GREEN + "板块：%-7s  " +
+        return String.format("板块：%-7s  " +
                         //今日一分钟
-                        "\t 今日一分钟相对涨跌：%.3f%% " +
+                        ANSI_RED + "\t 今日一分钟相对涨跌：%.3f%% " +
                         "[即:%.3f%%]， \t  " +
                         //今日开盘
                         "今日开盘相对涨跌:%.3f%%" +
-                        " [即:%.3f%%] \t  " +
+                        " [即:%.3f%%] \t  " + ANSI_RESET +
                         //昨日
                         " 上日相比大盘涨跌：%.2f%%" +
                         " [即:%.2f%%]， " +
                         //时间
-                        "\t  时间：%s" + ANSI_RESET,
+                        "\t  时间：%s",
                 fillName(e.getBankuaiName()),
                 //今日一分钟
                 e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100,
