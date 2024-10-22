@@ -22,9 +22,13 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-10-21";
-    static String todayDate = "2024-10-22";
-    static double lastDapanStar2EndDiff = -0.25 / 100;
+//    static String lastDate = "2024-10-21";
+//    static String todayDate = "2024-10-22";
+//    static double lastDapanStar2EndDiff = -0.25 / 100;
+
+    static String lastDate = "2024-10-22";
+    static String todayDate = "2024-10-23";
+    static double lastDapanStar2EndDiff = -0.74 / 100;
 
     static boolean needFilter = true;
     static boolean isSimpleMode = false;//简要模式
