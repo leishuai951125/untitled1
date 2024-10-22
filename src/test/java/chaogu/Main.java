@@ -23,14 +23,14 @@ public class Main {
     RunMode runMode = RunMode.YuCe;
 
     static String lastDate = "2024-10-21";
-    static String todayDate = "2024-10-23";
+    static String todayDate = "2024-10-22";
     static double lastDapanStar2EndDiff = -0.25 / 100;
 
     static boolean needFilter = false;
     static boolean isSimpleMode = false;//简要模式
 
 //    原则：1 min 涨越多越好  2 有反弹更好 3 早上涨幅不能太高  4 非科技板块*2
-    //处于低位，但是归一化分数高
+    //目前看归一化分数在 4～7 之间的表现最佳； 可能是调整阶段
 
 
     @Test
@@ -51,7 +51,7 @@ public class Main {
             System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
                             "昨日大盘涨跌：%.2f%% \n" +
                             "今日大盘开盘涨跌：%.2f%%\n" +
-                            "归一化分数范围 0～10，分数在4～8分的值得购买 \n",
+                            "归一化分数范围 0～10，分数在 4～7 分的值得购买 \n",
                     new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0,
                     lastDapanStar2EndDiff * 100,
                     hushen300BanKuaiData.last2StartDiff * 100);
@@ -99,7 +99,7 @@ public class Main {
         sb.append(String.format("过去十天：%s  |", xiangDuiBiLiList10Day.stream().map(v -> String.format("%.2f", v * 100 - 100)).collect(Collectors.toList())));
         double zuoRiGuiYiHua = zuoRiGuiYiHua(xiangDuiBiLiMap.get(lastDate), maxXiangDuiBiLi, minXiangDuiBiLi);
         String color = ANSI_RESET;
-        if (zuoRiGuiYiHua <= 8 && zuoRiGuiYiHua >= 4) {
+        if (zuoRiGuiYiHua <= 7 && zuoRiGuiYiHua >= 4) {
             color = ANSI_RED;
         }
         if (isSimpleMode) {
@@ -185,11 +185,8 @@ public class Main {
     }
 
     double getSortValue(BankuaiWithData bankuaiWithData) {
-//        double lastGuiYiHua = bankuaiWithData.lastDayData.startEndDiff * (0.1 / Math.abs(lastDapanStar2EndDiff));//昨日涨跌归一化
-//        double kaiPanGuiYiHua = bankuaiWithData.getLast2StartDiff() * (0.1 / Math.abs(lastDapanStar2EndDiff));//开盘归一化
-//        double todayGuiYiHua = bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * 20;
-//        return todayGuiYiHua - (lastGuiYiHua + kaiPanGuiYiHua);
-        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
     }
 
     //分钟级别
@@ -210,12 +207,12 @@ public class Main {
         return oneDataList;
     }
 
-    //天
+    //30天
     private static List<上证.Main.OneDayDataDetail> getLast30DayData(String bankuaiCode) throws IOException {
         JSONArray jsonArray = getDayData(bankuaiCode);
         List<String> list = jsonArray.stream().map(e -> (String) e).collect(Collectors.toList());
         List<上证.Main.OneDayDataDetail> detailList = Utils.parseDongFangCaiFuList(list);
-        return detailList.subList(detailList.size() - 31, detailList.size() - 1);
+        return detailList.subList(detailList.size() - 30, detailList.size());
     }
 
     @Data
