@@ -34,10 +34,6 @@ public class Main {
             return getBankuaiWithData(e);
         }).sorted((a, b) -> {
             return (int) ((getSortValue(b) - getSortValue(a)) * 10000);
-//            if ((a.getLastDayData().startEndDiff - lastDapanStar2EndDiff) * (b.getLastDayData().startEndDiff - lastDapanStar2EndDiff) < 0) {
-//                return (int) ((a.getLastDayData().startEndDiff - lastDapanStar2EndDiff) * 10000);
-//            }
-//            return -(int) ((a.getTodayMinuteDataList().get(1).startEndDiff - b.getTodayMinuteDataList().get(1).startEndDiff) * 10000);
         }).map(e -> {
             return String.format("板块：%-7s  " +
                             //今日一分钟
