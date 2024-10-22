@@ -117,6 +117,43 @@ public class Utils {
             }
             list.add(oneDayDataDetail);//jisuan
         });
+        fillAvg(list);
         return list;
     }
+
+    private static void fillAvg(List<Main.OneDayDataDetail> kechuangList) {
+        for (int i = 0; i < kechuangList.size(); i++) {
+            Main.OneDayDataDetail kechuangOneDayDataDetail = kechuangList.get(i);
+            if (i >= 5) {
+                kechuangOneDayDataDetail.last5dayEndAvg = getLastAvg(kechuangList, i, 5);
+            }
+            if (i >= 10) {
+                kechuangOneDayDataDetail.last10dayEndAvg = getLastAvg(kechuangList, i, 10);
+            }
+            if (i >= 20) {
+                kechuangOneDayDataDetail.last20dayEndAvg = getLastAvg(kechuangList, i, 20);
+            }
+            if (i >= 30) {
+                kechuangOneDayDataDetail.last30dayEndAvg = getLastAvg(kechuangList, i, 30);
+                kechuangOneDayDataDetail.last30dayBoDong = avgBoDongV2(kechuangList.subList(i - 30, i));
+            }
+        }
+    }
+
+    static Double getLastAvg(List<Main.OneDayDataDetail> oneDayDataDetailList, int currentIndex, int lastDays) {
+        if (currentIndex >= lastDays) {
+            return oneDayDataDetailList.subList(currentIndex - lastDays, currentIndex).stream()
+                    .mapToDouble(k -> k.getEnd()).average().getAsDouble();
+        }
+        return null;
+    }
+
+    public static double avgBoDongV2(List<Main.OneDayDataDetail> list) {
+        return list.stream().mapToDouble(e -> e.last2EndDiff == null ? 0 : Math.abs(e.last2StartDiff)).sum() / list.size();
+    }
+
+    public static double avgBoDong(List<Main.OneDayDataDetail> list) {
+        return list.stream().mapToDouble(e -> Math.abs(e.startEndDiff)).sum() / list.size();
+    }
+
 }

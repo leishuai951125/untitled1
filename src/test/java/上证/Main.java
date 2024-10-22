@@ -130,23 +130,14 @@ public class Main {
         bili(Utils.getDataByFileName("jiaoyu"), shangZhengZhishu);
     }
 
-    public static double avgBoDong(List<OneDayDataDetail> list) {
-        return list.stream().mapToDouble(e -> Math.abs(e.startEndDiff)).sum() / list.size();
-    }
 
-    public static double avgBoDongV2(List<OneDayDataDetail> list) {
-        return list.stream().mapToDouble(e -> e.last2EndDiff == null ? 0 : Math.abs(e.last2StartDiff)).sum() / list.size();
-    }
     //https://push2his.eastmoney.com/api/qt/stock/kline/get?cb=jQuery35105388667892147085_1729285290503&secid=1.000001&ut=fa5fd1943c7b386f172d6893dbfba10b&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61&klt=101&fqt=1&end=20500101&lmt=1360&_=1729285290508
-
     public void bili(String test, String base) {
         List<OneDayDataDetail> kechuangList = Utils.parseDongFangCaiFuList(JSON.parseArray(test, String.class));
-        fillAvg(kechuangList);
         List<OneDayDataDetail> baseList = Utils.parseDongFangCaiFuList(JSON.parseArray(base, String.class));
-        fillAvg(baseList);
         Map<String, OneDayDataDetail> baseMap = baseList.stream().collect(Collectors.toMap(e -> e.date, e -> e));
-        System.out.printf("波动幅度比例：%.2f:1\n", avgBoDong(kechuangList) / avgBoDong(baseList));
-        System.out.printf("波动幅度比例：%.2f:1\n", avgBoDongV2(kechuangList) / avgBoDongV2(baseList));
+        System.out.printf("波动幅度比例：%.2f:1\n", Utils.avgBoDong(kechuangList) / Utils.avgBoDong(baseList));
+        System.out.printf("波动幅度比例：%.2f:1\n", Utils.avgBoDongV2(kechuangList) / Utils.avgBoDongV2(baseList));
         System.out.println("========");
         double testShouyi = 0;
         double dapanShouyi = 0;
@@ -234,32 +225,6 @@ public class Main {
 //        System.out.println(dapanShouyi * 100);
     }
 
-    private void fillAvg(List<OneDayDataDetail> kechuangList) {
-        for (int i = 0; i < kechuangList.size(); i++) {
-            OneDayDataDetail kechuangOneDayDataDetail = kechuangList.get(i);
-            if (i >= 5) {
-                kechuangOneDayDataDetail.last5dayEndAvg = getLastAvg(kechuangList, i, 5);
-            }
-            if (i >= 10) {
-                kechuangOneDayDataDetail.last10dayEndAvg = getLastAvg(kechuangList, i, 10);
-            }
-            if (i >= 20) {
-                kechuangOneDayDataDetail.last20dayEndAvg = getLastAvg(kechuangList, i, 20);
-            }
-            if (i >= 30) {
-                kechuangOneDayDataDetail.last30dayEndAvg = getLastAvg(kechuangList, i, 30);
-                kechuangOneDayDataDetail.last30dayBoDong = avgBoDongV2(kechuangList.subList(i - 30, i));
-            }
-        }
-    }
-
-    Double getLastAvg(List<OneDayDataDetail> oneDayDataDetailList, int currentIndex, int lastDays) {
-        if (currentIndex >= lastDays) {
-            return oneDayDataDetailList.subList(currentIndex - lastDays, currentIndex).stream()
-                    .mapToDouble(k -> k.getEnd()).average().getAsDouble();
-        }
-        return null;
-    }
 
     void testZhangDie(String testJSON) {
         testDataInfoMap = Utils.parseDongFangCaiFuMap(JSON.parseArray(testJSON, String.class));
