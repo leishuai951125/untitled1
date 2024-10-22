@@ -71,8 +71,25 @@ public class Main {
     public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData(new BanKuai("沪深300", "1.000300"));
 
     double getSortValue(BankuaiWithData bankuaiWithData) {
-        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-//        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
+    }
+
+    //归一化 0～10 ，越大越值得买
+    static double zuoRiGuiYiHua(double zuoRi, double max, double min) {
+        return 10 - (zuoRi - min) / (max - min) * 10;
+    }
+
+    private static boolean filter(BankuaiWithData e) {
+        if (!needFilter) {
+            return true;
+        }
+        if (e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100 < 0
+                && e.todayMinuteDataList.get(1).startEndDiff * 100 < 0) {
+            //过滤掉上涨不如大盘的
+            return false;
+        }
+        return true;
     }
 
     @NotNull
@@ -119,22 +136,6 @@ public class Main {
         return sb.toString();
     }
 
-    //归一化 0～10 ，越大越值得买
-    static double zuoRiGuiYiHua(double zuoRi, double max, double min) {
-        return 10 - (zuoRi - min) / (max - min) * 10;
-    }
-
-    private static boolean filter(BankuaiWithData e) {
-        if (!needFilter) {
-            return true;
-        }
-        if (e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100 < 0
-                && e.todayMinuteDataList.get(1).startEndDiff * 100 < 0) {
-            //过滤掉上涨不如大盘的
-            return false;
-        }
-        return true;
-    }
 
     private static String todayOneMinutteDesc(BankuaiWithData e) {
         if (isSimpleMode) {
