@@ -32,6 +32,7 @@ public class Last30DayInfoUtils {
 
     public static Last30DayInfo getLast30DayInfo(List<String> jsonArray) {
         List<Main.OneDayDataDetail> detailList = Utils.parseDongFangCaiFuList(jsonArray);
+        detailList = detailList.subList(detailList.size() - 30, detailList.size());//只取最近30天
         Map<String, Main.OneDayDataDetail> detailMap = detailList.stream().collect(Collectors.toMap(e -> e.date, e -> e));
         return new Last30DayInfo(detailList, detailMap);
     }

@@ -14,6 +14,7 @@ import 上证.Utils;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -41,8 +42,11 @@ public class Main {
             return (int) ((getSortValue(b) - getSortValue(a)) * 10000);
         }).map(e -> {
             String ret = todayOneMinutteDesc(hushen300TodayWithData, e);
-            e.last30DayInfo.detailList.subList(e.last30DayInfo.detailList.size() - 30, e.last30DayInfo.detailList.size());
             //30 天比例，最大比例，最小比例，昨日比例
+            for (上证.Main.OneDayDataDetail dayDataDetail : e.last30DayInfoList) {
+//                上证.Main.OneDayDataDetail hushenDayDataDetail =hushen300TodayWithData.getTodayMinuteDataList();
+//                dayDataDetail.todayEndDiv30Avg / hushen300TodayWithData.
+            }
             return ret;
         }).collect(Collectors.toList());
         long endMs = System.currentTimeMillis();
@@ -97,8 +101,9 @@ public class Main {
         bankuaiWithData.setBankuaiName(e.getName());
         try {
             bankuaiWithData.setTodayMinuteDataList(getTodayMinuteDataList(e.getCode()));
-            bankuaiWithData.setLast30DayInfo(getLastDayData(e.getCode()));
-            bankuaiWithData.setLastDayDetail(bankuaiWithData.getLast30DayInfo().getDetailMap().get(lastDate));
+            bankuaiWithData.setLast30DayInfoList(getLast30DayData(e.getCode()));
+            bankuaiWithData.setLast30DayInfoMap(bankuaiWithData.getLast30DayInfoList().stream().collect(Collectors.toMap(kk -> kk.date, kk -> kk)));
+            bankuaiWithData.setLastDayDetail(bankuaiWithData.getLast30DayInfoMap().get(lastDate));
             bankuaiWithData.setLast2StartDiff(bankuaiWithData.getTodayMinuteDataList().get(0).start / bankuaiWithData.getLastDayDetail().end - 1);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
@@ -133,9 +138,11 @@ public class Main {
     }
 
     //天
-    private static Last30DayInfoUtils.Last30DayInfo getLastDayData(String bankuaiCode) throws IOException {
+    private static List<上证.Main.OneDayDataDetail> getLast30DayData(String bankuaiCode) throws IOException {
         JSONArray jsonArray = getDayData(bankuaiCode);
-        return Last30DayInfoUtils.getLast30DayInfo(jsonArray);
+        List<String> list = jsonArray.stream().map(e -> (String) e).collect(Collectors.toList());
+        List<上证.Main.OneDayDataDetail> detailList = Utils.parseDongFangCaiFuList(list);
+        return detailList.subList(detailList.size() - 31, detailList.size() - 1);
     }
 
     @Data
@@ -145,7 +152,8 @@ public class Main {
         String bankuaiName;
         List<OneData> todayMinuteDataList;
         double last2StartDiff;//今日开盘涨跌
-        Last30DayInfoUtils.Last30DayInfo last30DayInfo;
+        List<上证.Main.OneDayDataDetail> last30DayInfoList;
+        Map<String, 上证.Main.OneDayDataDetail> last30DayInfoMap;
         上证.Main.OneDayDataDetail lastDayDetail;
     }
 

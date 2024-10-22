@@ -147,9 +147,10 @@ public class Utils {
         }
     }
 
+    //获取过去 lastDays 天的数据，不含今天
     static Double getLastAvg(List<Main.OneDayDataDetail> oneDayDataDetailList, int currentIndex, int lastDays) {
-        if (currentIndex >= lastDays) {
-            return oneDayDataDetailList.subList(currentIndex - lastDays, currentIndex).stream()
+        if (currentIndex >= lastDays + 1) {
+            return oneDayDataDetailList.subList(currentIndex - lastDays - 1, currentIndex - 1).stream()
                     .mapToDouble(k -> k.getEnd()).average().getAsDouble();
         }
         return null;
