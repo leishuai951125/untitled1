@@ -84,7 +84,9 @@ public class Main {
         sb.append("\n");
         List<Double> xiangDuiBiLiList10Day = xiangDuiBiLiList.subList(xiangDuiBiLiList.size() - 10, xiangDuiBiLiList.size());
         sb.append(String.format("过去十天：%s  |", xiangDuiBiLiList10Day.stream().map(v -> String.format("%.2f", v * 100 - 100)).collect(Collectors.toList())));
-        sb.append(String.format(ANSI_RED + "归一化分数：%.0f  |  ", zuoRiGuiYiHua(xiangDuiBiLiMap.get(lastDate), maxXiangDuiBiLi, minXiangDuiBiLi)));
+        double zuoRiGuiYiHua = zuoRiGuiYiHua(xiangDuiBiLiMap.get(lastDate), maxXiangDuiBiLi, minXiangDuiBiLi);
+        String color = zuoRiGuiYiHua >= 5 ? ANSI_RED : ANSI_YELLOW;
+        sb.append(String.format(color + "归一化分数：%.0f  |  ", zuoRiGuiYiHua));
         sb.append(String.format("昨日：%.2f  |  " + ANSI_RESET, xiangDuiBiLiMap.get(lastDate) * 100 - 100));
         sb.append(String.format("过去最大：%.2f  |  ", maxXiangDuiBiLi * 100 - 100));
         sb.append(String.format("过去最小：%.2f  |  ", minXiangDuiBiLi * 100 - 100));
@@ -112,7 +114,7 @@ public class Main {
     private static String todayOneMinutteDesc(BankuaiWithData e) {
         return String.format("板块：%-7s  " +
                         //今日一分钟
-                        ANSI_RED + "\t 今日一分钟相对涨跌：%.3f%% " +
+                        ANSI_GREEN + "\t 今日一分钟相对涨跌：%.3f%% " +
                         "[即:%.3f%%]， \t  " +
                         //今日开盘
                         "今日开盘相对涨跌:%.3f%%" +
