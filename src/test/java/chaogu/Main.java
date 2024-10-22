@@ -26,7 +26,7 @@ public class Main {
     static String todayDate = "2024-10-22";
     static double lastDapanStar2EndDiff = -0.25 / 100;
 
-    static boolean needFilter = false;
+    static boolean needFilter = true;
     static boolean isSimpleMode = false;//简要模式
 
 //    原则：1 min 涨越多越好  2 有反弹更好 3 早上涨幅不能太高  4 非科技板块*2
@@ -69,6 +69,11 @@ public class Main {
     }
 
     public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData(new BanKuai("沪深300", "1.000300"));
+
+    double getSortValue(BankuaiWithData bankuaiWithData) {
+        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+//        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
+    }
 
     @NotNull
     private static String getLastDayDesc(BankuaiWithData e) {
@@ -123,7 +128,8 @@ public class Main {
         if (!needFilter) {
             return true;
         }
-        if (e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100 < 0) {
+        if (e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100 < 0
+                && e.todayMinuteDataList.get(1).startEndDiff * 100 < 0) {
             //过滤掉上涨不如大盘的
             return false;
         }
@@ -184,10 +190,6 @@ public class Main {
         return bankuaiWithData;
     }
 
-    double getSortValue(BankuaiWithData bankuaiWithData) {
-//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
-    }
 
     //分钟级别
     private static List<OneData> getTodayMinuteDataList(String bankuaiName) throws IOException {
