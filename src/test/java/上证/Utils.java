@@ -81,41 +81,41 @@ public class Utils {
 
     // 东方财富
     // https://quote.eastmoney.com/gb/zsXIN9.html
-    public static Map<String, Main.OneData> parseDongFangCaiFuMap(List<String> jsonArray) {
-        List<Main.OneData> list = new ArrayList<>(jsonArray.size());
+    public static Map<String, Main.OneDayDataDetail> parseDongFangCaiFuMap(List<String> jsonArray) {
+        List<Main.OneDayDataDetail> list = new ArrayList<>(jsonArray.size());
         jsonArray.forEach(e -> {
             String arr[] = e.split(",");
-            Main.OneData oneData = new Main.OneData();
-            oneData.date = arr[0];
-            oneData.start = Double.parseDouble(arr[1]);
-            oneData.end = Double.parseDouble(arr[2]);
-            oneData.startEndDiff = (oneData.end - oneData.start) / oneData.start;
+            Main.OneDayDataDetail oneDayDataDetail = new Main.OneDayDataDetail();
+            oneDayDataDetail.date = arr[0];
+            oneDayDataDetail.start = Double.parseDouble(arr[1]);
+            oneDayDataDetail.end = Double.parseDouble(arr[2]);
+            oneDayDataDetail.startEndDiff = (oneDayDataDetail.end - oneDayDataDetail.start) / oneDayDataDetail.start;
             if (list.size() != 0) {
-                Main.OneData lastOneData = list.get(list.size() - 1);
-                oneData.last2StartDiff = (oneData.start - lastOneData.end) / lastOneData.end;
-                oneData.last2EndDiff = (oneData.end - lastOneData.end) / lastOneData.end;
+                Main.OneDayDataDetail lastOneDayDataDetail = list.get(list.size() - 1);
+                oneDayDataDetail.last2StartDiff = (oneDayDataDetail.start - lastOneDayDataDetail.end) / lastOneDayDataDetail.end;
+                oneDayDataDetail.last2EndDiff = (oneDayDataDetail.end - lastOneDayDataDetail.end) / lastOneDayDataDetail.end;
             }
-            list.add(oneData);//jisuan
+            list.add(oneDayDataDetail);//jisuan
         });
         return list.stream().collect(Collectors.toMap(e -> e.getDate(), e -> e));
     }
 
-    public static List<Main.OneData> parseDongFangCaiFuList(List<String> jsonArray) {
-        List<Main.OneData> list = new ArrayList<>(jsonArray.size());
+    public static List<Main.OneDayDataDetail> parseDongFangCaiFuList(List<String> jsonArray) {
+        List<Main.OneDayDataDetail> list = new ArrayList<>(jsonArray.size());
         jsonArray.forEach(e -> {
             String arr[] = e.split(",");
-            Main.OneData oneData = new Main.OneData();
-            oneData.date = arr[0];
-            oneData.start = Double.parseDouble(arr[1]);
-            oneData.end = Double.parseDouble(arr[2]);
-            oneData.startEndDiff = (oneData.end - oneData.start) / oneData.start;
+            Main.OneDayDataDetail oneDayDataDetail = new Main.OneDayDataDetail();
+            oneDayDataDetail.date = arr[0];
+            oneDayDataDetail.start = Double.parseDouble(arr[1]);
+            oneDayDataDetail.end = Double.parseDouble(arr[2]);
+            oneDayDataDetail.startEndDiff = (oneDayDataDetail.end - oneDayDataDetail.start) / oneDayDataDetail.start;
             if (list.size() != 0) {
-                Main.OneData lastOneData = list.get(list.size() - 1);
-                oneData.last2StartDiff = (oneData.start - lastOneData.end) / lastOneData.end;
-                oneData.last2EndDiff = (oneData.end - lastOneData.end) / lastOneData.end;
-                oneData.setLasOneData(lastOneData);
+                Main.OneDayDataDetail lastOneDayDataDetail = list.get(list.size() - 1);
+                oneDayDataDetail.last2StartDiff = (oneDayDataDetail.start - lastOneDayDataDetail.end) / lastOneDayDataDetail.end;
+                oneDayDataDetail.last2EndDiff = (oneDayDataDetail.end - lastOneDayDataDetail.end) / lastOneDayDataDetail.end;
+                oneDayDataDetail.setLasOneDayDataDetail(lastOneDayDataDetail);
             }
-            list.add(oneData);//jisuan
+            list.add(oneDayDataDetail);//jisuan
         });
         return list;
     }

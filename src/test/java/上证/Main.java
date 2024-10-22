@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class Main {
     @Data
-    public static class OneData {
+    public static class OneDayDataDetail {
         String date;
         Double start;
         Double end;
@@ -20,7 +20,7 @@ public class Main {
         Double last2StartDiff;//开盘涨幅
         Double last2EndDiff;//收盘涨幅
 
-        OneData LasOneData;//上一日谁
+        OneDayDataDetail lasOneDayDataDetail;//上一日
 
         //------avg-----
         Double last5dayEndAvg;
@@ -38,7 +38,7 @@ public class Main {
     static double shouxufei = 0.0003;//正常 0.001
     //    static double shouxufei = 0.0025;//正常 0.001
     static boolean qufan = false;//不能用 true
-    static Map<String, OneData> testDataInfoMap = null;
+    static Map<String, OneDayDataDetail> testDataInfoMap = null;
 
     //当日阴阳线
 //    static Function<OneData, Boolean> yijuFunc = (oneData) -> oneData.getStartEndDiff() > 0;
@@ -54,24 +54,24 @@ public class Main {
     static AtomicInteger compareEqualsCount = new AtomicInteger(0);
     static AtomicInteger compareBuZhiXinCount = new AtomicInteger(0);
 
-    static Function<OneData, Boolean> yijuFunc = (oneData) -> {
-        Utils.QiInfo qiInfo = qihuoMap.get(oneData.date);
+    static Function<OneDayDataDetail, Boolean> yijuFunc = (oneDayDataDetail) -> {
+        Utils.QiInfo qiInfo = qihuoMap.get(oneDayDataDetail.date);
         if (qiInfo != null) {
 //            boolean zhixin = Math.abs(qiInfo.zhangdie) >= 0.006;//更准
             boolean zhixin = Math.abs(qiInfo.zhangdie) >= 0.006000;
             if (zhixin) {
-                String color = qiInfo.zhangdie * oneData.startEndDiff < 0 ? ANSI_RED : ANSI_GREEN;
+                String color = qiInfo.zhangdie * oneDayDataDetail.startEndDiff < 0 ? ANSI_RED : ANSI_GREEN;
                 System.out.printf(color + "置信：日期：%s,预测值:%.2f%%,整日涨跌: %.2f%% , 日内涨跌:%.2f%% \n" + ANSI_RESET,
-                        oneData.date, qiInfo.zhangdie * 100, oneData.last2EndDiff * 100, oneData.startEndDiff * 100);
+                        oneDayDataDetail.date, qiInfo.zhangdie * 100, oneDayDataDetail.last2EndDiff * 100, oneDayDataDetail.startEndDiff * 100);
                 compareCount.incrementAndGet();
-                if (qiInfo.zhangdie * oneData.startEndDiff > 0) {
+                if (qiInfo.zhangdie * oneDayDataDetail.startEndDiff > 0) {
                     compareEqualsCount.incrementAndGet();
                 }
                 return qiInfo.zhangdie > 0;
             } else {
-                String color = qiInfo.zhangdie * oneData.startEndDiff < 0 ? ANSI_RED : ANSI_YELLOW;
+                String color = qiInfo.zhangdie * oneDayDataDetail.startEndDiff < 0 ? ANSI_RED : ANSI_YELLOW;
                 System.out.printf(color + "不置信：日期：%s,预测值:%.2f%%,整日涨跌: %.2f%% , 日内涨跌:%.2f%% \n" + ANSI_RESET,
-                        oneData.date, qiInfo.zhangdie * 100, oneData.last2EndDiff * 100, oneData.startEndDiff * 100);
+                        oneDayDataDetail.date, qiInfo.zhangdie * 100, oneDayDataDetail.last2EndDiff * 100, oneDayDataDetail.startEndDiff * 100);
                 compareBuZhiXinCount.incrementAndGet();
                 return true;//不置信就不卖
             }
@@ -130,27 +130,27 @@ public class Main {
         bili(Utils.getDataByFileName("jiaoyu"), shangZhengZhishu);
     }
 
-    public static double avgBoDong(List<Main.OneData> list) {
+    public static double avgBoDong(List<OneDayDataDetail> list) {
         return list.stream().mapToDouble(e -> Math.abs(e.startEndDiff)).sum() / list.size();
     }
 
-    public static double avgBoDongV2(List<Main.OneData> list) {
+    public static double avgBoDongV2(List<OneDayDataDetail> list) {
         return list.stream().mapToDouble(e -> e.last2EndDiff == null ? 0 : Math.abs(e.last2StartDiff)).sum() / list.size();
     }
     //https://push2his.eastmoney.com/api/qt/stock/kline/get?cb=jQuery35105388667892147085_1729285290503&secid=1.000001&ut=fa5fd1943c7b386f172d6893dbfba10b&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61&klt=101&fqt=1&end=20500101&lmt=1360&_=1729285290508
 
     public void bili(String test, String base) {
-        List<Main.OneData> kechuangList = Utils.parseDongFangCaiFuList(JSON.parseArray(test, String.class));
+        List<OneDayDataDetail> kechuangList = Utils.parseDongFangCaiFuList(JSON.parseArray(test, String.class));
         fillAvg(kechuangList);
-        List<Main.OneData> baseList = Utils.parseDongFangCaiFuList(JSON.parseArray(base, String.class));
+        List<OneDayDataDetail> baseList = Utils.parseDongFangCaiFuList(JSON.parseArray(base, String.class));
         fillAvg(baseList);
-        Map<String, Main.OneData> baseMap = baseList.stream().collect(Collectors.toMap(e -> e.date, e -> e));
+        Map<String, OneDayDataDetail> baseMap = baseList.stream().collect(Collectors.toMap(e -> e.date, e -> e));
         System.out.printf("波动幅度比例：%.2f:1\n", avgBoDong(kechuangList) / avgBoDong(baseList));
         System.out.printf("波动幅度比例：%.2f:1\n", avgBoDongV2(kechuangList) / avgBoDongV2(baseList));
         System.out.println("========");
         double testShouyi = 0;
         double dapanShouyi = 0;
-        for (Main.OneData e : kechuangList) {
+        for (OneDayDataDetail e : kechuangList) {
 //            if (e.last30dayEndAvg != null) {
 //                double billi = e.getLasOneData().end / e.last30dayEndAvg;
 //
@@ -179,10 +179,10 @@ public class Main {
 //            }
 
             if (e.last30dayEndAvg != null) {
-                double billi = e.getLasOneData().end / e.last30dayEndAvg;
+                double billi = e.getLasOneDayDataDetail().end / e.last30dayEndAvg;
 
-                Main.OneData baseOneData = baseMap.get(e.date);
-                double baseBilli = baseOneData.getLasOneData().end / baseOneData.last30dayEndAvg;
+                OneDayDataDetail baseOneDayDataDetail = baseMap.get(e.date);
+                double baseBilli = baseOneDayDataDetail.getLasOneDayDataDetail().end / baseOneDayDataDetail.last30dayEndAvg;
                 double beishu = 0;
                 String colordiffDapan = ANSI_RESET;
 //                if (billi < 1) {//亏钱
@@ -208,15 +208,15 @@ public class Main {
                     colordiffDapan = Math.abs(billi - 1) / e.last30dayBoDong >= 30 ? ANSI_RED : ANSI_RESET; //红色表示盈利方向反向
                     if (colordiffDapan == ANSI_RED) {
                         testShouyi += e.getLast2EndDiff();
-                        dapanShouyi += baseOneData.getLast2EndDiff();
+                        dapanShouyi += baseOneDayDataDetail.getLast2EndDiff();
                         System.out.printf(ANSI_RESET + "计算收益,beishu:%.2f,beishu:%.2f,testShouyi :%.2f%%,dapanShouyi %.2f%%\n",
-                                e.last30dayBoDong / baseOneData.last30dayBoDong, (billi - 1) / e.last30dayBoDong,
+                                e.last30dayBoDong / baseOneDayDataDetail.last30dayBoDong, (billi - 1) / e.last30dayBoDong,
                                 testShouyi * 100, dapanShouyi * 100);
                     }
                 }
 
                 //昨日多涨
-                double diffDapanLast2EndDiff = (e.last2EndDiff - baseOneData.last2EndDiff) * 100;//todo
+                double diffDapanLast2EndDiff = (e.last2EndDiff - baseOneDayDataDetail.last2EndDiff) * 100;//todo
 //                double diffDapanLast2EndDiff = (e.startEndDiff - baseOneData.startEndDiff) * 100;
 
                 System.out.printf(colordiffDapan + "日期：%s,20日，上日大盘比例:%.3f，  上日板块比例:%.3f，     " +
@@ -226,7 +226,7 @@ public class Main {
                         e.date, baseBilli * 100 - 100, billi * 100 - 100,
                         billi / baseBilli * 100 - 100,
 //                        beishu, Math.abs(billi - 1) / e.last30dayBoDong,
-                        baseOneData.last2EndDiff * 100, baseOneData.startEndDiff * 100, e.startEndDiff * 100, e.last2EndDiff * 100, diffDapanLast2EndDiff);
+                        baseOneDayDataDetail.last2EndDiff * 100, baseOneDayDataDetail.startEndDiff * 100, e.startEndDiff * 100, e.last2EndDiff * 100, diffDapanLast2EndDiff);
             }
 
         }
@@ -234,28 +234,28 @@ public class Main {
 //        System.out.println(dapanShouyi * 100);
     }
 
-    private void fillAvg(List<OneData> kechuangList) {
+    private void fillAvg(List<OneDayDataDetail> kechuangList) {
         for (int i = 0; i < kechuangList.size(); i++) {
-            OneData kechuangOneData = kechuangList.get(i);
+            OneDayDataDetail kechuangOneDayDataDetail = kechuangList.get(i);
             if (i >= 5) {
-                kechuangOneData.last5dayEndAvg = getLastAvg(kechuangList, i, 5);
+                kechuangOneDayDataDetail.last5dayEndAvg = getLastAvg(kechuangList, i, 5);
             }
             if (i >= 10) {
-                kechuangOneData.last10dayEndAvg = getLastAvg(kechuangList, i, 10);
+                kechuangOneDayDataDetail.last10dayEndAvg = getLastAvg(kechuangList, i, 10);
             }
             if (i >= 20) {
-                kechuangOneData.last20dayEndAvg = getLastAvg(kechuangList, i, 20);
+                kechuangOneDayDataDetail.last20dayEndAvg = getLastAvg(kechuangList, i, 20);
             }
             if (i >= 30) {
-                kechuangOneData.last30dayEndAvg = getLastAvg(kechuangList, i, 30);
-                kechuangOneData.last30dayBoDong = avgBoDongV2(kechuangList.subList(i - 30, i));
+                kechuangOneDayDataDetail.last30dayEndAvg = getLastAvg(kechuangList, i, 30);
+                kechuangOneDayDataDetail.last30dayBoDong = avgBoDongV2(kechuangList.subList(i - 30, i));
             }
         }
     }
 
-    Double getLastAvg(List<Main.OneData> oneDataList, int currentIndex, int lastDays) {
+    Double getLastAvg(List<OneDayDataDetail> oneDayDataDetailList, int currentIndex, int lastDays) {
         if (currentIndex >= lastDays) {
-            return oneDataList.subList(currentIndex - lastDays, currentIndex).stream()
+            return oneDayDataDetailList.subList(currentIndex - lastDays, currentIndex).stream()
                     .mapToDouble(k -> k.getEnd()).average().getAsDouble();
         }
         return null;
@@ -286,7 +286,7 @@ public class Main {
 
 
     private static void testShouyi(List<String> jsonArray) {
-        List<OneData> list = new ArrayList<>(jsonArray.size());
+        List<OneDayDataDetail> list = new ArrayList<>(jsonArray.size());
         List<Double> shouyi = new ArrayList<>();
         List<Double> shouyi2 = new ArrayList<>();
         List<Double> shouyi3 = new ArrayList<>();
@@ -301,16 +301,16 @@ public class Main {
 //        public class
         jsonArray.forEach(e -> {
             String arr[] = e.split(",");
-            OneData oneData = new OneData();
-            oneData.date = arr[0];
-            oneData.start = Double.parseDouble(arr[1]);
-            oneData.end = Double.parseDouble(arr[2]);
-            oneData.startEndDiff = (oneData.end - oneData.start) / oneData.start;
+            OneDayDataDetail oneDayDataDetail = new OneDayDataDetail();
+            oneDayDataDetail.date = arr[0];
+            oneDayDataDetail.start = Double.parseDouble(arr[1]);
+            oneDayDataDetail.end = Double.parseDouble(arr[2]);
+            oneDayDataDetail.startEndDiff = (oneDayDataDetail.end - oneDayDataDetail.start) / oneDayDataDetail.start;
 
             if (list.size() != 0) {
-                OneData lastOneData = list.get(list.size() - 1);
-                oneData.last2StartDiff = (oneData.start - lastOneData.end) / lastOneData.end;
-                oneData.last2EndDiff = (oneData.end - lastOneData.end) / lastOneData.end;
+                OneDayDataDetail lastOneDayDataDetail = list.get(list.size() - 1);
+                oneDayDataDetail.last2StartDiff = (oneDayDataDetail.start - lastOneDayDataDetail.end) / lastOneDayDataDetail.end;
+                oneDayDataDetail.last2EndDiff = (oneDayDataDetail.end - lastOneDayDataDetail.end) / lastOneDayDataDetail.end;
 //                System.out.printf(ANSI_YELLOW + "日期：%s,上日涨跌:%.2f%%,整日涨跌: %.2f%% , 日内涨跌:%.2f%% \n" + ANSI_RESET,
 //                        oneData.date, lastOneData.startEndDiff * 100, oneData.last2EndDiff * 100, oneData.startEndDiff * 100);
 //                if (Math.abs(oneData.startEndDiff) > 0 &&
@@ -332,63 +332,63 @@ public class Main {
                 if (list.size() > 1) {
 
                     //当的开盘涨跌
-                    Boolean yiJu = yijuFunc.apply(oneData);
+                    Boolean yiJu = yijuFunc.apply(oneDayDataDetail);
 
                     if (yiJu != null) { //有买入
 
                         //无脑买入，有脑卖出
                         if (yiJu) { //当日整体涨幅
-                            shouyi.add(oneData.last2EndDiff);//预计涨就持有
+                            shouyi.add(oneDayDataDetail.last2EndDiff);//预计涨就持有
                         } else {
-                            shouyi.add(oneData.last2StartDiff - shouxufei);//预计跌就卖出 , todo 考虑手续费
+                            shouyi.add(oneDayDataDetail.last2StartDiff - shouxufei);//预计跌就卖出 , todo 考虑手续费
                         }
 
                         //上一日有收益买入，有脑卖出
-                        if (lastOneData.last2EndDiff > 0) {
+                        if (lastOneDayDataDetail.last2EndDiff > 0) {
                             if (yiJu) { //当日整体涨幅
-                                shouyi2.add(oneData.last2EndDiff);//预计涨就持有
+                                shouyi2.add(oneDayDataDetail.last2EndDiff);//预计涨就持有
                             } else {
-                                shouyi2.add(oneData.last2StartDiff - shouxufei);//预计跌就卖出 , todo 考虑手续费
+                                shouyi2.add(oneDayDataDetail.last2StartDiff - shouxufei);//预计跌就卖出 , todo 考虑手续费
                             }
                         } else {
                             if (yiJu) { //当日整体涨幅
-                                shouyi4.add(oneData.last2EndDiff);//预计涨就持有
+                                shouyi4.add(oneDayDataDetail.last2EndDiff);//预计涨就持有
                             } else {
-                                shouyi4.add(oneData.last2StartDiff - shouxufei);//预计跌就卖出 , todo 考虑手续费
+                                shouyi4.add(oneDayDataDetail.last2StartDiff - shouxufei);//预计跌就卖出 , todo 考虑手续费
                             }
                         }
 
                         //上一日有收益买入，有脑卖出
-                        if (lastOneData.last2EndDiff >= 0 && lastOneData.startEndDiff >= 0) {
+                        if (lastOneDayDataDetail.last2EndDiff >= 0 && lastOneDayDataDetail.startEndDiff >= 0) {
                             if (yiJu) { //当日整体涨幅
-                                shouyi3.add(oneData.last2EndDiff);//预计涨就持有
+                                shouyi3.add(oneDayDataDetail.last2EndDiff);//预计涨就持有
                             } else {
-                                shouyi3.add(oneData.last2StartDiff - shouxufei);//预计跌就卖出 , todo 考虑手续费
+                                shouyi3.add(oneDayDataDetail.last2StartDiff - shouxufei);//预计跌就卖出 , todo 考虑手续费
                             }
-                            shouyi7.add(oneData.last2EndDiff - shouxufei);//无脑卖
+                            shouyi7.add(oneDayDataDetail.last2EndDiff - shouxufei);//无脑卖
                         } else {
                             if (yiJu) { //当日整体涨幅
-                                shouyi5.add(oneData.last2EndDiff);//预计涨就持有
+                                shouyi5.add(oneDayDataDetail.last2EndDiff);//预计涨就持有
                             } else {
-                                shouyi5.add(oneData.last2StartDiff - shouxufei);//预计跌就卖出 , todo 考虑手续费
+                                shouyi5.add(oneDayDataDetail.last2StartDiff - shouxufei);//预计跌就卖出 , todo 考虑手续费
                             }
                         }
 
-                        if (lastOneData.last2EndDiff < 0 && lastOneData.startEndDiff < 0) {
+                        if (lastOneDayDataDetail.last2EndDiff < 0 && lastOneDayDataDetail.startEndDiff < 0) {
                             if (yiJu) { //当日整体涨幅
-                                shouyi6.add(oneData.last2EndDiff);//预计涨就持有
+                                shouyi6.add(oneDayDataDetail.last2EndDiff);//预计涨就持有
                             } else {
-                                shouyi6.add(oneData.last2StartDiff - shouxufei);//预计跌就卖出 , todo 考虑手续费
+                                shouyi6.add(oneDayDataDetail.last2StartDiff - shouxufei);//预计跌就卖出 , todo 考虑手续费
                             }
                         }
                         //无脑买入，无脑收盘卖出
-                        shouyiDuiZhao1.add(oneData.last2EndDiff - shouxufei);
+                        shouyiDuiZhao1.add(oneDayDataDetail.last2EndDiff - shouxufei);
                         //无脑买入，无脑开盘卖出
-                        shouyiDuiZhao2.add(oneData.last2StartDiff - shouxufei);
+                        shouyiDuiZhao2.add(oneDayDataDetail.last2StartDiff - shouxufei);
                     }
                 }
             }
-            list.add(oneData);
+            list.add(oneDayDataDetail);
         });
 
         System.out.printf("zhengque:%d,cuowu:%d,zhengque/cuowu:%.2f\n",

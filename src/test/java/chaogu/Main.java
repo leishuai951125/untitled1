@@ -18,12 +18,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Main {
-
-    static String lastDate = "2024-10-18";
-    static double lastDapanStar2EndDiff = 2.91 / 100;
-
-//    static String lastDate = "2024-10-21";
-//    static double lastDapanStar2EndDiff = -0.25 / 100;
+    static String lastDate = "2024-10-21";
+    static double lastDapanStar2EndDiff = -0.25 / 100;
 
 //    原则：1 min 涨越多越好  2 有反弹更好 3 早上涨幅不能太高  4 非科技板块*2
 
