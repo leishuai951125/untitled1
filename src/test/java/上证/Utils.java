@@ -120,7 +120,9 @@ public class Utils {
         fillAvg(list);
 
         list.forEach(e -> {
-            e.todayEndDiv30Avg = e.end / e.last30dayEndAvg;
+            if (e.last30dayEndAvg != null) {
+                e.todayEndDiv30Avg = e.end / e.last30dayEndAvg;
+            }
         });
 
         return list;
