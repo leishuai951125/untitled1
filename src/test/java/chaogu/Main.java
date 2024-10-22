@@ -21,10 +21,10 @@ public class Main {
     }
 
     RunMode runMode = RunMode.YuCe;
-    public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData(new BanKuai("沪深300", "1.000300"));
 
     static String lastDate = "2024-10-21";
     static String todayDate = "2024-10-23";
+
     static double lastDapanStar2EndDiff = -0.25 / 100;
     static boolean needFilter = true;
 
@@ -55,6 +55,8 @@ public class Main {
         resultListt.forEach(System.out::println);
     }
 
+    public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData(new BanKuai("沪深300", "1.000300"));
+
     @NotNull
     private static String getLastDayDesc(BankuaiWithData e) {
         //30 天比例，最大比例，最小比例，昨日比例
@@ -79,13 +81,12 @@ public class Main {
         }
         avgXiangDuiBiLi = sumXiangDuiBiLi / xiangDuiBiLiMap.size();
         StringBuilder sb = new StringBuilder();
-        sb.append("\n相对值信息  ");
+        sb.append("\n");
         List<Double> xiangDuiBiLiList10Day = xiangDuiBiLiList.subList(xiangDuiBiLiList.size() - 10, xiangDuiBiLiList.size());
-        sb.append(String.format("过去十天： %s", xiangDuiBiLiList10Day.stream().map(v -> String.format("%.2f", v * 100 - 100)).collect(Collectors.toList())));
-//        sb.append(String.format("昨日：%.2f  |  ", xiangDuiBiLiMap.get(lastDate) * 100 - 100));
+        sb.append(String.format("过去十天： %s  |", xiangDuiBiLiList10Day.stream().map(v -> String.format("%.2f", v * 100 - 100)).collect(Collectors.toList())));
+        sb.append(String.format("昨日：%.2f  |  ", xiangDuiBiLiMap.get(lastDate) * 100 - 100));
         sb.append(String.format("过去最大：%.2f  |  ", maxXiangDuiBiLi * 100 - 100));
         sb.append(String.format("过去最小：%.2f  |  ", minXiangDuiBiLi * 100 - 100));
-        sb.append(String.format("过去平均：%.2f  |  ", avgXiangDuiBiLi * 100 - 100));
         sb.append(String.format("过去平均：%.2f  |  ", avgXiangDuiBiLi * 100 - 100));
         sb.append("\n");
         return sb.toString();
