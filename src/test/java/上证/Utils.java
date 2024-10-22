@@ -118,6 +118,11 @@ public class Utils {
             list.add(oneDayDataDetail);//jisuan
         });
         fillAvg(list);
+
+        list.forEach(e -> {
+            e.todayEndDiv30Avg = e.end / e.last30dayEndAvg;
+        });
+
         return list;
     }
 

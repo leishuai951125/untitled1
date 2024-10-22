@@ -13,21 +13,23 @@ import java.util.stream.Collectors;
 public class Main {
     @Data
     public static class OneDayDataDetail {
-        String date;
-        Double start;
-        Double end;
-        Double startEndDiff;//当日波动
-        Double last2StartDiff;//开盘涨幅
-        Double last2EndDiff;//收盘涨幅
+        public String date;
+        public Double start;
+        public Double end;
+        public Double startEndDiff;//当日波动
+        public Double last2StartDiff;//开盘涨幅
+        public Double last2EndDiff;//收盘涨幅
 
-        OneDayDataDetail lasOneDayDataDetail;//上一日
+        public Double todayEndDiv30Avg;//上一日收盘除以30日 avg ; 得到今日相对比例
+
+        public OneDayDataDetail lasOneDayDataDetail;//上一日
 
         //------avg-----
-        Double last5dayEndAvg;
-        Double last10dayEndAvg;
-        Double last20dayEndAvg;
-        Double last30dayEndAvg;
-        Double last30dayBoDong;
+        public Double last5dayEndAvg;
+        public Double last10dayEndAvg;
+        public Double last20dayEndAvg;
+        public Double last30dayEndAvg;
+        public Double last30dayBoDong;
     }
 
     public static final String ANSI_RESET = "\u001B[0m";
@@ -142,57 +144,13 @@ public class Main {
         double testShouyi = 0;
         double dapanShouyi = 0;
         for (OneDayDataDetail e : kechuangList) {
-//            if (e.last30dayEndAvg != null) {
-//                double billi = e.getLasOneData().end / e.last30dayEndAvg;
-//
-//                Main.OneData baseOneData = baseMap.get(e.date);
-//                double baseBilli = baseOneData.getLasOneData().end / baseOneData.last30dayEndAvg;
-//                double beishu = 0;
-//                String colordiffDapan = ANSI_RESET;
-//                if (billi < 1) {//大盘亏钱
-//                    beishu = Math.abs(billi - 1) / Math.max(Math.abs(baseBilli - 1), 0.01);
-//                    //比大盘亏的多
-//                    colordiffDapan = beishu > 4.0 ? ANSI_RED : ANSI_RESET; //红色表示盈利方向反向
-//                } else if (billi > 1) { //大盘挣钱
-//                    beishu = (baseBilli - 1) / Math.max(billi - 1, 0.01);
-//                    //没大盘挣的多
-//                    colordiffDapan = beishu >= 1 ? ANSI_RED : ANSI_RESET; //红色表示盈利方向反向
-//                }
-//
-//                //昨日多涨
-//                double diffDapanLast2EndDiff = (e.last2EndDiff - baseOneData.last2EndDiff) * 100;
-//
-//                System.out.printf(colordiffDapan + "日期：%s,30日，上日大盘比例:%.3f，  上日板块比例:%.3f，     " +
-//                                " \t上日板块比大盘比值:%.3f,   上日板块多余倍数:%.1f     " +
-//                                "  \t今日大盘涨跌:%.3f，今日板块涨跌:%.3f，\t今日板块比大盘多涨:%.3f,\n",
-//                        e.date, baseBilli * 100 - 100, billi * 100 - 100, billi / baseBilli * 100 - 100, beishu,
-//                        baseOneData.last2EndDiff * 100, e.last2EndDiff * 100, diffDapanLast2EndDiff);
-//            }
 
             if (e.last30dayEndAvg != null) {
                 double billi = e.getLasOneDayDataDetail().end / e.last30dayEndAvg;
 
                 OneDayDataDetail baseOneDayDataDetail = baseMap.get(e.date);
                 double baseBilli = baseOneDayDataDetail.getLasOneDayDataDetail().end / baseOneDayDataDetail.last30dayEndAvg;
-                double beishu = 0;
                 String colordiffDapan = ANSI_RESET;
-//                if (billi < 1) {//亏钱
-//                    beishu = Math.abs(billi - 1) / Math.max(Math.abs(baseBilli - 1), 0.01);
-//                    //比大盘亏的多
-//                    colordiffDapan = beishu > e.last30dayBoDong / baseOneData.last30dayBoDong * 2 ? ANSI_RED : ANSI_RESET; //红色表示盈利方向反向
-//                    if (colordiffDapan == ANSI_RED) {
-//                        testShouyi += e.getLast2EndDiff();
-//                        dapanShouyi += baseOneData.getLast2EndDiff();
-//                        System.out.printf(ANSI_RESET + "计算收益,beishu:%.2f,beishu:%.2f,testShouyi :%.2f%%,dapanShouyi %.2f%%\n",
-//                                e.last30dayBoDong / baseOneData.last30dayBoDong, Math.abs(billi - 1) / e.last30dayBoDong,
-//                                testShouyi * 100, dapanShouyi * 100);
-//                    }
-//                } else if (billi > 1) { //挣钱
-//                    beishu = (baseBilli - 1) / Math.max(billi - 1, 0.01);
-//                    //没大盘挣的多
-//                    colordiffDapan = beishu >= 0.7 ? ANSI_YELLOW : ANSI_RESET; //红色表示盈利方向反向
-//                }
-
 
                 if (billi < 1) {//亏钱
                     //比大盘亏的多

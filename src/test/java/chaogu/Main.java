@@ -26,8 +26,6 @@ public class Main {
     @Test
     public void main() throws IOException {
         getBankuaiWithData(new BanKuai("沪深300", "90.BK0740"));
-
-
         List<BanKuai> banKuaiList = parseAllBanKuai();
 //        System.out.println(JSON.toJSONString(banKuaiList));
         long starMs = System.currentTimeMillis();
@@ -40,31 +38,33 @@ public class Main {
 //                return (int) ((a.getLastDayData().startEndDiff - lastDapanStar2EndDiff) * 10000);
 //            }
 //            return -(int) ((a.getTodayMinuteDataList().get(1).startEndDiff - b.getTodayMinuteDataList().get(1).startEndDiff) * 10000);
-        }).map(e -> String.format("板块：%-7s  " +
-                        //今日一分钟
-                        "\t 今日一分钟相对涨跌：%.3f%% " +
-                        "[即:%.3f%%]， \t  " +
-                        //今日开盘
-                        "今日开盘相对涨跌:%.3f%%" +
-                        " [即:%.3f%%] \t  " +
-                        //昨日
-                        " 上日相比大盘涨跌：%.2f%%" +
-                        " [即:%.2f%%]， " +
-                        //时间
-                        "\t  时间：%s",
-                fillName(e.getBankuaiName()),
-                //今日一分钟
-                e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300TodayWithData.todayMinuteDataList.get(1).startEndDiff * 100,
-                e.todayMinuteDataList.get(1).startEndDiff * 100,
-                //今日开盘
-                e.last2StartDiff * 100 - hushen300TodayWithData.last2StartDiff * 100,
-                e.last2StartDiff * 100,
-                //昨日
-                (e.lastDayData.startEndDiff - lastDapanStar2EndDiff) * 100,
-                e.lastDayData.startEndDiff * 100,
-                //时间
-                e.todayMinuteDataList.get(1).dateTime
-        )).collect(Collectors.toList());
+        }).map(e -> {
+            return String.format("板块：%-7s  " +
+                            //今日一分钟
+                            "\t 今日一分钟相对涨跌：%.3f%% " +
+                            "[即:%.3f%%]， \t  " +
+                            //今日开盘
+                            "今日开盘相对涨跌:%.3f%%" +
+                            " [即:%.3f%%] \t  " +
+                            //昨日
+                            " 上日相比大盘涨跌：%.2f%%" +
+                            " [即:%.2f%%]， " +
+                            //时间
+                            "\t  时间：%s",
+                    fillName(e.getBankuaiName()),
+                    //今日一分钟
+                    e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300TodayWithData.todayMinuteDataList.get(1).startEndDiff * 100,
+                    e.todayMinuteDataList.get(1).startEndDiff * 100,
+                    //今日开盘
+                    e.last2StartDiff * 100 - hushen300TodayWithData.last2StartDiff * 100,
+                    e.last2StartDiff * 100,
+                    //昨日
+                    (e.lastDayDetail.startEndDiff - lastDapanStar2EndDiff) * 100,
+                    e.lastDayDetail.startEndDiff * 100,
+                    //时间
+                    e.todayMinuteDataList.get(1).dateTime
+            );
+        }).collect(Collectors.toList());
         long endMs = System.currentTimeMillis();
         System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
                         "昨日大盘涨跌：%.2f%% \n" +
@@ -90,8 +90,9 @@ public class Main {
         bankuaiWithData.setBankuaiName(e.getName());
         try {
             bankuaiWithData.setTodayMinuteDataList(getTodayMinuteDataList(e.getCode()));
-            bankuaiWithData.setLastDayData(getLastDayData(e.getCode()));
-            bankuaiWithData.setLast2StartDiff(bankuaiWithData.getTodayMinuteDataList().get(0).start / bankuaiWithData.getLastDayData().end - 1);
+            bankuaiWithData.setLast30DayInfo(getLastDayData(e.getCode()));
+            bankuaiWithData.setLastDayDetail(bankuaiWithData.getLast30DayInfo().getDetailMap().get(lastDate));
+            bankuaiWithData.setLast2StartDiff(bankuaiWithData.getTodayMinuteDataList().get(0).start / bankuaiWithData.getLastDayDetail().end - 1);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -125,21 +126,9 @@ public class Main {
     }
 
     //天
-    private static OneData getLastDayData(String bankuaiCode) throws IOException {
-        String jqueryString = getDayData(bankuaiCode);
-        String arr[] = jqueryString.split("\\(|\\)");
-        JSONArray jsonArray = JSON.parseObject(arr[1]).getJSONObject("data").getJSONArray("klines");
-        return jsonArray.subList(jsonArray.size() - 4, jsonArray.size()) //倒数4天（包括今天）
-                .stream().map(e -> {
-                    String one = (String) e;
-                    String[] tmp = one.split(",");
-                    OneData oneData = new OneData();
-                    oneData.setDateTime(tmp[0]);
-                    oneData.setStart(Double.parseDouble(tmp[1]));
-                    oneData.setEnd(Double.parseDouble(tmp[2]));
-                    oneData.setStartEndDiff(oneData.end / oneData.start - 1);
-                    return oneData;
-                }).filter(e -> e.dateTime.equals(lastDate)).findFirst().get();
+    private static GetXiangDuiBiLi.Last30DayInfo getLastDayData(String bankuaiCode) throws IOException {
+        JSONArray jsonArray = getDayData(bankuaiCode);
+        return GetXiangDuiBiLi.getLast30DayInfo(jsonArray);
     }
 
     @Data
@@ -149,7 +138,8 @@ public class Main {
         String bankuaiName;
         List<OneData> todayMinuteDataList;
         double last2StartDiff;//今日开盘涨跌
-        OneData lastDayData;
+        GetXiangDuiBiLi.Last30DayInfo last30DayInfo;
+        上证.Main.OneDayDataDetail lastDayDetail;
     }
 
     @Data
@@ -190,13 +180,16 @@ public class Main {
         return getData(url);
     }
 
-    private static String getDayData(String bankuaiCode) throws IOException {
+    private static JSONArray getDayData(String bankuaiCode) throws IOException {
         long ms = System.currentTimeMillis();
         String url = "https://push2his.eastmoney.com/api/qt/stock/kline/get?cb=jQuery35105715717072793236_"
                 + ms + "&secid=" + bankuaiCode +
                 "&ut=fa5fd1943c7b386f172d6893dbfba10b&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61&klt=101&fqt=1&end=20500101&lmt=120&_="
                 + (ms + 50);
-        return getData(url);
+        String jqueryString = getData(url);
+        String arr[] = jqueryString.split("\\(|\\)");
+        JSONArray jsonArray = JSON.parseObject(arr[1]).getJSONObject("data").getJSONArray("klines");
+        return jsonArray;
     }
 
     @NotNull
