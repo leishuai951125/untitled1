@@ -12,9 +12,7 @@ import org.junit.Test;
 import 上证.Utils;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -23,31 +21,28 @@ public class Main {
     }
 
     RunMode runMode = RunMode.YuCe;
+    public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData(new BanKuai("沪深300", "1.000300"));
 
     static String lastDate = "2024-10-21";
     static String todayDate = "2024-10-23";
     static double lastDapanStar2EndDiff = -0.25 / 100;
+    static boolean needFilter = true;
 
 //    原则：1 min 涨越多越好  2 有反弹更好 3 早上涨幅不能太高  4 非科技板块*2
+
 
     @Test
     public void main() throws IOException {
 //        getBankuaiWithData(new BanKuai("教育", "90.BK0740"));
         List<BanKuai> banKuaiList = parseAllBanKuai();
         long starMs = System.currentTimeMillis();
-        BankuaiWithData hushen300TodayWithData = getBankuaiWithData(new BanKuai("沪深300", "1.000300"));
         List<String> resultListt = banKuaiList.stream().parallel().map(e -> {
             return getBankuaiWithData(e);
-        }).sorted((a, b) -> {
+        }).filter(Main::filter).sorted((a, b) -> {
             return (int) ((getSortValue(b) - getSortValue(a)) * 10000);
         }).map(e -> {
-            String ret = todayOneMinutteDesc(hushen300TodayWithData, e);
-            //30 天比例，最大比例，最小比例，昨日比例
-            for (上证.Main.OneDayDataDetail dayDataDetail : e.last30DayInfoList) {
-//                上证.Main.OneDayDataDetail hushenDayDataDetail =hushen300TodayWithData.getTodayMinuteDataList();
-//                dayDataDetail.todayEndDiv30Avg / hushen300TodayWithData.
-            }
-            return ret;
+            String ret = todayOneMinutteDesc(e);
+            return ret + getLastDayDesc(e);
         }).collect(Collectors.toList());
         long endMs = System.currentTimeMillis();
         System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
@@ -55,13 +50,61 @@ public class Main {
                         "今日大盘开盘涨跌：%.2f%%,今日大盘一分钟涨跌：%.2f%%\n",
                 new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0,
                 lastDapanStar2EndDiff * 100,
-                hushen300TodayWithData.last2StartDiff * 100, hushen300TodayWithData.todayMinuteDataList.get(1).startEndDiff * 100);
+                hushen300BanKuaiData.last2StartDiff * 100, hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100);
         System.out.println("===========");
         resultListt.forEach(System.out::println);
     }
 
-    private static String todayOneMinutteDesc(BankuaiWithData hushen300TodayWithData, BankuaiWithData e) {
-        return String.format("板块：%-7s  " +
+    @NotNull
+    private static String getLastDayDesc(BankuaiWithData e) {
+        //30 天比例，最大比例，最小比例，昨日比例
+        double maxXiangDuiBiLi = -1000;
+        double minXiangDuiBiLi = 1000;
+        double sumXiangDuiBiLi = 0;
+        double avgXiangDuiBiLi = 0;
+        List<Double> xiangDuiBiLiList = new ArrayList<>(e.last30DayInfoList.size());
+        Map<String, Double> xiangDuiBiLiMap = new HashMap<>(e.last30DayInfoList.size());
+        for (上证.Main.OneDayDataDetail dayDataDetail : e.last30DayInfoList) {
+            上证.Main.OneDayDataDetail hushenDayDataDetail = hushen300BanKuaiData.getLast30DayInfoMap().get(dayDataDetail.date);
+            Double xiangDuiBiLi = dayDataDetail.todayEndDiv30Avg / hushenDayDataDetail.todayEndDiv30Avg;
+            if (xiangDuiBiLi > maxXiangDuiBiLi) {
+                maxXiangDuiBiLi = xiangDuiBiLi;
+            }
+            if (xiangDuiBiLi < minXiangDuiBiLi) {
+                minXiangDuiBiLi = xiangDuiBiLi;
+            }
+            sumXiangDuiBiLi += xiangDuiBiLi;
+            xiangDuiBiLiMap.put(dayDataDetail.date, xiangDuiBiLi);
+            xiangDuiBiLiList.add(xiangDuiBiLi);
+        }
+        avgXiangDuiBiLi = sumXiangDuiBiLi / xiangDuiBiLiMap.size();
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n相对值信息  ");
+        List<Double> xiangDuiBiLiList10Day = xiangDuiBiLiList.subList(xiangDuiBiLiList.size() - 10, xiangDuiBiLiList.size());
+        sb.append(String.format("过去十天： %s", xiangDuiBiLiList10Day.stream().map(v -> String.format("%.2f", v * 100 - 100)).collect(Collectors.toList())));
+//        sb.append(String.format("昨日：%.2f  |  ", xiangDuiBiLiMap.get(lastDate) * 100 - 100));
+        sb.append(String.format("过去最大：%.2f  |  ", maxXiangDuiBiLi * 100 - 100));
+        sb.append(String.format("过去最小：%.2f  |  ", minXiangDuiBiLi * 100 - 100));
+        sb.append(String.format("过去平均：%.2f  |  ", avgXiangDuiBiLi * 100 - 100));
+        sb.append(String.format("过去平均：%.2f  |  ", avgXiangDuiBiLi * 100 - 100));
+        sb.append("\n");
+        return sb.toString();
+    }
+
+
+    private static boolean filter(BankuaiWithData e) {
+        if (!needFilter) {
+            return true;
+        }
+        if (e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100 < 0) {
+            //过滤掉上涨不如大盘的
+            return false;
+        }
+        return true;
+    }
+
+    private static String todayOneMinutteDesc(BankuaiWithData e) {
+        return String.format(ANSI_GREEN + "板块：%-7s  " +
                         //今日一分钟
                         "\t 今日一分钟相对涨跌：%.3f%% " +
                         "[即:%.3f%%]， \t  " +
@@ -72,13 +115,13 @@ public class Main {
                         " 上日相比大盘涨跌：%.2f%%" +
                         " [即:%.2f%%]， " +
                         //时间
-                        "\t  时间：%s",
+                        "\t  时间：%s" + ANSI_RESET,
                 fillName(e.getBankuaiName()),
                 //今日一分钟
-                e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300TodayWithData.todayMinuteDataList.get(1).startEndDiff * 100,
+                e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100,
                 e.todayMinuteDataList.get(1).startEndDiff * 100,
                 //今日开盘
-                e.last2StartDiff * 100 - hushen300TodayWithData.last2StartDiff * 100,
+                e.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100,
                 e.last2StartDiff * 100,
                 //昨日
                 (e.lastDayDetail.startEndDiff - lastDapanStar2EndDiff) * 100,
@@ -226,4 +269,9 @@ public class Main {
         Response response = client.newCall(request).execute();
         return response.body().string();
     }
+
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
 }
