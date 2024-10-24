@@ -26,15 +26,18 @@ public class Main {
 //    static String todayDate = "2024-10-22";
 //    static double lastDapanStar2EndDiff = -0.25 / 100;
 
-    static String lastDate = "2024-10-22";
-    static String todayDate = "2024-10-23";
-    static double lastDapanStar2EndDiff = -0.74 / 100;
+    static String lastDate = "2024-10-23";
+    static String todayDate = "2024-10-24";
+    static double lastDapanStar2EndDiff = 0.56 / 100;
 
-    static boolean needFilter = true;
+    //25min整结束集合竞价，30分整开始交易
+
+    static boolean needFilter = false;
     static boolean isSimpleMode = false;//简要模式
 
 //    原则：1 min 涨越多越好  2 有反弹更好 3 早上涨幅不能太高  4 非科技板块*2
     //目前看归一化分数在 4～7 之间的表现最佳； 可能是调整阶段
+    //最近几天上涨趋势
 
 
     @Test
@@ -75,8 +78,8 @@ public class Main {
     public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData(new BanKuai("沪深300", "1.000300"));
 
     double getSortValue(BankuaiWithData bankuaiWithData) {
-        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-//        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
     }
 
     //归一化 0～10 ，越大越值得买
@@ -155,6 +158,9 @@ public class Main {
                         //昨日
                         " 上日相比大盘涨跌：%.2f%%" +
                         " [即:%.2f%%]， " + ANSI_RESET +
+                        //今日
+                        " 今日相比大盘涨跌：%.2f%%" +
+                        " [即:%.2f%%]， " + ANSI_RESET +
                         //时间
                         "\t  时间：%s",
                 fillName(e.getBankuaiName()),
@@ -167,6 +173,8 @@ public class Main {
                 //昨日
                 (e.lastDayDetail.startEndDiff - lastDapanStar2EndDiff) * 100,
                 e.lastDayDetail.startEndDiff * 100,
+                (e.getLast30DayInfoMap().get(todayDate).startEndDiff - hushen300BanKuaiData.getLast30DayInfoMap().get(todayDate).startEndDiff) * 100,
+                e.getLast30DayInfoMap().get(todayDate).startEndDiff * 100,
                 //时间
                 e.todayMinuteDataList.get(1).dateTime
         );
@@ -245,7 +253,7 @@ public class Main {
     @NotNull
     private static List<BanKuai> parseAllBanKuai() {
 //        https://data.eastmoney.com/bkzj/hy_5.html
-        List<BanKuai> banKuaiList = JSON.parseArray(Utils.getDataByFileName("all_bankuai")).stream().map(e -> {
+        List<BanKuai> banKuaiList = JSON.parseArray(Utils.getDataByFileName("all_bankuai.txt")).stream().map(e -> {
             JSONObject jsonObject = (JSONObject) e;
             BanKuai banKuai = new BanKuai();
             banKuai.setName(jsonObject.getString("f14"));
