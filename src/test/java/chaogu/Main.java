@@ -26,9 +26,9 @@ public class Main {
 //    static String todayDate = "2024-10-22";
 //    static double lastDapanStar2EndDiff = -0.25 / 100;
 
-    static String lastDate = "2024-10-23";
-    static String todayDate = "2024-10-24";
-    static double lastDapanStar2EndDiff = 0.56 / 100;
+    static String lastDate = "2024-10-24";
+    static String todayDate = "2024-10-25";
+    static double lastDapanStar2EndDiff = -0.68 / 100;
 
     //25min整结束集合竞价，30分整开始交易
 
@@ -78,13 +78,14 @@ public class Main {
     public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData(new BanKuai("沪深300", "1.000300"));
 
     double getSortValue(BankuaiWithData bankuaiWithData) {
-//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
+        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+//        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
     }
 
     //归一化 0～10 ，越大越值得买
     static double zuoRiGuiYiHua(double zuoRi, double max, double min) {
-        return 10 - (zuoRi - min) / (max - min) * 10;
+//        return 10-(zuoRi - min) / (max - min) * 10;
+        return (zuoRi - min) / (max - min) * 100;
     }
 
     private static boolean filter(BankuaiWithData e) {
@@ -99,6 +100,8 @@ public class Main {
         return true;
     }
 
+    static Map<Integer/*归一化/10*/, List<Double>> tongjiMap = new HashMap<>();
+
     @NotNull
     private static String getLastDayDesc(BankuaiWithData e) {
         //30 天比例，最大比例，最小比例，昨日比例
@@ -106,6 +109,7 @@ public class Main {
         double minXiangDuiBiLi = 1000;
         double sumXiangDuiBiLi = 0;
         double avgXiangDuiBiLi = 0;
+        e.last30DayInfoList = e.last30DayInfoList.subList(0, e.last30DayInfoList.size() - 1);//去掉今天
         List<Double> xiangDuiBiLiList = new ArrayList<>(e.last30DayInfoList.size());
         Map<String, Double> xiangDuiBiLiMap = new HashMap<>(e.last30DayInfoList.size());
         for (上证.Main.OneDayDataDetail dayDataDetail : e.last30DayInfoList) {
@@ -127,8 +131,11 @@ public class Main {
         List<Double> xiangDuiBiLiList10Day = xiangDuiBiLiList.subList(xiangDuiBiLiList.size() - 10, xiangDuiBiLiList.size());
         sb.append(String.format("过去十天：%s  |", xiangDuiBiLiList10Day.stream().map(v -> String.format("%.2f", v * 100 - 100)).collect(Collectors.toList())));
         double zuoRiGuiYiHua = zuoRiGuiYiHua(xiangDuiBiLiMap.get(lastDate), maxXiangDuiBiLi, minXiangDuiBiLi);
+//        double zuoRiGuiYiHua = (xiangDuiBiLiMap.get(lastDate) - minXiangDuiBiLi) / (avgXiangDuiBiLi - minXiangDuiBiLi);
+//        double zuoRiGuiYiHua = (xiangDuiBiLiMap.get(lastDate)-1 ) / (avgXiangDuiBiLi - 1);
+//        double zuoRiGuiYiHua = xiangDuiBiLiMap.get(lastDate);
         String color = ANSI_RESET;
-        if (zuoRiGuiYiHua <= 7 && zuoRiGuiYiHua >= 4) {
+        if (zuoRiGuiYiHua <= 80 && zuoRiGuiYiHua >= 30) {
             color = ANSI_RED;
         }
         if (isSimpleMode) {
