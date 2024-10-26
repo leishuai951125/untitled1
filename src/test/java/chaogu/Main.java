@@ -27,10 +27,9 @@ public class Main {
 //    static String todayDate = "2024-10-22";
 //    static double lastDapanStar2EndDiff = -0.25 / 100;
 
-    //    static String lastDate = "2024-10-24";
-//    static String todayDate = "2024-10-25";
-    static String lastDate = "2024-10-23";
-    static String todayDate = "2024-10-24";
+    static String lastDate = "2024-10-24";
+    static String todayDate = "2024-10-25";
+
     static double lastDapanStar2EndDiff = -0.68 / 100;
 
     //25min整结束集合竞价，30分整开始交易
@@ -123,8 +122,8 @@ public class Main {
     public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData(new BanKuai("沪深300", "1.000300"));
 
     double getSortValue(BankuaiWithData bankuaiWithData) {
-//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
+        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+//        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
     }
 
     static double zuoRiGuiYiHua(double zuoRi, double max, double min, double avg) {
@@ -156,7 +155,7 @@ public class Main {
         sb.append(String.format("过去十天：%s  |", xiangDuiBiLi30Day.xiangDuiBiLiList10Day.stream().map(v -> String.format("%.2f", v * 100 - 100)).collect(Collectors.toList())));
         String color = ANSI_RESET;
         //归一化 35（涨幅80名）～80（涨幅47名）
-        if (xiangDuiBiLi30Day.guiyiHuaPaiMing <= 50 && xiangDuiBiLi30Day.guiyiHuaPaiMing >= 1) {
+        if (xiangDuiBiLi30Day.guiyiHuaPaiMing <= 50 && xiangDuiBiLi30Day.guiyiHuaPaiMing >= 10) {
             color = ANSI_RED;
         }
         if (isSimpleMode) {
@@ -193,7 +192,6 @@ public class Main {
     static XiangDuiBiLi30Day getXiangDuiBiLi30Day(BankuaiWithData e) {
         XiangDuiBiLi30Day xiangDuiBiLi30Day = new XiangDuiBiLi30Day();
         List<上证.Main.OneDayDataDetail> last30DayInfoWithoutTodyList = e.last30DayInfoList;
-//        last30DayInfoWithoutTodyList = last30DayInfoWithoutTodyList.subList(0, last30DayInfoWithoutTodyList.size() - 1);//todo
 
         if (last30DayInfoWithoutTodyList.get(last30DayInfoWithoutTodyList.size() - 1).date.equals(todayDate)) {
             //去掉今天
