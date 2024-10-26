@@ -13,6 +13,7 @@ import 上证.Utils;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -45,9 +46,18 @@ public class Main {
 //        getBankuaiWithData(new BanKuai("教育", "90.BK0740"));
         List<BanKuai> banKuaiList = parseAllBanKuai();
         long starMs = System.currentTimeMillis();
-        List<String> resultListt = banKuaiList.stream().parallel().map(e -> {
+        List<BankuaiWithData> bankuaiWithDataList = banKuaiList.stream().parallel().map(e -> {
             return getBankuaiWithData(e);
-        }).filter(Main::filter).sorted((a, b) -> {
+        }).collect(Collectors.toList());
+        //填充归一化、比例
+        bankuaiWithDataList.forEach(e -> e.setXiangDuiBiLi30Day(getXiangDuiBiLi30Day(e)));
+        //填充归一化排名
+        AtomicInteger sort = new AtomicInteger(0);
+        bankuaiWithDataList.stream().sorted((a, b) -> (int) ((b.xiangDuiBiLi30Day.zuoRiGuiYiHua - a.xiangDuiBiLi30Day.zuoRiGuiYiHua) * 1000))
+                .collect(Collectors.toList())
+                .forEach(e -> e.xiangDuiBiLi30Day.guiyiHuaPaiMing = sort.incrementAndGet());
+        //打印
+        List<String> resultListt = bankuaiWithDataList.stream().filter(Main::filter).sorted((a, b) -> {
             return (int) ((getSortValue(b) - getSortValue(a)) * 10000);
         }).map(e -> {
             String ret = todayOneMinutteDesc(e);
@@ -73,19 +83,40 @@ public class Main {
         }
         System.out.println("===========");
         resultListt.forEach(System.out::println);
+
+        System.out.println("===========");
+
+        AtomicInteger sortCount = new AtomicInteger();
+        tongjiMap.stream().sorted((a, b) -> (int) ((b.getGuiyihua() * 1000 - a.getGuiyihua() * 1000)))
+                .forEach(entry -> {
+                    System.out.printf("归一化：%.1f,排位：%d,收益：%.2f\n", entry.getGuiyihua(), sortCount.incrementAndGet(), entry.getShouyi() * 100);
+                });
+
+        System.out.println("===========");
+        tongjiMap.stream().collect(Collectors.groupingBy(a -> (int) (a.getGuiyihua() / 5)))
+                .entrySet().stream().map(entry -> {
+                    GuiYiHua2ShouYi guiYiHua2ShouYi = new GuiYiHua2ShouYi();
+                    guiYiHua2ShouYi.setGuiyihua(entry.getKey() * 5.0);
+                    guiYiHua2ShouYi.setShouyi(entry.getValue().stream().mapToDouble(e -> e.getShouyi()).average().getAsDouble());
+                    guiYiHua2ShouYi.setCount(entry.getValue().size());
+                    return guiYiHua2ShouYi;
+                }).sorted((a, b) -> (int) ((b.getShouyi() * 1000 - a.getShouyi() * 1000)))
+                .forEach(entry -> System.out.printf("归一化：%.1f,count:%d,平均收益：%.2f\n",
+                        entry.getGuiyihua(), entry.getCount(), entry.getShouyi() * 100));
     }
 
     public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData(new BanKuai("沪深300", "1.000300"));
 
     double getSortValue(BankuaiWithData bankuaiWithData) {
-        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-//        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
     }
 
-    //归一化 0～10 ，越大越值得买
-    static double zuoRiGuiYiHua(double zuoRi, double max, double min) {
-//        return 10-(zuoRi - min) / (max - min) * 10;
+    static double zuoRiGuiYiHua(double zuoRi, double max, double min, double avg) {
         return (zuoRi - min) / (max - min) * 100;
+//        return (zuoRi - min) / (max - min) * 100;
+//        return (zuoRi - avg) / (max - avg) * 100;
+//        return (zuoRi - min) / (avg - min) * 100;
     }
 
     private static boolean filter(BankuaiWithData e) {
@@ -100,56 +131,88 @@ public class Main {
         return true;
     }
 
-    static Map<Integer/*归一化/10*/, List<Double>> tongjiMap = new HashMap<>();
+    @AllArgsConstructor
+    @Data
+    @NoArgsConstructor
+    public static class GuiYiHua2ShouYi {
+        Double guiyihua;
+        Double shouyi;
+        int count;
+    }
+
+    static List<GuiYiHua2ShouYi> tongjiMap = new ArrayList<>(100);
 
     @NotNull
     private static String getLastDayDesc(BankuaiWithData e) {
         //30 天比例，最大比例，最小比例，昨日比例
-        double maxXiangDuiBiLi = -1000;
-        double minXiangDuiBiLi = 1000;
-        double sumXiangDuiBiLi = 0;
-        double avgXiangDuiBiLi = 0;
-        e.last30DayInfoList = e.last30DayInfoList.subList(0, e.last30DayInfoList.size() - 1);//去掉今天
-        List<Double> xiangDuiBiLiList = new ArrayList<>(e.last30DayInfoList.size());
-        Map<String, Double> xiangDuiBiLiMap = new HashMap<>(e.last30DayInfoList.size());
-        for (上证.Main.OneDayDataDetail dayDataDetail : e.last30DayInfoList) {
-            上证.Main.OneDayDataDetail hushenDayDataDetail = hushen300BanKuaiData.getLast30DayInfoMap().get(dayDataDetail.date);
-            Double xiangDuiBiLi = dayDataDetail.todayEndDiv30Avg / hushenDayDataDetail.todayEndDiv30Avg;
-            if (xiangDuiBiLi > maxXiangDuiBiLi) {
-                maxXiangDuiBiLi = xiangDuiBiLi;
-            }
-            if (xiangDuiBiLi < minXiangDuiBiLi) {
-                minXiangDuiBiLi = xiangDuiBiLi;
-            }
-            sumXiangDuiBiLi += xiangDuiBiLi;
-            xiangDuiBiLiMap.put(dayDataDetail.date, xiangDuiBiLi);
-            xiangDuiBiLiList.add(xiangDuiBiLi);
-        }
-        avgXiangDuiBiLi = sumXiangDuiBiLi / xiangDuiBiLiMap.size();
+        XiangDuiBiLi30Day xiangDuiBiLi30Day = e.getXiangDuiBiLi30Day();
         StringBuilder sb = new StringBuilder();
         sb.append("\n");
-        List<Double> xiangDuiBiLiList10Day = xiangDuiBiLiList.subList(xiangDuiBiLiList.size() - 10, xiangDuiBiLiList.size());
-        sb.append(String.format("过去十天：%s  |", xiangDuiBiLiList10Day.stream().map(v -> String.format("%.2f", v * 100 - 100)).collect(Collectors.toList())));
-        double zuoRiGuiYiHua = zuoRiGuiYiHua(xiangDuiBiLiMap.get(lastDate), maxXiangDuiBiLi, minXiangDuiBiLi);
-//        double zuoRiGuiYiHua = (xiangDuiBiLiMap.get(lastDate) - minXiangDuiBiLi) / (avgXiangDuiBiLi - minXiangDuiBiLi);
-//        double zuoRiGuiYiHua = (xiangDuiBiLiMap.get(lastDate)-1 ) / (avgXiangDuiBiLi - 1);
-//        double zuoRiGuiYiHua = xiangDuiBiLiMap.get(lastDate);
+        sb.append(String.format("过去十天：%s  |", xiangDuiBiLi30Day.xiangDuiBiLiList10Day.stream().map(v -> String.format("%.2f", v * 100 - 100)).collect(Collectors.toList())));
+        tongjiMap.add(new GuiYiHua2ShouYi(xiangDuiBiLi30Day.zuoRiGuiYiHua, e.getLast30DayInfoMap().get(todayDate).startEndDiff, 1));
         String color = ANSI_RESET;
-        if (zuoRiGuiYiHua <= 80 && zuoRiGuiYiHua >= 30) {
+        //归一化 35（涨幅80名）～80（涨幅47名）
+        if (xiangDuiBiLi30Day.guiyiHuaPaiMing <= 65 && xiangDuiBiLi30Day.guiyiHuaPaiMing >= 35) {
             color = ANSI_RED;
         }
         if (isSimpleMode) {
-            return String.format(color + "归一化分数：%.1f " + ANSI_RESET, zuoRiGuiYiHua);
+            return String.format(color + "价格：%.1f " + ANSI_RESET, xiangDuiBiLi30Day.zuoRiGuiYiHua);
         }
-        sb.append(String.format(color + "归一化分数：%.1f  |  ", zuoRiGuiYiHua));
-        sb.append(String.format("昨日：%.2f  |  " + ANSI_RESET, xiangDuiBiLiMap.get(lastDate) * 100 - 100));
-        sb.append(String.format("过去最大：%.2f  |  ", maxXiangDuiBiLi * 100 - 100));
-        sb.append(String.format("过去最小：%.2f  |  ", minXiangDuiBiLi * 100 - 100));
-        sb.append(String.format("过去平均：%.2f  |  ", avgXiangDuiBiLi * 100 - 100));
+        sb.append(String.format(color + "价格排名：%d  |  ", xiangDuiBiLi30Day.guiyiHuaPaiMing));
+        sb.append(String.format(color + "价格：%.1f  |  ", xiangDuiBiLi30Day.zuoRiGuiYiHua));
+        sb.append(String.format("昨日：%.2f  |  " + ANSI_RESET, xiangDuiBiLi30Day.xiangDuiBiLiMap.get(lastDate) * 100 - 100));
+        sb.append(String.format("过去最大：%.2f  |  ", xiangDuiBiLi30Day.maxXiangDuiBiLi * 100 - 100));
+        sb.append(String.format("过去最小：%.2f  |  ", xiangDuiBiLi30Day.minXiangDuiBiLi * 100 - 100));
+        sb.append(String.format("过去平均：%.2f  |  ", xiangDuiBiLi30Day.avgXiangDuiBiLi * 100 - 100));
         sb.append("\n");
         return sb.toString();
     }
 
+
+    @Data
+    public static class XiangDuiBiLi30Day {
+        double maxXiangDuiBiLi = -1000;
+        double minXiangDuiBiLi = 1000;
+        double avgXiangDuiBiLi;
+        Map<String, Double> xiangDuiBiLiMap;
+        List<Double> xiangDuiBiLiList10Day;
+        double zuoRiGuiYiHua;
+        int guiyiHuaPaiMing;
+    }
+
+    static XiangDuiBiLi30Day getXiangDuiBiLi30Day(BankuaiWithData e) {
+        XiangDuiBiLi30Day xiangDuiBiLi30Day = new XiangDuiBiLi30Day();
+        List<上证.Main.OneDayDataDetail> last30DayInfoWithoutTodyList = e.last30DayInfoList;
+        if (last30DayInfoWithoutTodyList.get(last30DayInfoWithoutTodyList.size() - 1).date.equals(todayDate)) {
+            //去掉今天
+            last30DayInfoWithoutTodyList = last30DayInfoWithoutTodyList.subList(0, last30DayInfoWithoutTodyList.size() - 1);
+        }
+        //todo 取 15 天试试
+        last30DayInfoWithoutTodyList.subList(last30DayInfoWithoutTodyList.size() - 15, last30DayInfoWithoutTodyList.size());
+
+        List<Double> xiangDuiBiLiList = new ArrayList<>(last30DayInfoWithoutTodyList.size());
+        Map<String, Double> xiangDuiBiLiMap = new HashMap<>(last30DayInfoWithoutTodyList.size());
+        for (上证.Main.OneDayDataDetail dayDataDetail : last30DayInfoWithoutTodyList) {
+            上证.Main.OneDayDataDetail hushenDayDataDetail = hushen300BanKuaiData.getLast30DayInfoMap().get(dayDataDetail.date);
+            Double xiangDuiBiLi = dayDataDetail.todayEndDiv30Avg / hushenDayDataDetail.todayEndDiv30Avg;
+            xiangDuiBiLiMap.put(dayDataDetail.date, xiangDuiBiLi);
+            xiangDuiBiLiList.add(xiangDuiBiLi);
+            if (dayDataDetail.date.equals(lastDate)) {
+                continue;
+            }
+            if (xiangDuiBiLi > xiangDuiBiLi30Day.maxXiangDuiBiLi) {
+                xiangDuiBiLi30Day.maxXiangDuiBiLi = xiangDuiBiLi;
+            }
+            if (xiangDuiBiLi < xiangDuiBiLi30Day.minXiangDuiBiLi) {
+                xiangDuiBiLi30Day.minXiangDuiBiLi = xiangDuiBiLi;
+            }
+        }
+        xiangDuiBiLi30Day.xiangDuiBiLiMap = xiangDuiBiLiMap;
+        xiangDuiBiLi30Day.avgXiangDuiBiLi = xiangDuiBiLiList.subList(0, xiangDuiBiLiList.size() - 1).stream().mapToDouble(d -> d).average().getAsDouble();
+        xiangDuiBiLi30Day.xiangDuiBiLiList10Day = xiangDuiBiLiList.subList(xiangDuiBiLiList.size() - 10, xiangDuiBiLiList.size());
+        xiangDuiBiLi30Day.zuoRiGuiYiHua = zuoRiGuiYiHua(xiangDuiBiLiMap.get(lastDate), xiangDuiBiLi30Day.maxXiangDuiBiLi, xiangDuiBiLi30Day.minXiangDuiBiLi, xiangDuiBiLi30Day.avgXiangDuiBiLi);
+        return xiangDuiBiLi30Day;
+    }
 
     private static String todayOneMinutteDesc(BankuaiWithData e) {
         if (isSimpleMode) {
@@ -247,6 +310,7 @@ public class Main {
         List<上证.Main.OneDayDataDetail> last30DayInfoList;
         Map<String, 上证.Main.OneDayDataDetail> last30DayInfoMap;
         上证.Main.OneDayDataDetail lastDayDetail;
+        XiangDuiBiLi30Day xiangDuiBiLi30Day;
     }
 
     @Data
