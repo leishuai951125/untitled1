@@ -22,11 +22,11 @@ public class Main {
     }
 
     RunMode runMode = RunMode.YuCe;
-    
-    static String lastDate = "2024-10-24";
-    static String todayDate = "2024-10-25";
 
-    static double lastDapanStar2EndDiff = -0.68 / 100;
+    static String lastDate = "2024-10-25";
+    static String todayDate = "2024-10-28";
+
+    static double lastDapanStar2EndDiff = -0.7 / 100;
 
     //25min整结束集合竞价，30分整开始交易
 
@@ -157,9 +157,9 @@ public class Main {
         if (isSimpleMode) {
             return String.format(color + "相对价格：%.1f " + ANSI_RESET, xiangDuiBiLi30Day.zuoRiGuiYiHua);
         }
-        sb.append(String.format(color + "价格排名：%d  |  ", xiangDuiBiLi30Day.guiyiHuaPaiMing));
-        sb.append(String.format(color + "相对价格：%.1f  |  ", xiangDuiBiLi30Day.zuoRiGuiYiHua));
-        sb.append(String.format("昨日：%.2f  |  " + ANSI_RESET, xiangDuiBiLi30Day.xiangDuiBiLiMap.get(lastDate) * 100 - 100));
+        sb.append(String.format(color + "价格排名：%d  |  " + ANSI_RESET, xiangDuiBiLi30Day.guiyiHuaPaiMing));
+        sb.append(String.format("相对价格：%.1f  |  ", xiangDuiBiLi30Day.zuoRiGuiYiHua));
+        sb.append(String.format("昨日：%.2f  |  ", xiangDuiBiLi30Day.xiangDuiBiLiMap.get(lastDate) * 100 - 100));
         sb.append(String.format("过去最大：%.2f  |  ", xiangDuiBiLi30Day.maxXiangDuiBiLi * 100 - 100));
         sb.append(String.format("过去最小：%.2f  |  ", xiangDuiBiLi30Day.minXiangDuiBiLi * 100 - 100));
         sb.append(String.format("过去平均：%.2f  |  ", xiangDuiBiLi30Day.avgXiangDuiBiLi * 100 - 100));
@@ -224,30 +224,33 @@ public class Main {
         if (isSimpleMode) {
             return "板块： " + fillName(e.getBankuaiName()) + "  \t";
         }
+        double todayMinuteXiangDui = e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100;
+        double kaipanXiangDui = e.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100;
+        double zuoRiXiangDui = (e.lastDayDetail.startEndDiff - lastDapanStar2EndDiff) * 100;
         return String.format("板块：%-7s  " +
                         //今日一分钟
-                        ANSI_GREEN + "\t 今日一分钟相对涨跌：%.3f%% " +
-                        "[即:%.3f%%]， \t  " +
+                        (todayMinuteXiangDui > 1 ? ANSI_RED : ANSI_GREEN) + "\t 今日一分钟相对涨跌：%.3f%% " +
+                        "[即:%.3f%%]， \t  " + ANSI_RESET +
                         //今日开盘
-                        "今日开盘相对涨跌:%.3f%%" +
-                        " [即:%.3f%%] \t  " +
+                        (kaipanXiangDui < 0 ? ANSI_RED : "") + "今日开盘相对涨跌:%.3f%%" +
+                        " [即:%.3f%%] \t  " + ANSI_RESET +
                         //昨日
-                        " 上日相比大盘涨跌：%.2f%%" +
+                        (zuoRiXiangDui < 0 ? ANSI_RED : "") + " 上日相比大盘涨跌：%.2f%%" +
                         " [即:%.2f%%]， " + ANSI_RESET +
                         //今日
                         " 今日相比大盘涨跌：%.2f%%" +
-                        " [即:%.2f%%]， " + ANSI_RESET +
+                        " [即:%.2f%%]， " +
                         //时间
                         "\t  时间：%s",
                 fillName(e.getBankuaiName()),
                 //今日一分钟
-                e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100,
+                todayMinuteXiangDui,
                 e.todayMinuteDataList.get(1).startEndDiff * 100,
                 //今日开盘
-                e.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100,
+                kaipanXiangDui,
                 e.last2StartDiff * 100,
                 //昨日
-                (e.lastDayDetail.startEndDiff - lastDapanStar2EndDiff) * 100,
+                zuoRiXiangDui,
                 e.lastDayDetail.startEndDiff * 100,
                 (e.getLast30DayInfoMap().get(todayDate).startEndDiff - hushen300BanKuaiData.getLast30DayInfoMap().get(todayDate).startEndDiff) * 100,
                 e.getLast30DayInfoMap().get(todayDate).startEndDiff * 100,
