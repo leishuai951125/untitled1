@@ -23,10 +23,10 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-10-25";
-    static String todayDate = "2024-10-28";
+    static String lastDate = "2024-10-28";
+    static String todayDate = "2024-10-29";
 
-    static double lastDapanStar2EndDiff = -0.7 / 100;
+    static double lastDapanStar2EndDiff = 0.7 / 100;
 
     //25min整结束集合竞价，30分整开始交易
 
@@ -118,8 +118,15 @@ public class Main {
     public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData(new BanKuai("沪深300", "1.000300"));
 
     double getSortValue(BankuaiWithData bankuaiWithData) {
-        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+        return getTodayDiffAfter1min(bankuaiWithData);
 //        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
+    }
+
+    //一分钟后的涨跌
+    static double getTodayDiffAfter1min(BankuaiWithData bankuaiWithData) {
+        return bankuaiWithData.last30DayInfoMap.get(todayDate).getStartEndDiff()
+                - bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
     }
 
     static double zuoRiGuiYiHua(double zuoRi, double max, double min, double avg) {
@@ -240,6 +247,7 @@ public class Main {
                         //今日
                         " 今日相比大盘涨跌：%.2f%%" +
                         " [即:%.2f%%]， " +
+                        "   [一分钟后:%.2f%%]， " +
                         //时间
                         "\t  时间：%s",
                 fillName(e.getBankuaiName()),
@@ -254,6 +262,8 @@ public class Main {
                 e.lastDayDetail.startEndDiff * 100,
                 (e.getLast30DayInfoMap().get(todayDate).startEndDiff - hushen300BanKuaiData.getLast30DayInfoMap().get(todayDate).startEndDiff) * 100,
                 e.getLast30DayInfoMap().get(todayDate).startEndDiff * 100,
+                //一分钟后
+                getTodayDiffAfter1min(e) * 100,
                 //时间
                 e.todayMinuteDataList.get(1).dateTime
         );
