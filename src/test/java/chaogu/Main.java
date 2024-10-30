@@ -9,6 +9,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+import org.springframework.util.StringUtils;
 import 上证.Utils;
 
 import java.io.IOException;
@@ -23,10 +24,10 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-10-28";
-    static String todayDate = "2024-10-29";
+    static String lastDate = "2024-10-29";
+    static String todayDate = "2024-10-30";
 
-    static double lastDapanStar2EndDiff = 0.7 / 100;
+    static double lastDapanStar2EndDiff = -1.0 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
 
@@ -44,7 +45,12 @@ public class Main {
         List<BanKuai> banKuaiList = parseAllBanKuai();
         long starMs = System.currentTimeMillis();
         List<BankuaiWithData> bankuaiWithDataList = banKuaiList.stream().parallel().map(e -> {
-            return getBankuaiWithData(e);
+            BankuaiWithData bankuaiWithData = getBankuaiWithData(e.getName(), e.getCode());
+            if (!StringUtils.isEmpty(e.getEtfCode())) {
+                String etfName = !StringUtils.isEmpty(e.getEftName()) ? e.getEftName() : "etf";
+                bankuaiWithData.etfBankuaiWithData = getBankuaiWithData(etfName, e.getEtfCode());
+            }
+            return bankuaiWithData;
         }).collect(Collectors.toList());
         //过滤
         bankuaiWithDataList = bankuaiWithDataList.stream().filter(Main::filter).collect(Collectors.toList());
@@ -60,6 +66,9 @@ public class Main {
             return (int) ((getSortValue(b) - getSortValue(a)) * 10000);
         }).map(e -> {
             String ret = todayOneMinutteDesc(e);
+            if (e.etfBankuaiWithData != null) {
+                ret += todayOneMinutteDesc(e.etfBankuaiWithData);
+            }
             return ret + getLastDayDesc(e);
         }).collect(Collectors.toList());
         long endMs = System.currentTimeMillis();
@@ -115,11 +124,11 @@ public class Main {
         int count;
     }
 
-    public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData(new BanKuai("沪深300", "1.000300"));
+    public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData("沪深300", "1.000300");
 
     double getSortValue(BankuaiWithData bankuaiWithData) {
-//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-        return getTodayDiffAfter1min(bankuaiWithData);
+        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+//        return getTodayDiffAfter1min(bankuaiWithData);
 //        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
     }
 
@@ -154,7 +163,6 @@ public class Main {
         //30 天比例，最大比例，最小比例，昨日比例
         XiangDuiBiLi30Day xiangDuiBiLi30Day = e.getXiangDuiBiLi30Day();
         StringBuilder sb = new StringBuilder();
-        sb.append("\n");
         sb.append(String.format("过去十天：%s  |", xiangDuiBiLi30Day.xiangDuiBiLiList10Day.stream().map(v -> String.format("%.2f", v * 100 - 100)).collect(Collectors.toList())));
         String color = ANSI_RESET;
         //归一化 35（涨幅80名）～80（涨幅47名）
@@ -249,7 +257,8 @@ public class Main {
                         " [即:%.2f%%]， " +
                         "   [一分钟后:%.2f%%]， " +
                         //时间
-                        "\t  时间：%s",
+                        "\t  时间：%s" +
+                        "\n",
                 fillName(e.getBankuaiName()),
                 //今日一分钟
                 todayMinuteXiangDui,
@@ -277,12 +286,12 @@ public class Main {
     }
 
     @NotNull
-    public static BankuaiWithData getBankuaiWithData(BanKuai e) {
+    public static BankuaiWithData getBankuaiWithData(String name, String code) {
         BankuaiWithData bankuaiWithData = new BankuaiWithData();
-        bankuaiWithData.setBankuaiName(e.getName());
+        bankuaiWithData.setBankuaiName(name);
         try {
-            bankuaiWithData.setTodayMinuteDataList(getTodayMinuteDataList(e.getCode()));
-            bankuaiWithData.setLast30DayInfoList(getLast30DayData(e.getCode()));
+            bankuaiWithData.setTodayMinuteDataList(getTodayMinuteDataList(code));
+            bankuaiWithData.setLast30DayInfoList(getLast30DayData(code));
             bankuaiWithData.setLast30DayInfoMap(bankuaiWithData.getLast30DayInfoList().stream().collect(Collectors.toMap(kk -> kk.date, kk -> kk)));
             bankuaiWithData.setLastDayDetail(bankuaiWithData.getLast30DayInfoMap().get(lastDate));
             bankuaiWithData.setLast2StartDiff(bankuaiWithData.getTodayMinuteDataList().get(0).start / bankuaiWithData.getLastDayDetail().end - 1);
@@ -330,6 +339,8 @@ public class Main {
         Map<String, 上证.Main.OneDayDataDetail> last30DayInfoMap;
         上证.Main.OneDayDataDetail lastDayDetail;
         XiangDuiBiLi30Day xiangDuiBiLi30Day;
+        //板块对应的 etf 信息
+        BankuaiWithData etfBankuaiWithData;
     }
 
     @Data
@@ -338,6 +349,8 @@ public class Main {
     public static class BanKuai {
         String name;
         String code;
+        String eftName;
+        String etfCode;
     }
 
     @NotNull
@@ -349,6 +362,8 @@ public class Main {
             banKuai.setName(jsonObject.getString("f14"));
             banKuai.setCode(jsonObject.getString("f13") +
                     "." + jsonObject.getString("f12"));
+            banKuai.setEftName(jsonObject.getString("etfName"));
+            banKuai.setEftName(jsonObject.getString("etfCode"));
             return banKuai;
         }).collect(Collectors.toList());
         return banKuaiList;
