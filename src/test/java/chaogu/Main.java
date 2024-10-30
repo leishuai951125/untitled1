@@ -355,7 +355,7 @@ public class Main {
     @NotNull
     private static List<BanKuai> parseAllBanKuai() {
 //        https://data.eastmoney.com/bkzj/hy_5.html
-        List<BanKuai> banKuaiList = JSON.parseArray(Utils.getDataByFileName("all_bankuai.txt")).stream().map(e -> {
+        List<BanKuai> banKuaiList = JSON.parseArray(Utils.getDataByFileName("all_bankuai.json")).stream().map(e -> {
             JSONObject jsonObject = (JSONObject) e;
             BanKuai banKuai = new BanKuai();
             banKuai.setName(jsonObject.getString("f14"));
