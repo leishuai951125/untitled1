@@ -24,15 +24,13 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-10-29";
-    static String todayDate = "2024-10-30";
-
-    static double lastDapanStar2EndDiff = -0.9 / 100.0;
-
-//    static String lastDate = "2024-10-30";
-//    static String todayDate = "2024-10-31";
-//
+//    static String lastDate = "2024-10-29";
+//    static String todayDate = "2024-10-30";
 //    static double lastDapanStar2EndDiff = -0.9 / 100.0;
+
+    static String lastDate = "2024-10-30";
+    static String todayDate = "2024-10-31";
+    static double lastDapanStar2EndDiff = -0.9 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
 
