@@ -47,8 +47,7 @@ public class Main {
         List<BankuaiWithData> bankuaiWithDataList = banKuaiList.stream().parallel().map(e -> {
             BankuaiWithData bankuaiWithData = getBankuaiWithData(e.getName(), e.getCode());
             if (!StringUtils.isEmpty(e.getEtfCode())) {
-                String etfName = !StringUtils.isEmpty(e.getEftName()) ? e.getEftName() : "etf";
-                bankuaiWithData.etfBankuaiWithData = getBankuaiWithData(etfName, e.getEtfCode());
+                bankuaiWithData.etfBankuaiWithData = getBankuaiWithData(e.getEftName(), e.getEtfCode());
             }
             return bankuaiWithData;
         }).collect(Collectors.toList());
@@ -362,7 +361,7 @@ public class Main {
             banKuai.setName(jsonObject.getString("f14"));
             banKuai.setCode(jsonObject.getString("f13") +
                     "." + jsonObject.getString("f12"));
-            banKuai.setEftName(jsonObject.getString("etfName"));
+            banKuai.setEftName(jsonObject.getString("etfName") != null ? jsonObject.getString("etfName") : "etf");
             banKuai.setEftName(jsonObject.getString("etfCode"));
             return banKuai;
         }).collect(Collectors.toList());
