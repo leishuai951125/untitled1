@@ -40,10 +40,10 @@ public class Main {
     static boolean isSimpleMode = false;//简要模式
 
 //    原则：1 min 涨越多越好  2 有反弹更好 3 早上涨幅不能太高  4 非科技板块*2
-    //目前看归一化分数在 4～7 之间的表现最佳； 可能是调整阶段
-    //最近几天上涨趋势
 
-
+    //判断开盘：昨日涨跌+尾盘+昨晚中概股 ， 上午是否有利好利空消息
+    //判断后续行情，看美元汇率
+    //选股：板块涨幅大、价格排名 <60 、etf 相对涨幅小 、昨日和开盘为负数
     @Test
     public void main() throws IOException {
 //        getBankuaiWithData(new BanKuai("教育", "90.BK0740"));
@@ -282,12 +282,12 @@ public class Main {
         );
     }
 
-    private static String etfTodayOneMinutteDesc(BankuaiWithData e, BankuaiWithData bankuai) {
-        if (e == null || isSimpleMode) {
+    private static String etfTodayOneMinutteDesc(BankuaiWithData etf, BankuaiWithData bankuai) {
+        if (etf == null || isSimpleMode) {
             return "";
         }
-        double todayMinuteXiangDui = e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100;
-        double kaipanXiangDui = e.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100;
+        double todayMinuteXiangDui = etf.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100;
+        double kaipanXiangDui = etf.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100;
 
         double bankuaiTodayMinuteXiangDui = bankuai.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100;
         double bankuaiKaipanXiangDui = bankuai.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100;
@@ -295,10 +295,10 @@ public class Main {
         double etfXiangDuiBanKuai = (todayMinuteXiangDui + kaipanXiangDui) - (bankuaiTodayMinuteXiangDui + bankuaiKaipanXiangDui);
         return String.format("板块：%-7s  " +
                         //今日一分钟
-                        (todayMinuteXiangDui > 1 ? ANSI_RED : ANSI_GREEN) + "\t 今日一分钟相对涨跌：%.3f%% " +
+                        "\t 今日一分钟相对涨跌：%.3f%% " +
                         "[即:%.3f%%]， \t  " + ANSI_RESET +
                         //今日开盘
-                        (kaipanXiangDui < 0 ? ANSI_RED : "") + "今日开盘相对涨跌:%.3f%%" +
+                        "今日开盘相对涨跌:%.3f%%" +
                         " [即:%.3f%%] \t  " + ANSI_RESET +
                         //etf 比 板块
                         (etfXiangDuiBanKuai < -0.5 ? ANSI_RED : "") + "【截止开盘一分钟etf相对板块:%.3f%%】" + ANSI_RESET +
@@ -309,23 +309,23 @@ public class Main {
                         //时间
                         "\t  时间：%s" +
                         "\n",
-                fillName(e.getBankuaiName()),
+                fillName(etf.getBankuaiName()),
                 //今日一分钟
                 todayMinuteXiangDui,
-                e.todayMinuteDataList.get(1).startEndDiff * 100,
+                etf.todayMinuteDataList.get(1).startEndDiff * 100,
                 //今日开盘
                 kaipanXiangDui,
-                e.last2StartDiff * 100,
+                etf.last2StartDiff * 100,
                 //etf 比 板块
                 etfXiangDuiBanKuai,
                 //今日
-                e.lastDayDetail.startEndDiff * 100,
-                (e.getLast30DayInfoMap().get(todayDate).startEndDiff - hushen300BanKuaiData.getLast30DayInfoMap().get(todayDate).startEndDiff) * 100,
-                e.getLast30DayInfoMap().get(todayDate).startEndDiff * 100,
+                etf.lastDayDetail.startEndDiff * 100,
+                (etf.getLast30DayInfoMap().get(todayDate).startEndDiff - hushen300BanKuaiData.getLast30DayInfoMap().get(todayDate).startEndDiff) * 100,
+                etf.getLast30DayInfoMap().get(todayDate).startEndDiff * 100,
                 //一分钟后
-                getTodayDiffAfter1min(e) * 100,
+                getTodayDiffAfter1min(etf) * 100,
                 //时间
-                e.todayMinuteDataList.get(1).dateTime
+                etf.todayMinuteDataList.get(1).dateTime
         );
     }
 
