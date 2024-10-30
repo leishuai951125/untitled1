@@ -362,7 +362,7 @@ public class Main {
             banKuai.setCode(jsonObject.getString("f13") +
                     "." + jsonObject.getString("f12"));
             banKuai.setEftName(jsonObject.getString("etfName") != null ? jsonObject.getString("etfName") : "etf");
-            banKuai.setEftName(jsonObject.getString("etfCode"));
+            banKuai.setEtfCode(jsonObject.getString("etfCode"));
             return banKuai;
         }).collect(Collectors.toList());
         return banKuaiList;
