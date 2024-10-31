@@ -299,7 +299,8 @@ public class Main {
                         "今日开盘相对涨跌:%.3f%%" +
                         " [即:%.3f%%] \t  " + ANSI_RESET +
                         //etf 比 板块
-                        (etfXiangDuiBanKuai < -0.5 ? ANSI_RED : "") + "【截止开盘一分钟etf相对板块:%.3f%%】" + ANSI_RESET +
+                        (etfXiangDuiBanKuai < -0.5 ? ANSI_RED : (etfXiangDuiBanKuai > 0 ? ANSI_GREEN : ""))
+                        + "【截止开盘一分钟etf相对板块:%.3f%%】" + ANSI_RESET +
                         //今日
                         " 今日相比大盘涨跌：%.2f%%" +
                         " [即:%.2f%%]， " +
