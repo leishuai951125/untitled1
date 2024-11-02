@@ -39,8 +39,8 @@ public class Main {
 
     static String TestEndTime = "09:50";
 
-    static int testStartTimeIndex = 1;//当前时间是多少分钟
-    static int testEndTimeIndex = 20;//当前时间是多少分钟
+    static int testStartTimeIndex = 3;//当前时间是多少分钟
+    static int testEndTimeIndex = 14;//当前时间是多少分钟
     //            int index;
 //            for(int i=0;i<241 && i<bankuaiWithData.getTodayMinuteDataList().size();i++){
 //                OneData oneData=bankuaiWithData.getTodayMinuteDataList().get(i);
@@ -108,14 +108,15 @@ public class Main {
                     bankuaiZhengSum += banuaiOneData.startEndDiff;
                 }
             }
-            double timeCount = 60.0;
+            double timeCount = (240.0 - testEndTimeIndex) / 2;
             double hushenSum = timeCount / fuCount * hushenFuSum + timeCount / zhengCount * hushenZhengSum
 //                    - timeCount / testEndTimeIndex * hushen0_EndIndexShouyi;
-                    - hushen0_EndIndexShouyi;
+//                    - hushen0_EndIndexShouyi
+                    ;
             double bankuaiSum = timeCount / fuCount * bankuaiFuSum + timeCount / zhengCount * bankuaiZhengSum
 //                    - timeCount / testEndTimeIndex * bankuai0_EndIndexShouyi;
-                    - bankuai0_EndIndexShouyi;
-            ;
+//                    - bankuai0_EndIndexShouyi;
+                    ;
             bankuai.testMinuteShouYiSum = bankuaiSum;
             hushen300BanKuaiData.testMinuteShouYiSum = hushenSum;
 
@@ -200,10 +201,10 @@ public class Main {
     public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData("沪深300", "1.000300");
 
     double getSortValue(BankuaiWithData bankuaiWithData) {
-//        return bankuaiWithData.testMinuteShouYiSum;
+        return bankuaiWithData.testMinuteShouYiSum;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
 //        return getTodayDiffAfter1min(bankuaiWithData);
-        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
+//        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
     }
 
     //一分钟后的涨跌
