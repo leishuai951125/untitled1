@@ -39,8 +39,8 @@ public class Main {
 
     static String TestEndTime = "09:50";
 
-    static int testStartTimeIndex = 1;//当前时间是多少分钟
-    static int testEndTimeIndex = 5;//当前时间是多少分钟
+    static int testStartTimeIndex = 15;//当前时间是多少分钟
+    static int testEndTimeIndex = 45;//当前时间是多少分钟
 
     static double shangZhangGaiLv = 0.5;
     //            int index;
@@ -201,12 +201,14 @@ public class Main {
 //            double timeCount = (240.0 - testEndTimeIndex) / 2;
             double shangZhangCount = (240.0 - testEndTimeIndex) * shangZhangGaiLv;
             double xiajiangCount = (240.0 - testEndTimeIndex) * (1 - shangZhangGaiLv);
-            double hushenSum = xiajiangCount / fuCount * hushenFuSum + shangZhangCount / zhengCount * hushenZhengSum
-//                    - timeCount / testEndTimeIndex * hushen0_EndIndexShouyi;
+            double hushenSum = (xiajiangCount / fuCount * hushenFuSum + shangZhangCount / zhengCount * hushenZhengSum)
+//                    / Math.abs(240.0 / testEndTimeIndex * hushen0_EndIndexShouyi);
+//                    - 60.0 / testEndTimeIndex * hushen0_EndIndexShouyi;
 //                    - hushen0_EndIndexShouyi
                     ;
-            double bankuaiSum = xiajiangCount / fuCount * bankuaiFuSum + shangZhangCount / zhengCount * bankuaiZhengSum
-//                    - timeCount / testEndTimeIndex * bankuai0_EndIndexShouyi;
+            double bankuaiSum = (xiajiangCount / fuCount * bankuaiFuSum + shangZhangCount / zhengCount * bankuaiZhengSum)
+//                    / Math.abs(240.0 / testEndTimeIndex * bankuai0_EndIndexShouyi);
+//                    - 60.0 / testEndTimeIndex * bankuai0_EndIndexShouyi;
 //                    - bankuai0_EndIndexShouyi;
                     ;
             if (bankuai.etfBankuaiWithData != null) {
