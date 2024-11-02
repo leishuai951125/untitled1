@@ -39,7 +39,7 @@ public class Main {
 
     static String TestEndTime = "09:50";
 
-    static int testStartTimeIndex = 15;//当前时间是多少分钟
+    static int testStartTimeIndex = 1;//当前时间是多少分钟
     static int testEndTimeIndex = 45;//当前时间是多少分钟
 
     static double shangZhangGaiLv = 0.5;
@@ -238,7 +238,7 @@ public class Main {
         return bankuaiWithData.testMinuteShouYiSum;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
 //        return getTodayDiffAfter1min(bankuaiWithData);
-//        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
+//        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
     }
 
     //一分钟后的涨跌
