@@ -37,13 +37,34 @@ public class Main {
     static boolean needFilter = false;
     static boolean isSimpleMode = false;//简要模式
 
+    static String TestEndTime = "09:50";
+
+    static int testStartTimeIndex = 1;//当前时间是多少分钟
+    static int testEndTimeIndex = 15;//当前时间是多少分钟
+    //            int index;
+//            for(int i=0;i<241 && i<bankuaiWithData.getTodayMinuteDataList().size();i++){
+//                OneData oneData=bankuaiWithData.getTodayMinuteDataList().get(i);
+//                if(oneData.dateTime.endsWith(TestEndTime)){
+//                    index=i;
+//                }
+//            }
+
 //    原则：1 min 涨越多越好  2 有反弹更好 3 早上涨幅不能太高  4 非科技板块*2
 
     //判断开盘：昨日涨跌+尾盘+昨晚中概股 ， 上午是否有利好利空消息
     //判断后续行情，看美元汇率
     //选股：板块涨幅大、价格排名 <60 、etf 相对涨幅小 、昨日和开盘为负数
+
+    /**
+     * 猜想：
+     * 1 开盘涨后续跌的；可能有原因：1 行情不好时，开盘涨的太猛的更容易跌； 2 涨到顶了，套现
+     * 2 只有<2个板块能涨超过 1%，尽量不买；
+     * 3 大盘不景气，买上证 50 （可能无用）
+     */
+
     @Test
     public void main() throws IOException {
+//        List<OneData> list = getTodayMinuteDataList("1.515220");
 //        getBankuaiWithData(new BanKuai("教育", "90.BK0740"));
         List<BanKuai> banKuaiList = parseAllBanKuai();
         long starMs = System.currentTimeMillis();
@@ -54,6 +75,33 @@ public class Main {
             }
             return bankuaiWithData;
         }).collect(Collectors.toList());
+
+        for (BankuaiWithData bankuai : bankuaiWithDataList) {
+            double hushenFuSum = 0.0;
+            double hushenZhengSum = 0.0;
+            double bankuaiFuSum = 0.0;
+            double bankuaiZhengSum = 0.0;
+            int fuCount = 0;
+            int zhengCount = 0;
+            for (int i = testStartTimeIndex; i <= testEndTimeIndex; i++) {
+                OneData hushenOneData = hushen300BanKuaiData.getTodayMinuteDataList().get(i);
+                OneData banuaiOneData = bankuai.getTodayMinuteDataList().get(i);
+                if (hushenOneData.startEndDiff < 0) {
+                    fuCount++;
+                    hushenFuSum += hushenOneData.startEndDiff;
+                    bankuaiFuSum += banuaiOneData.startEndDiff;
+                } else if (hushenOneData.startEndDiff > 0) {
+                    zhengCount++;
+                    hushenZhengSum += hushenOneData.startEndDiff;
+                    bankuaiZhengSum += banuaiOneData.startEndDiff;
+                }
+            }
+            double timeCount = 60.0;
+            double hushenSum = timeCount / fuCount * hushenFuSum + timeCount / zhengCount * hushenZhengSum;
+            double bankuaiSum = timeCount / fuCount * bankuaiFuSum + timeCount / zhengCount * bankuaiZhengSum;
+            bankuai.testMinuteShouYiSum = bankuaiSum;
+            hushen300BanKuaiData.testMinuteShouYiSum = hushenSum;
+        }
         //过滤
         bankuaiWithDataList = bankuaiWithDataList.stream().filter(Main::filter).collect(Collectors.toList());
         //填充归一化、比例
@@ -74,11 +122,13 @@ public class Main {
             return ret + getLastDayDesc(e);
         }).collect(Collectors.toList());
         long endMs = System.currentTimeMillis();
+        String dapanGuiyiHuZhangDie = String.format("时间区间：[%d~%d],收益：%.2f%% \n",
+                testStartTimeIndex, testEndTimeIndex, hushen300BanKuaiData.testMinuteShouYiSum * 100);
         if (isSimpleMode) {
             System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
                             "昨日大盘涨跌：%.2f%% \n" +
                             "今日大盘开盘涨跌：%.2f%%\n" +
-                            "归一化分数范围 0～10，分数在 4～7 分的值得购买 \n",
+                            "归一化分数范围 0～10，分数在 4～7 分的值得购买 \n" + dapanGuiyiHuZhangDie,
                     new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0,
                     lastDapanStar2EndDiff * 100,
                     hushen300BanKuaiData.last2StartDiff * 100);
@@ -86,7 +136,7 @@ public class Main {
             System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
                             "昨日大盘涨跌：%.2f%% \n" +
                             "今日大盘开盘涨跌：%.2f%%,今日大盘一分钟涨跌：%.2f%%\n" +
-                            "归一化分数范围 0～10，分数在 4～7 分的值得购买 \n",
+                            "归一化分数范围 0～10，分数在 4～7 分的值得购买 \n" + dapanGuiyiHuZhangDie,
                     new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0,
                     lastDapanStar2EndDiff * 100,
                     hushen300BanKuaiData.last2StartDiff * 100, hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100);
@@ -129,7 +179,8 @@ public class Main {
     public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData("沪深300", "1.000300");
 
     double getSortValue(BankuaiWithData bankuaiWithData) {
-        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+        return bankuaiWithData.testMinuteShouYiSum;
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
 //        return getTodayDiffAfter1min(bankuaiWithData);
 //        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
     }
@@ -251,6 +302,9 @@ public class Main {
                         //今日开盘
                         (kaipanXiangDui < 0 ? ANSI_RED : "") + "今日开盘相对涨跌:%.3f%%" +
                         " [即:%.3f%%] \t  " + ANSI_RESET +
+                        //归一化收益
+                        "归一化对收益:%.3f%%" +
+                        " [即:%.3f%%] \t  " + ANSI_RESET +
                         //昨日
                         (zuoRiXiangDui < 0 ? ANSI_RED : "") + " 上日相比大盘涨跌：%.2f%%" +
                         " [即:%.2f%%]， " + ANSI_RESET +
@@ -268,6 +322,9 @@ public class Main {
                 //今日开盘
                 kaipanXiangDui,
                 e.last2StartDiff * 100,
+                //归一化收益
+                e.testMinuteShouYiSum * 100 - hushen300BanKuaiData.testMinuteShouYiSum * 100,
+                e.testMinuteShouYiSum * 100,
                 //昨日
                 zuoRiXiangDui,
                 e.lastDayDetail.startEndDiff * 100,
@@ -358,7 +415,7 @@ public class Main {
     private static List<OneData> getTodayMinuteDataList(String bankuaiName) throws IOException {
         String jqueryString = getMinuteData(bankuaiName);
         String arr[] = jqueryString.split("\\(|\\)");
-        List<OneData> oneDataList = JSON.parseObject(arr[1]).getJSONObject("data").getJSONArray("trends").subList(0, 2) //前 6 分钟，第一分钟为开盘
+        List<OneData> oneDataList = JSON.parseObject(arr[1]).getJSONObject("data").getJSONArray("trends") //前 6 分钟，第一分钟为开盘
                 .stream().map(e -> {
                     String one = (String) e;
                     String[] tmp = one.split(",");
@@ -386,6 +443,7 @@ public class Main {
     public static class BankuaiWithData {
         String bankuaiName;
         List<OneData> todayMinuteDataList;
+        double testMinuteShouYiSum = 0.0;
         double last2StartDiff;//今日开盘涨跌
         List<上证.Main.OneDayDataDetail> last30DayInfoList;
         Map<String, 上证.Main.OneDayDataDetail> last30DayInfoMap;
