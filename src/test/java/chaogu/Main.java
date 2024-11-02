@@ -40,7 +40,7 @@ public class Main {
     static String TestEndTime = "09:50";
 
     static int testStartTimeIndex = 1;//当前时间是多少分钟
-    static int testEndTimeIndex = 15;//当前时间是多少分钟
+    static int testEndTimeIndex = 20;//当前时间是多少分钟
     //            int index;
 //            for(int i=0;i<241 && i<bankuaiWithData.getTodayMinuteDataList().size();i++){
 //                OneData oneData=bankuaiWithData.getTodayMinuteDataList().get(i);
@@ -77,6 +77,18 @@ public class Main {
         }).collect(Collectors.toList());
 
         for (BankuaiWithData bankuai : bankuaiWithDataList) {
+            //-----已有收益
+            double hushen0_EndIndexShouyi = 0.0;
+            double bankuai0_EndIndexShouyi = 0.0;
+            for (int i = 1; i <= testEndTimeIndex; i++) {
+                OneData hushenOneData = hushen300BanKuaiData.getTodayMinuteDataList().get(i);
+                OneData banuaiOneData = bankuai.getTodayMinuteDataList().get(i);
+                hushen0_EndIndexShouyi += hushenOneData.startEndDiff;
+                bankuai0_EndIndexShouyi += banuaiOneData.startEndDiff;
+            }
+            bankuai.test0_EndIndexShouyim = bankuai0_EndIndexShouyi;
+            hushen300BanKuaiData.test0_EndIndexShouyim = hushen0_EndIndexShouyi;
+            //-------归一化收益
             double hushenFuSum = 0.0;
             double hushenZhengSum = 0.0;
             double bankuaiFuSum = 0.0;
@@ -97,10 +109,16 @@ public class Main {
                 }
             }
             double timeCount = 60.0;
-            double hushenSum = timeCount / fuCount * hushenFuSum + timeCount / zhengCount * hushenZhengSum;
-            double bankuaiSum = timeCount / fuCount * bankuaiFuSum + timeCount / zhengCount * bankuaiZhengSum;
+            double hushenSum = timeCount / fuCount * hushenFuSum + timeCount / zhengCount * hushenZhengSum
+//                    - timeCount / testEndTimeIndex * hushen0_EndIndexShouyi;
+                    - hushen0_EndIndexShouyi;
+            double bankuaiSum = timeCount / fuCount * bankuaiFuSum + timeCount / zhengCount * bankuaiZhengSum
+//                    - timeCount / testEndTimeIndex * bankuai0_EndIndexShouyi;
+                    - bankuai0_EndIndexShouyi;
+            ;
             bankuai.testMinuteShouYiSum = bankuaiSum;
             hushen300BanKuaiData.testMinuteShouYiSum = hushenSum;
+
         }
         //过滤
         bankuaiWithDataList = bankuaiWithDataList.stream().filter(Main::filter).collect(Collectors.toList());
@@ -122,13 +140,12 @@ public class Main {
             return ret + getLastDayDesc(e);
         }).collect(Collectors.toList());
         long endMs = System.currentTimeMillis();
-        String dapanGuiyiHuZhangDie = String.format("时间区间：[%d~%d],收益：%.2f%% \n",
-                testStartTimeIndex, testEndTimeIndex, hushen300BanKuaiData.testMinuteShouYiSum * 100);
+
         if (isSimpleMode) {
             System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
                             "昨日大盘涨跌：%.2f%% \n" +
                             "今日大盘开盘涨跌：%.2f%%\n" +
-                            "归一化分数范围 0～10，分数在 4～7 分的值得购买 \n" + dapanGuiyiHuZhangDie,
+                            "归一化分数范围 0～10，分数在 4～7 分的值得购买 \n",
                     new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0,
                     lastDapanStar2EndDiff * 100,
                     hushen300BanKuaiData.last2StartDiff * 100);
@@ -136,11 +153,15 @@ public class Main {
             System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
                             "昨日大盘涨跌：%.2f%% \n" +
                             "今日大盘开盘涨跌：%.2f%%,今日大盘一分钟涨跌：%.2f%%\n" +
-                            "归一化分数范围 0～10，分数在 4～7 分的值得购买 \n" + dapanGuiyiHuZhangDie,
+                            "归一化分数范围 0～10，分数在 4～7 分的值得购买 \n",
                     new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0,
                     lastDapanStar2EndDiff * 100,
                     hushen300BanKuaiData.last2StartDiff * 100, hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100);
         }
+        System.out.printf("时间区间：[%d~%d],大盘归一化收益：%.2f%% , 大盘从[1~%d] 的收益：%.2f%% \n",
+                testStartTimeIndex, testEndTimeIndex, hushen300BanKuaiData.testMinuteShouYiSum * 100,
+                testEndTimeIndex, hushen300BanKuaiData.test0_EndIndexShouyim * 100
+        );
         System.out.println("===========");
         resultListt.forEach(System.out::println);
 
@@ -179,10 +200,10 @@ public class Main {
     public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData("沪深300", "1.000300");
 
     double getSortValue(BankuaiWithData bankuaiWithData) {
-        return bankuaiWithData.testMinuteShouYiSum;
+//        return bankuaiWithData.testMinuteShouYiSum;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
 //        return getTodayDiffAfter1min(bankuaiWithData);
-//        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
+        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff();
     }
 
     //一分钟后的涨跌
@@ -303,8 +324,10 @@ public class Main {
                         (kaipanXiangDui < 0 ? ANSI_RED : "") + "今日开盘相对涨跌:%.3f%%" +
                         " [即:%.3f%%] \t  " + ANSI_RESET +
                         //归一化收益
-                        "归一化对收益:%.3f%%" +
+                        "归一化相对收益:%.3f%%" +
                         " [即:%.3f%%] \t  " + ANSI_RESET +
+                        //已有收益
+                        " [已有收益:%.3f%%] \t  " +
                         //昨日
                         (zuoRiXiangDui < 0 ? ANSI_RED : "") + " 上日相比大盘涨跌：%.2f%%" +
                         " [即:%.2f%%]， " + ANSI_RESET +
@@ -325,6 +348,8 @@ public class Main {
                 //归一化收益
                 e.testMinuteShouYiSum * 100 - hushen300BanKuaiData.testMinuteShouYiSum * 100,
                 e.testMinuteShouYiSum * 100,
+                //已有收益
+                e.test0_EndIndexShouyim * 100,
                 //昨日
                 zuoRiXiangDui,
                 e.lastDayDetail.startEndDiff * 100,
@@ -444,6 +469,7 @@ public class Main {
         String bankuaiName;
         List<OneData> todayMinuteDataList;
         double testMinuteShouYiSum = 0.0;
+        double test0_EndIndexShouyim = 0.0;
         double last2StartDiff;//今日开盘涨跌
         List<上证.Main.OneDayDataDetail> last30DayInfoList;
         Map<String, 上证.Main.OneDayDataDetail> last30DayInfoMap;
