@@ -39,8 +39,10 @@ public class Main {
 
     static String TestEndTime = "09:50";
 
-    static int testStartTimeIndex = 80;//当前时间是多少分钟
-    static int testEndTimeIndex = 120;//当前时间是多少分钟
+    static int testStartTimeIndex = 1;//当前时间是多少分钟
+    static int testEndTimeIndex = 5;//当前时间是多少分钟
+
+    static double shangZhangGaiLv = 0.5;
     //            int index;
 //            for(int i=0;i<241 && i<bankuaiWithData.getTodayMinuteDataList().size();i++){
 //                OneData oneData=bankuaiWithData.getTodayMinuteDataList().get(i);
@@ -61,6 +63,8 @@ public class Main {
      * 2 只有<2个板块能涨超过 1%，尽量不买；
      * 3 大盘不景气，买上证 50 （可能无用）
      */
+
+    //上午开盘3分钟和收盘3分钟不可信
 
     //盘中选股：排名 10～60 ，归一化为正，已有涨幅较小
     @Test
@@ -194,18 +198,21 @@ public class Main {
                     }
                 }
             }
-            double timeCount = (240.0 - testEndTimeIndex) / 2;
-            double hushenSum = timeCount / fuCount * hushenFuSum + timeCount / zhengCount * hushenZhengSum
-                    - timeCount / testEndTimeIndex * hushen0_EndIndexShouyi;
+//            double timeCount = (240.0 - testEndTimeIndex) / 2;
+            double shangZhangCount = (240.0 - testEndTimeIndex) * shangZhangGaiLv;
+            double xiajiangCount = (240.0 - testEndTimeIndex) * (1 - shangZhangGaiLv);
+            double hushenSum = xiajiangCount / fuCount * hushenFuSum + shangZhangCount / zhengCount * hushenZhengSum
+//                    - timeCount / testEndTimeIndex * hushen0_EndIndexShouyi;
 //                    - hushen0_EndIndexShouyi
-            ;
-            double bankuaiSum = timeCount / fuCount * bankuaiFuSum + timeCount / zhengCount * bankuaiZhengSum
-                    - timeCount / testEndTimeIndex * bankuai0_EndIndexShouyi;
+                    ;
+            double bankuaiSum = xiajiangCount / fuCount * bankuaiFuSum + shangZhangCount / zhengCount * bankuaiZhengSum
+//                    - timeCount / testEndTimeIndex * bankuai0_EndIndexShouyi;
 //                    - bankuai0_EndIndexShouyi;
-            ;
+                    ;
             if (bankuai.etfBankuaiWithData != null) {
-                bankuai.etfBankuaiWithData.testMinuteShouYiSum = timeCount / fuCount * etfFuSum + timeCount / zhengCount * etfZhengSum
-                        - timeCount / testEndTimeIndex * etf0_EndIndexShouyi;
+                bankuai.etfBankuaiWithData.testMinuteShouYiSum = xiajiangCount / fuCount * etfFuSum + shangZhangCount / zhengCount * etfZhengSum
+//                        - timeCount / testEndTimeIndex * etf0_EndIndexShouyi;
+                ;
             }
 
             bankuai.testMinuteShouYiSum = bankuaiSum;
@@ -264,9 +271,9 @@ public class Main {
         XiangDuiBiLi30Day xiangDuiBiLi30Day = e.getXiangDuiBiLi30Day();
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("过去十天：%s  |", xiangDuiBiLi30Day.xiangDuiBiLiList10Day.stream().map(v -> String.format("%.2f", v * 100 - 100)).collect(Collectors.toList())));
-        String color = ANSI_RESET;
+        String color = ANSI_GREEN;
         //归一化 35（涨幅80名）～80（涨幅47名）
-        if (xiangDuiBiLi30Day.guiyiHuaPaiMing <= 50 && xiangDuiBiLi30Day.guiyiHuaPaiMing >= 10) {
+        if (xiangDuiBiLi30Day.guiyiHuaPaiMing <= 60 && xiangDuiBiLi30Day.guiyiHuaPaiMing >= 10) {
             color = ANSI_RED;
         }
         if (isSimpleMode) {
