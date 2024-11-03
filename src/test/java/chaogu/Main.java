@@ -28,8 +28,10 @@ public class Main {
 //    static String todayDate = "2024-10-30";
 //    static double lastDapanStar2EndDiff = -0.9 / 100.0;
 
-    static String lastDate = "2024-10-31";
-    static String todayDate = "2024-11-01";
+    static String lastDate = "2024-11-01";
+    static String todayDate = "2024-11-04";
+    //    static String lastDate = "2024-10-31";
+//    static String todayDate = "2024-11-01";
     static double lastDapanStar2EndDiff = 0.5 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
@@ -39,27 +41,19 @@ public class Main {
 
     static String TestEndTime = "09:50";
 
-    static int testStartTimeIndex = 3;//当前时间是多少分钟
-    static int testEndTimeIndex = 10;//当前时间是多少分钟
+    static int testStartTimeIndex = 90;//当前时间是多少分钟
+    static int testEndTimeIndex = 120;//当前时间是多少分钟
 
     static double shangZhangGaiLv = 0.5;
 
     double getSortValue(BankuaiWithData bankuaiWithData) {
-        return bankuaiWithData.testMinuteShouYiSum;
+//        return bankuaiWithData.testMinuteShouYiSum;
 //        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
-//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
 //        return getTodayDiffAfter1min(bankuaiWithData);
     }
 
     public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData("科技创新50", "1.588000");
-//    public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData("沪深300", "1.000300");
-    //            int index;
-//            for(int i=0;i<241 && i<bankuaiWithData.getTodayMinuteDataList().size();i++){
-//                OneData oneData=bankuaiWithData.getTodayMinuteDataList().get(i);
-//                if(oneData.dateTime.endsWith(TestEndTime)){
-//                    index=i;
-//                }
-//            }
 
 //    原则：1 min 涨越多越好  2 有反弹更好 3 早上涨幅不能太高  4 非科技板块*2
 
@@ -174,14 +168,14 @@ public class Main {
             for (int i = testStartTimeIndex; i <= testEndTimeIndex; i++) {
                 OneData hushenOneData = hushen300BanKuaiData.getTodayMinuteDataList().get(i);
                 OneData banuaiOneData = bankuai.getTodayMinuteDataList().get(i);
-                if (banuaiOneData.startEndDiff < 0.0) {
+                if (hushenOneData.startEndDiff < 0.0) {
                     fuCount++;
                     hushenFuSum += hushenOneData.startEndDiff;
                     bankuaiFuSum += banuaiOneData.startEndDiff;
                     if (bankuai.etfBankuaiWithData != null) {
                         etfFuSum += bankuai.etfBankuaiWithData.getTodayMinuteDataList().get(i).startEndDiff;
                     }
-                } else if (banuaiOneData.startEndDiff > 0.0) {
+                } else if (hushenOneData.startEndDiff > 0.0) {
                     zhengCount++;
                     hushenZhengSum += hushenOneData.startEndDiff;
                     bankuaiZhengSum += banuaiOneData.startEndDiff;
