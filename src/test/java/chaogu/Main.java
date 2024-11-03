@@ -39,10 +39,20 @@ public class Main {
 
     static String TestEndTime = "09:50";
 
-    static int testStartTimeIndex = 1;//当前时间是多少分钟
-    static int testEndTimeIndex = 45;//当前时间是多少分钟
+    static int testStartTimeIndex = 3;//当前时间是多少分钟
+    static int testEndTimeIndex = 10;//当前时间是多少分钟
 
     static double shangZhangGaiLv = 0.5;
+
+    double getSortValue(BankuaiWithData bankuaiWithData) {
+        return bankuaiWithData.testMinuteShouYiSum;
+//        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+//        return getTodayDiffAfter1min(bankuaiWithData);
+    }
+
+    public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData("科技创新50", "1.588000");
+//    public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData("沪深300", "1.000300");
     //            int index;
 //            for(int i=0;i<241 && i<bankuaiWithData.getTodayMinuteDataList().size();i++){
 //                OneData oneData=bankuaiWithData.getTodayMinuteDataList().get(i);
@@ -96,7 +106,7 @@ public class Main {
                 .forEach(e -> e.xiangDuiBiLi30Day.guiyiHuaPaiMing = sort.incrementAndGet());
         //打印
         List<String> resultListt = bankuaiWithDataList.stream().filter(Main::filter).sorted((a, b) -> {
-            return (int) ((getSortValue(b) - getSortValue(a)) * 10000);
+            return getSortValue(b) > getSortValue(a) ? 1 : -1;
         }).map(e -> {
             String ret = todayOneMinutteDesc(e);
             if (e.etfBankuaiWithData != null) {
@@ -128,27 +138,9 @@ public class Main {
         System.out.println("===========");
         resultListt.forEach(System.out::println);
 
-        System.out.println("===========");
-
-        AtomicInteger sortCount = new AtomicInteger();
-
-        System.out.println("===========");
-        int groupSize = 10;
-        bankuaiWithDataList.stream().collect(Collectors.groupingBy(a -> (a.xiangDuiBiLi30Day.guiyiHuaPaiMing - 1) / groupSize))
-                .entrySet().stream().map(entry -> {
-                    ShouYiTongJi guiYiHua2ShouYi = new ShouYiTongJi();
-                    guiYiHua2ShouYi.setPaiMing(entry.getKey() * groupSize);
-                    guiYiHua2ShouYi.setShouYiList(entry.getValue().stream()
-                            .map(e -> e.getLast30DayInfoMap().get(todayDate).last2EndDiff).collect(Collectors.toList()));
-                    guiYiHua2ShouYi.setAvgShouYi(guiYiHua2ShouYi.getShouYiList().stream().mapToDouble(e -> e).average().getAsDouble());
-                    guiYiHua2ShouYi.setCount(entry.getValue().size());
-                    return guiYiHua2ShouYi;
-                }).sorted((a, b) -> (int) ((b.avgShouYi * 1000 - a.avgShouYi * 1000)))
-                .forEach(entry -> System.out.printf("排名：%d~%d,count:%d,平均收益：%.2f,所有收益:%s\n",
-                        entry.getPaiMing() + 1, entry.getPaiMing() + groupSize, entry.getCount(), entry.getAvgShouYi() * 100,
-                        entry.getShouYiList().stream().map(e -> String.format("%.2f", e * 100)).collect(Collectors.joining(","))
-                ));
+        tongji(bankuaiWithDataList);
     }
+
 
     private static void fillGuiYihuaShouyi(List<BankuaiWithData> bankuaiWithDataList) {
         for (BankuaiWithData bankuai : bankuaiWithDataList) {
@@ -182,14 +174,14 @@ public class Main {
             for (int i = testStartTimeIndex; i <= testEndTimeIndex; i++) {
                 OneData hushenOneData = hushen300BanKuaiData.getTodayMinuteDataList().get(i);
                 OneData banuaiOneData = bankuai.getTodayMinuteDataList().get(i);
-                if (hushenOneData.startEndDiff < 0) {
+                if (banuaiOneData.startEndDiff < 0.0) {
                     fuCount++;
                     hushenFuSum += hushenOneData.startEndDiff;
                     bankuaiFuSum += banuaiOneData.startEndDiff;
                     if (bankuai.etfBankuaiWithData != null) {
                         etfFuSum += bankuai.etfBankuaiWithData.getTodayMinuteDataList().get(i).startEndDiff;
                     }
-                } else if (hushenOneData.startEndDiff > 0) {
+                } else if (banuaiOneData.startEndDiff > 0.0) {
                     zhengCount++;
                     hushenZhengSum += hushenOneData.startEndDiff;
                     bankuaiZhengSum += banuaiOneData.startEndDiff;
@@ -204,7 +196,7 @@ public class Main {
             double hushenSum = (xiajiangCount / fuCount * hushenFuSum + shangZhangCount / zhengCount * hushenZhengSum)
 //                    / Math.abs(240.0 / testEndTimeIndex * hushen0_EndIndexShouyi);
 //                    - 60.0 / testEndTimeIndex * hushen0_EndIndexShouyi;
-//                    - hushen0_EndIndexShouyi
+//                    - hushen0_EndIndexShouyi;
                     ;
             double bankuaiSum = (xiajiangCount / fuCount * bankuaiFuSum + shangZhangCount / zhengCount * bankuaiZhengSum)
 //                    / Math.abs(240.0 / testEndTimeIndex * bankuai0_EndIndexShouyi);
@@ -222,6 +214,27 @@ public class Main {
         }
     }
 
+
+    private static void tongji(List<BankuaiWithData> bankuaiWithDataList) {
+        System.out.println("===========");
+        System.out.println("===========");
+        int groupSize = 10;
+        bankuaiWithDataList.stream().collect(Collectors.groupingBy(a -> (a.xiangDuiBiLi30Day.guiyiHuaPaiMing - 1) / groupSize))
+                .entrySet().stream().map(entry -> {
+                    ShouYiTongJi guiYiHua2ShouYi = new ShouYiTongJi();
+                    guiYiHua2ShouYi.setPaiMing(entry.getKey() * groupSize);
+                    guiYiHua2ShouYi.setShouYiList(entry.getValue().stream()
+                            .map(e -> e.getLast30DayInfoMap().get(todayDate).last2EndDiff).collect(Collectors.toList()));
+                    guiYiHua2ShouYi.setAvgShouYi(guiYiHua2ShouYi.getShouYiList().stream().mapToDouble(e -> e).average().getAsDouble());
+                    guiYiHua2ShouYi.setCount(entry.getValue().size());
+                    return guiYiHua2ShouYi;
+                }).sorted((a, b) -> (int) ((b.avgShouYi * 1000 - a.avgShouYi * 1000)))
+                .forEach(entry -> System.out.printf("排名：%d~%d,count:%d,平均收益：%.2f,所有收益:%s\n",
+                        entry.getPaiMing() + 1, entry.getPaiMing() + groupSize, entry.getCount(), entry.getAvgShouYi() * 100,
+                        entry.getShouYiList().stream().map(e -> String.format("%.2f", e * 100)).collect(Collectors.joining(","))
+                ));
+    }
+
     @AllArgsConstructor
     @Data
     @NoArgsConstructor
@@ -232,14 +245,6 @@ public class Main {
         int count;
     }
 
-    public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData("沪深300", "1.000300");
-
-    double getSortValue(BankuaiWithData bankuaiWithData) {
-        return bankuaiWithData.testMinuteShouYiSum;
-//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-//        return getTodayDiffAfter1min(bankuaiWithData);
-//        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
-    }
 
     //一分钟后的涨跌
     static double getTodayDiffAfter1min(BankuaiWithData bankuaiWithData) {
