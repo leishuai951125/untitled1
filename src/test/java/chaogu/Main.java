@@ -24,25 +24,20 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-//    static String lastDate = "2024-10-29";
-//    static String todayDate = "2024-10-30";
-//    static double lastDapanStar2EndDiff = -0.9 / 100.0;
 
-    static String lastDate = "2024-11-01";
-    static String todayDate = "2024-11-04";
-    //    static String lastDate = "2024-10-31";
-//    static String todayDate = "2024-11-01";
-    static double lastDapanStar2EndDiff = 0.5 / 100.0;
+    static String lastDate = "2024-11-04";
+    static String todayDate = "2024-11-05";
+
+    static double lastDapanStar2EndDiff = 1.1 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
 
     static boolean needFilter = false;
     static boolean isSimpleMode = false;//简要模式
 
-    static String TestEndTime = "09:50";
 
-    static int testStartTimeIndex = 90;//当前时间是多少分钟
-    static int testEndTimeIndex = 120;//当前时间是多少分钟
+    static int testStartTimeIndex = 1;//当前时间是多少分钟
+    static int testEndTimeIndex = 166;//当前时间是多少分钟
 
     static double shangZhangGaiLv = 0.5;
 
@@ -53,7 +48,8 @@ public class Main {
 //        return getTodayDiffAfter1min(bankuaiWithData);
     }
 
-    public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData("科技创新50", "1.588000");
+    //    public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData("科技创新50", "1.588000");
+    public static BankuaiWithData hushen300BanKuaiData = getBankuaiWithData("沪深300", "1.000300");
 
 //    原则：1 min 涨越多越好  2 有反弹更好 3 早上涨幅不能太高  4 非科技板块*2
 
@@ -73,8 +69,6 @@ public class Main {
     //盘中选股：排名 10～60 ，归一化为正，已有涨幅较小
     @Test
     public void main() throws IOException {
-//        List<OneData> list = getTodayMinuteDataList("1.515220");
-//        getBankuaiWithData(new BanKuai("教育", "90.BK0740"));
         List<BanKuai> banKuaiList = parseAllBanKuai();
         long starMs = System.currentTimeMillis();
         List<BankuaiWithData> bankuaiWithDataList = banKuaiList.stream().parallel().map(e -> {
@@ -347,13 +341,12 @@ public class Main {
         if (isSimpleMode) {
             return "板块： " + fillName(e.getBankuaiName()) + "  \t";
         }
-        double todayMinuteXiangDui = e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100;
+//        double todayMinuteXiangDui = e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100;
         double kaipanXiangDui = e.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100;
         double zuoRiXiangDui = (e.lastDayDetail.startEndDiff - lastDapanStar2EndDiff) * 100;
-        return String.format("板块：%-7s  " +
+        return String.format("板块：%-7s  \t" +
                         //今日一分钟
-                        (todayMinuteXiangDui > 1 ? ANSI_RED : ANSI_GREEN) + "\t 今日一分钟相对涨跌：%.3f%% " +
-                        "[即:%.3f%%]， \t  " + ANSI_RESET +
+                        (e.todayMinuteDataList.get(1).startEndDiff > 0.01 ? ANSI_RED : ANSI_GREEN) + "今日一分钟涨跌：%.3f%% \t" + ANSI_RESET +
                         //今日开盘
                         (kaipanXiangDui < 0 ? ANSI_RED : "") + "今日开盘相对涨跌:%.3f%%" +
                         " [即:%.3f%%] \t  " + ANSI_RESET +
@@ -374,7 +367,6 @@ public class Main {
                         "\n",
                 fillName(e.getBankuaiName()),
                 //今日一分钟
-                todayMinuteXiangDui,
                 e.todayMinuteDataList.get(1).startEndDiff * 100,
                 //今日开盘
                 kaipanXiangDui,
@@ -407,10 +399,9 @@ public class Main {
         double bankuaiKaipanXiangDui = bankuai.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100;
 
         double etfXiangDuiBanKuai = (todayMinuteXiangDui + kaipanXiangDui) - (bankuaiTodayMinuteXiangDui + bankuaiKaipanXiangDui);
-        return String.format("板块：%-7s  " +
+        return String.format("板块：%-7s  \t" +
                         //今日一分钟
-                        "\t 今日一分钟相对涨跌：%.3f%% " +
-                        "[即:%.3f%%]， \t  " + ANSI_RESET +
+                        "今日一分钟涨跌：%.3f%% \t" + ANSI_RESET +
                         //今日开盘
                         "今日开盘相对涨跌:%.3f%%" +
                         " [即:%.3f%%] \t  " + ANSI_RESET +
@@ -430,7 +421,6 @@ public class Main {
                         "\n",
                 fillName(etf.getBankuaiName()),
                 //今日一分钟
-                todayMinuteXiangDui,
                 etf.todayMinuteDataList.get(1).startEndDiff * 100,
                 //今日开盘
                 kaipanXiangDui,
@@ -443,7 +433,6 @@ public class Main {
                 //etf 比 板块
                 etfXiangDuiBanKuai,
                 //今日
-//                etf.lastDayDetail.startEndDiff * 100,
                 (etf.getLast30DayInfoMap().get(todayDate).startEndDiff - hushen300BanKuaiData.getLast30DayInfoMap().get(todayDate).startEndDiff) * 100,
                 etf.getLast30DayInfoMap().get(todayDate).startEndDiff * 100,
                 //一分钟后
@@ -601,3 +590,8 @@ public class Main {
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_YELLOW = "\u001B[33m";
 }
+
+/**
+ * 猜想：
+ * 1 美元降息 ； 美股+a股涨； 但是美股可能吸收a股的资金，a股不升反降； 如果人民币跟着降息，则a股升；
+ */
