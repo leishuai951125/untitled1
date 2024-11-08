@@ -368,12 +368,14 @@ public class Main {
         if (isSimpleMode) {
             return "板块： " + fillName(e.getBankuaiName()) + "  \t";
         }
-//        double todayMinuteXiangDui = e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100;
+        double todayMinuteXiangDui = e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100;
         double kaipanXiangDui = e.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100;
         double zuoRiXiangDui = (e.lastDayDetail.startEndDiff - lastDapanStar2EndDiff) * 100;
         return String.format("板块：%-7s  \t" +
                         //今日一分钟
-                        (e.todayMinuteDataList.get(1).startEndDiff > 0.01 ? ANSI_RED : ANSI_RESET) + "今日一分钟涨跌：%.3f%% \t" + ANSI_RESET +
+                        (e.todayMinuteDataList.get(1).startEndDiff > 0.01 ? ANSI_RED :
+                                (todayMinuteXiangDui < 0 && e.todayMinuteDataList.get(1).startEndDiff < 0) ? ANSI_GREEN : ANSI_RESET) +
+                        "今日一分钟涨跌：%.3f%% \t" + ANSI_RESET +
                         //今日开盘
                         (kaipanXiangDui < 0 ? ANSI_RED : ANSI_GREEN) + "今日开盘相对涨跌:%.3f%%" +
                         " [即:%.3f%%] \t  " + ANSI_RESET +
