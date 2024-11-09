@@ -52,8 +52,9 @@ public class Main {
 //        return bankuaiWithData.testMinuteShouYiSum;
 //        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
-        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
 //        return getTodayDiffAfter1min(bankuaiWithData);
+        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
     }
 
     static ExecutorService executorService = Executors.newFixedThreadPool(10);
@@ -138,18 +139,23 @@ public class Main {
         } else {
             System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
                             "昨日大盘涨跌：%.2f%% \n" +
-                            "今日大盘开盘涨跌：%.2f%%,今日大盘一分钟涨跌：%.2f%%\n",
+                            "今日大盘开盘涨跌：%.2f%%,今日大盘一分钟涨跌：%.2f%%, 一分钟后的收益：%.2f%%\n",
                     new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0,
                     lastDapanStar2EndDiff * 100,
-                    hushen300BanKuaiData.last2StartDiff * 100, hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100);
+                    hushen300BanKuaiData.last2StartDiff * 100, hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100,
+                    getTodayDiffAfter1min(hushen300BanKuaiData) * 100);
         }
-        System.out.printf("科创50开盘涨跌：%.2f%%,今日大盘一分钟涨跌：%.2f%%\n",
-                KeChuang50BanKuaiData.last2StartDiff * 100, KeChuang50BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100);
+        System.out.printf("科创50开盘涨跌：%.2f%%,今日大盘一分钟涨跌：%.2f%%, 一分钟后的收益：%.2f%%\n",
+                KeChuang50BanKuaiData.last2StartDiff * 100, KeChuang50BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100,
+                getTodayDiffAfter1min(KeChuang50BanKuaiData) * 100
+        );
 
         System.out.printf("时间区间：[%d~%d],大盘归一化收益：%.2f%% , 大盘从[1~%d] 的收益：%.2f%% \n",
                 testStartTimeIndex, testEndTimeIndex, hushen300BanKuaiData.testMinuteShouYiSum * 100,
                 testEndTimeIndex, hushen300BanKuaiData.test0_EndIndexShouyim * 100
         );
+        System.out.printf("一分钟后平均收益：%.2f\n", sumTodayDiffAfter1min.stream().mapToDouble(e -> e).average().getAsDouble());
+        System.out.printf("一分钟后etf平均收益：%.2f\n", etfSumTodayDiffAfter1min.stream().mapToDouble(e -> e).average().getAsDouble());
         System.out.println("===========");
         resultListt.forEach(System.out::println);
 
@@ -364,6 +370,9 @@ public class Main {
         return xiangDuiBiLi30Day;
     }
 
+    public static List<Double> sumTodayDiffAfter1min = new ArrayList<>(100);
+    public static List<Double> etfSumTodayDiffAfter1min = new ArrayList<>(100);
+
     private static String todayOneMinutteDesc(BankuaiWithData e) {
         if (isSimpleMode) {
             return "板块： " + fillName(e.getBankuaiName()) + "  \t";
@@ -371,9 +380,10 @@ public class Main {
         double todayMinuteXiangDui = e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100;
         double kaipanXiangDui = e.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100;
         double zuoRiXiangDui = (e.lastDayDetail.startEndDiff - lastDapanStar2EndDiff) * 100;
+        sumTodayDiffAfter1min.add(getTodayDiffAfter1min(e) * 100);
         return String.format("板块：%-7s  \t" +
                         //今日一分钟
-                        (e.todayMinuteDataList.get(1).startEndDiff > 0.01 ? ANSI_RED :
+                        (todayMinuteXiangDui > 0.5 && e.todayMinuteDataList.get(1).startEndDiff > 0.005 ? ANSI_RED :
                                 (todayMinuteXiangDui < 0 && e.todayMinuteDataList.get(1).startEndDiff < 0) ? ANSI_GREEN : ANSI_RESET) +
                         "今日一分钟涨跌：%.3f%% \t" + ANSI_RESET +
                         //今日开盘
@@ -429,6 +439,7 @@ public class Main {
         double bankuaiKaipanXiangDui = bankuai.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100;
 
         double etfXiangDuiBanKuai = (todayMinuteXiangDui + kaipanXiangDui) - (bankuaiTodayMinuteXiangDui + bankuaiKaipanXiangDui);
+        etfSumTodayDiffAfter1min.add(getTodayDiffAfter1min(etf) * 100);
         return String.format("板块：%-7s  \t" +
                         //今日一分钟
                         "今日一分钟涨跌：%.3f%% \t" + ANSI_RESET +
