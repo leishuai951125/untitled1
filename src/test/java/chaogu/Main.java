@@ -52,9 +52,9 @@ public class Main {
 //        return bankuaiWithData.testMinuteShouYiSum;
 //        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
-//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
 //        return getTodayDiffAfter1min(bankuaiWithData);
-        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
     }
 
     static ExecutorService executorService = Executors.newFixedThreadPool(10);
@@ -88,11 +88,11 @@ public class Main {
             hushen300BanKuaiData = getBankuaiWithData("沪深300", "1.000300");
         }));
         waitAll(futureList);
-        List<BanKuai> banKuaiList = parseAllBanKuai().stream()
-                .filter(e -> !filterNoEtf || !StringUtils.isEmpty(e.getEtfCode())).collect(Collectors.toList());
+        List<BanKuai> banKuaiList = parseAllBanKuai();
         long starMs = System.currentTimeMillis();
         List<BankuaiWithData> bankuaiWithDataList = banKuaiList.stream().parallel().map(e -> {
             BankuaiWithData bankuaiWithData = getBankuaiWithData(e.getName(), e.getCode());
+            bankuaiWithData.banKuai = e;
             if (!StringUtils.isEmpty(e.getEtfCode())) {
                 bankuaiWithData.etfBankuaiWithData = getBankuaiWithData(e.getEftName(), e.getEtfCode());
             }
@@ -111,6 +111,9 @@ public class Main {
         bankuaiWithDataList.stream().sorted((a, b) -> (int) ((a.xiangDuiBiLi30Day.zuoRiGuiYiHua - b.xiangDuiBiLi30Day.zuoRiGuiYiHua) * 1000))
                 .collect(Collectors.toList())
                 .forEach(e -> e.xiangDuiBiLi30Day.guiyiHuaPaiMing = sort.incrementAndGet());
+        //过滤
+        bankuaiWithDataList = bankuaiWithDataList.stream()
+                .filter(e -> !filterNoEtf || !StringUtils.isEmpty(e.banKuai.etfCode)).collect(Collectors.toList());
         //打印
         List<String> resultListt = bankuaiWithDataList.stream().filter(Main::filter).sorted((a, b) -> {
             return getSortValue(b) > getSortValue(a) ? 1 : -1;
@@ -245,7 +248,11 @@ public class Main {
                     ShouYiTongJi guiYiHua2ShouYi = new ShouYiTongJi();
                     guiYiHua2ShouYi.setPaiMing(entry.getKey() * groupSize);
                     guiYiHua2ShouYi.setShouYiList(entry.getValue().stream()
-                            .map(e -> e.getLast30DayInfoMap().get(todayDate).last2EndDiff).collect(Collectors.toList()));
+                            .map(e -> {
+//                               return e.getLast30DayInfoMap().get(todayDate).last2EndDiff;
+                                //一分钟后收益
+                                return e.getLast30DayInfoMap().get(todayDate).last2EndDiff - e.getTodayMinuteDataList().get(1).startEndDiff;
+                            }).collect(Collectors.toList()));
                     guiYiHua2ShouYi.setAvgShouYi(guiYiHua2ShouYi.getShouYiList().stream().mapToDouble(e -> e).average().getAsDouble());
                     guiYiHua2ShouYi.setCount(entry.getValue().size());
                     return guiYiHua2ShouYi;
@@ -539,6 +546,7 @@ public class Main {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class BankuaiWithData {
+        BanKuai banKuai;
         String bankuaiName;
         List<OneData> todayMinuteDataList;
         double testMinuteShouYiSum = 0.0;
