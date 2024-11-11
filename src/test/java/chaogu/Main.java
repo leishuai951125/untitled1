@@ -28,14 +28,10 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
+    static String lastDate = "2024-11-08";
+    static String todayDate = "2024-11-11";
 
-//    static String lastDate = "2024-11-07";
-//    static String todayDate = "2024-11-08";
-
-    static String lastDate = "2024-11-07";
-    static String todayDate = "2024-11-08";
-
-    static double lastDapanStar2EndDiff = 3 / 100.0;
+    static double lastDapanStar2EndDiff = -1 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
 
@@ -52,8 +48,8 @@ public class Main {
 //        return bankuaiWithData.testMinuteShouYiSum;
 //        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
-        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-//        return getTodayDiffAfter1min(bankuaiWithData);
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+        return getTodayDiffAfter1min(bankuaiWithData);
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
     }
 
@@ -65,7 +61,7 @@ public class Main {
 //    原则：1 min 涨越多越好  2 有反弹更好 3 早上涨幅不能太高  4 非科技板块*2
 
     //判断开盘：昨日涨跌+尾盘+昨晚中概股 ， 上午是否有利好利空消息
-    //判断后续行情，看美元汇率
+    //判断后续行情，看美元汇率、a50（0.6置信度较高）、消息
     //选股：板块涨幅大、价格排名 <60 、etf 相对涨幅小 、昨日和开盘为负数
 
     /**
@@ -573,16 +569,21 @@ public class Main {
     @NotNull
     private static List<BanKuai> parseAllBanKuai() {
 //        https://data.eastmoney.com/bkzj/hy_5.html
-        List<BanKuai> banKuaiList = JSON.parseArray(Utils.getDataByFileName("all_bankuai.json")).stream().map(e -> {
-            JSONObject jsonObject = (JSONObject) e;
-            BanKuai banKuai = new BanKuai();
-            banKuai.setName(jsonObject.getString("f14"));
-            banKuai.setCode(jsonObject.getString("f13") +
-                    "." + jsonObject.getString("f12"));
-            banKuai.setEftName(jsonObject.getString("etfName") != null ? jsonObject.getString("etfName") : "etf");
-            banKuai.setEtfCode(jsonObject.getString("etfCode"));
-            return banKuai;
-        }).collect(Collectors.toList());
+        List<BanKuai> banKuaiList = JSON.parseArray(Utils.getDataByFileName("all_bankuai.json")).stream()
+                .filter(e -> {
+                    JSONObject jsonObject = (JSONObject) e;
+                    return !Objects.equals(jsonObject.getBoolean("isSkip"), true);
+                })
+                .map(e -> {
+                    JSONObject jsonObject = (JSONObject) e;
+                    BanKuai banKuai = new BanKuai();
+                    banKuai.setName(jsonObject.getString("f14"));
+                    banKuai.setCode(jsonObject.getString("f13") +
+                            "." + jsonObject.getString("f12"));
+                    banKuai.setEftName(jsonObject.getString("etfName") != null ? jsonObject.getString("etfName") : "etf");
+                    banKuai.setEtfCode(jsonObject.getString("etfCode"));
+                    return banKuai;
+                }).collect(Collectors.toList());
         return banKuaiList;
     }
 
