@@ -71,6 +71,9 @@ public class Main {
      * 3 大盘不景气，买上证 50 （可能无用）
      */
 
+    //优先级： 1分钟涨幅 > 昨日排名 > 今日开盘 > etf 相对涨幅
+    //不允许：昨日排名过高 、开盘涨幅过高、etf 溢价>0.5%
+
     //上午开盘3分钟和收盘3分钟不可信
 
     //盘中选股：排名 10～60 ，归一化为正，已有涨幅较小
@@ -406,12 +409,12 @@ public class Main {
         sumTodayDiffAfter1min.add(getTodayDiffAfter1min(e) * 100);
         String sub1 = String.format("板块：%-7s  \t" +
                         //今日一分钟
-//                        (todayMinuteXiangDui > 0.5 && e.todayMinuteDataList.get(1).startEndDiff > 0.005 ? ANSI_RED :
-//                                (todayMinuteXiangDui < 0 && e.todayMinuteDataList.get(1).startEndDiff < 0) ? ANSI_GREEN : ANSI_RESET) +
-                        (e.last2StartDiffSort > 0 && e.last2StartDiffSort <= 50 ? ANSI_RED : ANSI_GREEN) +
+                        (todayMinuteXiangDui > 0.5 && e.todayMinuteDataList.get(1).startEndDiff > 0.005 ? ANSI_RED :
+                                (todayMinuteXiangDui < 0 && e.todayMinuteDataList.get(1).startEndDiff < 0) ? ANSI_GREEN : ANSI_RESET) +
                         "今日一分钟涨跌：%.3f%% \t" + ANSI_RESET +
                         //今日开盘
-                        (kaipanXiangDui < 0 ? ANSI_RED : ANSI_GREEN) + "今日开盘相对涨跌:%.3f%%" +
+//                        (kaipanXiangDui < 0 ? ANSI_RED : ANSI_GREEN) + "今日开盘相对涨跌:%.3f%%" +
+                        (e.last2StartDiffSort > 0 && e.last2StartDiffSort <= 50 ? ANSI_RED : ANSI_GREEN) + "今日开盘相对涨跌:%.3f%%" +
                         " [即:%.3f%%] %d \t  " + ANSI_RESET,
                 fillName(e.getBankuaiName()),
                 //今日一分钟
@@ -470,7 +473,7 @@ public class Main {
                         "今日开盘相对涨跌:%.3f%%" +
                         " [即:%.3f%%] \t  " + ANSI_RESET +
                         //etf 比 板块
-                        (etfXiangDuiBanKuai < -0.5 ? ANSI_RED : (etfXiangDuiBanKuai > 0 ? ANSI_GREEN : "")) + "【截止开盘一分钟etf相对板块:%.3f%%】" + ANSI_RESET +
+                        (etfXiangDuiBanKuai < -0.5 ? ANSI_RED : (etfXiangDuiBanKuai > 0.2 ? ANSI_GREEN : "")) + "【截止开盘一分钟etf相对板块:%.3f%%】" + ANSI_RESET +
                         //归一化收益
                         "归一化相对收益:%.3f%%" +
                         " [即:%.3f%%] \t  " + ANSI_RESET +
