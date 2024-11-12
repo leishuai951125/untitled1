@@ -48,8 +48,8 @@ public class Main {
 //        return bankuaiWithData.testMinuteShouYiSum;
 //        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
-        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-//        return getTodayDiffAfter1min(bankuaiWithData);
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+        return getTodayDiffAfter1min(bankuaiWithData);
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
     }
 
@@ -156,7 +156,6 @@ public class Main {
         System.out.printf("一分钟后etf平均收益：%.2f\n", etfSumTodayDiffAfter1min.stream().mapToDouble(e -> e).average().getAsDouble());
         System.out.println("===========");
         resultListt.forEach(System.out::println);
-
         tongji(bankuaiWithDataList);
     }
 
@@ -412,16 +411,16 @@ public class Main {
                         "今日一分钟涨跌：%.3f%% \t" + ANSI_RESET +
                         //今日开盘
                         (kaipanXiangDui < 0 ? ANSI_RED : ANSI_GREEN) + "今日开盘相对涨跌:%.3f%%" +
-                        " [即:%.3f%%] \t  " + ANSI_RESET,
+                        " [即:%.3f%%] %d \t  " + ANSI_RESET,
                 fillName(e.getBankuaiName()),
                 //今日一分钟
                 e.todayMinuteDataList.get(1).startEndDiff * 100,
                 //今日开盘
                 kaipanXiangDui,
-                e.last2StartDiff * 100);
+                e.last2StartDiff * 100, e.last2StartDiffSort);
         String sub2 = String.format( //昨日
-                (zuoRiXiangDui < 0 ? ANSI_RED : "") + " 上日相比大盘涨跌：%.2f%%" +
-                        " [即:%.2f%%]， " + ANSI_RESET +
+                (e.lastDayZhangFuSort > 5 && e.lastDayZhangFuSort <= 50 ? ANSI_RED : ANSI_GREEN) + " 上日相比大盘涨跌：%.2f%%" +
+                        " [即:%.2f%%] %d， " + ANSI_RESET +
                         //归一化收益
                         "归一化相对收益:%.3f%%" +
                         " [即:%.3f%%] \t" + ANSI_RESET +
@@ -435,7 +434,7 @@ public class Main {
                         "\t  时间：%s" +
                         "\n",//昨日
                 zuoRiXiangDui,
-                e.lastDayDetail.startEndDiff * 100,
+                e.lastDayDetail.startEndDiff * 100, e.lastDayZhangFuSort,
                 //归一化收益
                 e.testMinuteShouYiSum * 100 - hushen300BanKuaiData.testMinuteShouYiSum * 100,
                 e.testMinuteShouYiSum * 100,
