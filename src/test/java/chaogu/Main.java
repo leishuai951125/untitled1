@@ -53,7 +53,7 @@ public class Main {
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
     }
 
-    static ExecutorService executorService = Executors.newFixedThreadPool(10);
+    static ExecutorService executorService = Executors.newFixedThreadPool(300);
     public static BankuaiWithData KeChuang50BanKuaiData;
     public static BankuaiWithData hushen300BanKuaiData;
 
@@ -80,13 +80,11 @@ public class Main {
     @Test
     public void main() throws IOException {
         List<Future> futureList = new ArrayList<>();
-        futureList.add(executorService.submit(() -> {
+        waitAll(() -> {
             KeChuang50BanKuaiData = getBankuaiWithData("科技创新50", "1.588000");
-        }));
-        futureList.add(executorService.submit(() -> {
+        }, () -> {
             hushen300BanKuaiData = getBankuaiWithData("沪深300", "1.000300");
-        }));
-        waitAll(futureList);
+        });
         List<BanKuai> banKuaiList = parseAllBanKuai();
         long starMs = System.currentTimeMillis();
         List<BankuaiWithData> bankuaiWithDataList = banKuaiList.stream().parallel().map(e -> {
@@ -531,14 +529,20 @@ public class Main {
         BankuaiWithData bankuaiWithData = new BankuaiWithData();
         bankuaiWithData.setBankuaiName(name);
         try {
-            bankuaiWithData.setTodayMinuteDataList(getTodayMinuteDataList(code));
-            bankuaiWithData.setZhuLi(getZiJin(code));
-            bankuaiWithData.setLast30DayInfoList(getLast30DayData(code));
+            waitAll(
+                    () -> {
+                        bankuaiWithData.setTodayMinuteDataList(getTodayMinuteDataList(code));
+                    },
+                    () -> {
+                        bankuaiWithData.setZhuLi(getZiJin(code));
+                    },
+                    () -> {
+                        bankuaiWithData.setLast30DayInfoList(getLast30DayData(code));
+                    }
+            );
             bankuaiWithData.setLast30DayInfoMap(bankuaiWithData.getLast30DayInfoList().stream().collect(Collectors.toMap(kk -> kk.date, kk -> kk)));
             bankuaiWithData.setLastDayDetail(bankuaiWithData.getLast30DayInfoMap().get(lastDate));
             bankuaiWithData.setLast2StartDiff(bankuaiWithData.getTodayMinuteDataList().get(0).start / bankuaiWithData.getLastDayDetail().end - 1);
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
         } catch (Exception e) {
             throw e;
         }
@@ -547,7 +551,8 @@ public class Main {
 
 
     //分钟级别
-    private static List<OneData> getTodayMinuteDataList(String bankuaiName) throws IOException {
+    @SneakyThrows
+    private static List<OneData> getTodayMinuteDataList(String bankuaiName) {
         String jqueryString = getMinuteData(bankuaiName);
         String arr[] = jqueryString.split("\\(|\\)");
         List<OneData> oneDataList = JSON.parseObject(arr[1]).getJSONObject("data").getJSONArray("trends") //前 6 分钟，第一分钟为开盘
@@ -565,7 +570,8 @@ public class Main {
     }
 
     //30天
-    private static List<上证.Main.OneDayDataDetail> getLast30DayData(String bankuaiCode) throws IOException {
+    @SneakyThrows
+    private static List<上证.Main.OneDayDataDetail> getLast30DayData(String bankuaiCode) {
         JSONArray jsonArray = getDayData(bankuaiCode);
         List<String> list = jsonArray.stream().map(e -> (String) e).collect(Collectors.toList());
         List<上证.Main.OneDayDataDetail> detailList = Utils.parseDongFangCaiFuList(list);
@@ -632,6 +638,7 @@ public class Main {
         Double startEndDiff;//当日波动
     }
 
+    @SneakyThrows
     private static String getMinuteData(String bankuaiCode) throws IOException {
         long ms = System.currentTimeMillis();
         String url = "https://push2his.eastmoney.com/api/qt/stock/trends2/get?fields1=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13&fields2=f51,f52,f53,f54,f55,f56,f57,f58&ut=fa5fd1943c7b386f172d6893dbfba10b&iscr=0&ndays=1&secid=" +
@@ -640,6 +647,7 @@ public class Main {
         return getData(url);
     }
 
+    @SneakyThrows
     private static JSONArray getDayData(String bankuaiCode) throws IOException {
         long ms = System.currentTimeMillis();
         String url = "https://push2his.eastmoney.com/api/qt/stock/kline/get?cb=jQuery35105715717072793236_"
@@ -652,7 +660,8 @@ public class Main {
         return jsonArray;
     }
 
-    private static String getZiJin(String bankuaiCode) throws IOException {
+    @SneakyThrows
+    private static String getZiJin(String bankuaiCode) {
         try {
             long ms = System.currentTimeMillis();
             String url = "https://push2.eastmoney.com/api/qt/stock/fflow/kline/get?cb=jQuery1123007371597491709281_" +
@@ -684,7 +693,8 @@ public class Main {
     }
 
     @NotNull
-    private static String getData(String url) throws IOException {
+    @SneakyThrows
+    private static String getData(String url) {
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         Request request = new Request.Builder()
@@ -701,6 +711,13 @@ public class Main {
                 .build();
         Response response = client.newCall(request).execute();
         return response.body().string();
+    }
+
+
+    @SneakyThrows
+    public static void waitAll(Runnable... task) {
+        List<Future> futureList = Arrays.stream(task).map(t -> executorService.submit(t)).collect(Collectors.toList());
+        waitAll(futureList);
     }
 
     private static void waitAll(List<Future> futureList) {
