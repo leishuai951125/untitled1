@@ -408,7 +408,7 @@ public class Main {
         double zuoRiXiangDui = (e.lastDayDetail.startEndDiff - lastDapanStar2EndDiff) * 100;
         sumTodayDiffAfter1min.add(getTodayDiffAfter1min(e) * 100);
         int deFen = 200 - e.lastDayZhangFuSort - e.getXiangDuiBiLi30Day().guiyiHuaPaiMing / 2 - e.last2StartDiffSort / 5;
-        String sub1 = String.format("板块：%-7s  \t" +
+        String sub1 = String.format("板块：%-7s \t" +
                         //今日一分钟
                         (todayMinuteXiangDui > 0.5 && e.todayMinuteDataList.get(1).startEndDiff > 0.005 ? ANSI_RED :
                                 (todayMinuteXiangDui < 0 && e.todayMinuteDataList.get(1).startEndDiff < 0) ? ANSI_GREEN : ANSI_RESET) +
@@ -417,19 +417,28 @@ public class Main {
                         //今日开盘
 //                        (kaipanXiangDui < 0 ? ANSI_RED : ANSI_GREEN) + "今日开盘相对涨跌:%.3f%%" +
                         (e.last2StartDiffSort > 0 && e.last2StartDiffSort <= 50 ? ANSI_RED : "") + "今日开盘相对涨跌:%.3f%%" +
-                        " [即:%.3f%%] %d \t  " + ANSI_RESET,
+                        " [即:%.3f%%] %d \t" + ANSI_RESET +
+                        //昨日
+                        (e.lastDayZhangFuSort > 5 && e.lastDayZhangFuSort <= 50 ? ANSI_RED : ANSI_GREEN) + " 上日相比大盘涨跌：%.2f%%" +
+                        " [即:%.2f%%] %d， " + ANSI_RESET
+                        //资金
+                        + "%s\t",
                 fillName(e.getBankuaiName()),
                 //今日一分钟
                 e.todayMinuteDataList.get(1).startEndDiff * 100,
                 deFen,
                 //今日开盘
                 kaipanXiangDui,
-                e.last2StartDiff * 100, e.last2StartDiffSort);
-        String sub2 = String.format( //昨日
-                (e.lastDayZhangFuSort > 5 && e.lastDayZhangFuSort <= 50 ? ANSI_RED : ANSI_GREEN) + " 上日相比大盘涨跌：%.2f%%" +
-                        " [即:%.2f%%] %d， " + ANSI_RESET +
-                        //归一化收益
-                        "归一化相对收益:%.3f%%" +
+                e.last2StartDiff * 100, e.last2StartDiffSort,
+                //昨日
+                zuoRiXiangDui,
+                e.lastDayDetail.startEndDiff * 100, e.lastDayZhangFuSort,
+                //资金
+                e.zhuLi
+        );
+        String sub2 = String.format(
+                //归一化收益
+                "归一化相对收益:%.3f%%" +
                         " [即:%.3f%%] \t" + ANSI_RESET +
                         //已有收益
                         " [已有收益:%.3f%%] \t" +
@@ -440,8 +449,6 @@ public class Main {
                         //时间
                         "\t  时间：%s" +
                         "\n",//昨日
-                zuoRiXiangDui,
-                e.lastDayDetail.startEndDiff * 100, e.lastDayZhangFuSort,
                 //归一化收益
                 e.testMinuteShouYiSum * 100 - hushen300BanKuaiData.testMinuteShouYiSum * 100,
                 e.testMinuteShouYiSum * 100,
@@ -525,6 +532,7 @@ public class Main {
         bankuaiWithData.setBankuaiName(name);
         try {
             bankuaiWithData.setTodayMinuteDataList(getTodayMinuteDataList(code));
+            bankuaiWithData.setZhuLi(getZiJin(code));
             bankuaiWithData.setLast30DayInfoList(getLast30DayData(code));
             bankuaiWithData.setLast30DayInfoMap(bankuaiWithData.getLast30DayInfoList().stream().collect(Collectors.toMap(kk -> kk.date, kk -> kk)));
             bankuaiWithData.setLastDayDetail(bankuaiWithData.getLast30DayInfoMap().get(lastDate));
@@ -571,6 +579,7 @@ public class Main {
         BanKuai banKuai;
         String bankuaiName;
         List<OneData> todayMinuteDataList;
+        String zhuLi;
         double testMinuteShouYiSum = 0.0;
         double test0_EndIndexShouyim = 0.0;
         double last2StartDiff;//今日开盘涨跌
@@ -641,6 +650,37 @@ public class Main {
         String arr[] = jqueryString.split("\\(|\\)");
         JSONArray jsonArray = JSON.parseObject(arr[1]).getJSONObject("data").getJSONArray("klines");
         return jsonArray;
+    }
+
+    private static String getZiJin(String bankuaiCode) throws IOException {
+        try {
+            long ms = System.currentTimeMillis();
+            String url = "https://push2.eastmoney.com/api/qt/stock/fflow/kline/get?cb=jQuery1123007371597491709281_" +
+                    +ms + "&lmt=0&klt=1&fields1=f1%2Cf2%2Cf3%2Cf7&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf62%2Cf63%2Cf64%2Cf65&ut=b2884a393a59ad64002292a3e90d46a5&secid=" +
+                    bankuaiCode + "&_=" + (ms + 50);
+            ;
+            String jqueryString = getData(url);
+            String arr[] = jqueryString.split("\\(|\\)");
+            JSONArray jsonArray = JSON.parseObject(arr[1]).getJSONObject("data").getJSONArray("klines");
+            if (jsonArray != null && jsonArray.size() != 0) {
+                String oneLine = (String) (jsonArray.get(0));
+                String[] arr2 = oneLine.split(",");
+                if (arr2[0].endsWith("09:31")) {
+                    double dadan = Double.parseDouble(arr2[4]) / 1e8;
+                    double chaodadan = Double.parseDouble(arr2[5]) / 1e8;
+                    String prefix = ANSI_RESET;
+//                    if (chaodadan + dadan > 1) {
+//                        prefix = ANSI_RED;
+//                    } else if (dadan + chaodadan < -1) {
+//                        prefix = ANSI_GREEN;
+//                    }
+                    return String.format(prefix + "大单:%.2f,超大单:%.2f" + ANSI_RESET, dadan, chaodadan);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(bankuaiCode + "获取主力资金出错");
+        }
+        return "主力资金未知";
     }
 
     @NotNull
