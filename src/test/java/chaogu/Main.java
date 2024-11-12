@@ -406,8 +406,9 @@ public class Main {
         sumTodayDiffAfter1min.add(getTodayDiffAfter1min(e) * 100);
         String sub1 = String.format("板块：%-7s  \t" +
                         //今日一分钟
-                        (todayMinuteXiangDui > 0.5 && e.todayMinuteDataList.get(1).startEndDiff > 0.005 ? ANSI_RED :
-                                (todayMinuteXiangDui < 0 && e.todayMinuteDataList.get(1).startEndDiff < 0) ? ANSI_GREEN : ANSI_RESET) +
+//                        (todayMinuteXiangDui > 0.5 && e.todayMinuteDataList.get(1).startEndDiff > 0.005 ? ANSI_RED :
+//                                (todayMinuteXiangDui < 0 && e.todayMinuteDataList.get(1).startEndDiff < 0) ? ANSI_GREEN : ANSI_RESET) +
+                        (e.last2StartDiffSort > 0 && e.last2StartDiffSort <= 50 ? ANSI_RED : ANSI_GREEN) +
                         "今日一分钟涨跌：%.3f%% \t" + ANSI_RESET +
                         //今日开盘
                         (kaipanXiangDui < 0 ? ANSI_RED : ANSI_GREEN) + "今日开盘相对涨跌:%.3f%%" +
