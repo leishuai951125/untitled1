@@ -28,10 +28,10 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-08";
-    static String todayDate = "2024-11-11";
+    static String lastDate = "2024-11-11";
+    static String todayDate = "2024-11-12";
 
-    static double lastDapanStar2EndDiff = -1 / 100.0;
+    static double lastDapanStar2EndDiff = 0.5 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
 
@@ -48,8 +48,8 @@ public class Main {
 //        return bankuaiWithData.testMinuteShouYiSum;
 //        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
-//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-        return getTodayDiffAfter1min(bankuaiWithData);
+        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+//        return getTodayDiffAfter1min(bankuaiWithData);
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
     }
 
@@ -97,16 +97,16 @@ public class Main {
         if (hushen300BanKuaiData.todayMinuteDataList.size() >= testEndTimeIndex) {
             fillGuiYihuaShouyi(bankuaiWithDataList);
         }
-
-        //过滤
-        bankuaiWithDataList = bankuaiWithDataList.stream().filter(Main::filter).collect(Collectors.toList());
         //填充归一化、比例
         bankuaiWithDataList.forEach(e -> e.setXiangDuiBiLi30Day(getXiangDuiBiLi30Day(e)));
         //填充归一化排名
-        AtomicInteger sort = new AtomicInteger(0);
-        bankuaiWithDataList.stream().sorted((a, b) -> (int) ((a.xiangDuiBiLi30Day.zuoRiGuiYiHua - b.xiangDuiBiLi30Day.zuoRiGuiYiHua) * 1000))
-                .collect(Collectors.toList())
-                .forEach(e -> e.xiangDuiBiLi30Day.guiyiHuaPaiMing = sort.incrementAndGet());
+        fillGuiYiHuaPaiMing(bankuaiWithDataList);
+        //填充开盘涨幅排名
+        fillKapPanZhangFuPaiMing(bankuaiWithDataList);
+        //填充开盘涨幅排名
+        fillZuoRiZhangFuPaiMing(bankuaiWithDataList);
+        //过滤
+        bankuaiWithDataList = bankuaiWithDataList.stream().filter(Main::filter).collect(Collectors.toList());
         //过滤
         bankuaiWithDataList = bankuaiWithDataList.stream()
                 .filter(e -> !filterNoEtf || !StringUtils.isEmpty(e.banKuai.etfCode)).collect(Collectors.toList());
@@ -148,17 +148,38 @@ public class Main {
                 KeChuang50BanKuaiData.last2StartDiff * 100, KeChuang50BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100,
                 getTodayDiffAfter1min(KeChuang50BanKuaiData) * 100
         );
-
         System.out.printf("时间区间：[%d~%d],大盘归一化收益：%.2f%% , 大盘从[1~%d] 的收益：%.2f%% \n",
                 testStartTimeIndex, testEndTimeIndex, hushen300BanKuaiData.testMinuteShouYiSum * 100,
                 testEndTimeIndex, hushen300BanKuaiData.test0_EndIndexShouyim * 100
         );
-        System.out.printf("一分钟后平均收益：%.2f\n", sumTodayDiffAfter1min.stream().mapToDouble(e -> e).average().getAsDouble());
+        System.out.printf("一分钟后平均收益：%.2f \t", sumTodayDiffAfter1min.stream().mapToDouble(e -> e).average().getAsDouble());
         System.out.printf("一分钟后etf平均收益：%.2f\n", etfSumTodayDiffAfter1min.stream().mapToDouble(e -> e).average().getAsDouble());
         System.out.println("===========");
         resultListt.forEach(System.out::println);
 
         tongji(bankuaiWithDataList);
+    }
+
+    private static void fillGuiYiHuaPaiMing(List<BankuaiWithData> bankuaiWithDataList) {
+        AtomicInteger sort = new AtomicInteger(0);
+        bankuaiWithDataList.stream().sorted((a, b) -> (int) ((a.xiangDuiBiLi30Day.zuoRiGuiYiHua - b.xiangDuiBiLi30Day.zuoRiGuiYiHua) * 1000))
+                .collect(Collectors.toList())
+                .forEach(e -> e.xiangDuiBiLi30Day.guiyiHuaPaiMing = sort.incrementAndGet());
+    }
+
+    private static void fillKapPanZhangFuPaiMing(List<BankuaiWithData> bankuaiWithDataList) {
+        AtomicInteger sort = new AtomicInteger(0);
+        bankuaiWithDataList.stream().sorted((a, b) -> (int) ((a.last2StartDiff - b.last2StartDiff) * 1000))
+                .collect(Collectors.toList())
+                .forEach(e -> e.last2StartDiffSort = sort.incrementAndGet());
+    }
+
+    private static void fillZuoRiZhangFuPaiMing(List<BankuaiWithData> bankuaiWithDataList) {
+        //填充归一化排名
+        AtomicInteger sort = new AtomicInteger(0);
+        bankuaiWithDataList.stream().sorted((a, b) -> (int) ((a.lastDayDetail.startEndDiff - b.lastDayDetail.startEndDiff) * 1000))
+                .collect(Collectors.toList())
+                .forEach(e -> e.lastDayZhangFuSort = sort.incrementAndGet());
     }
 
 
@@ -347,7 +368,7 @@ public class Main {
             last30DayInfoWithoutTodyList = last30DayInfoWithoutTodyList.subList(0, last30DayInfoWithoutTodyList.size() - 1);
         }
         //todo 取 x 天试试
-        last30DayInfoWithoutTodyList = last30DayInfoWithoutTodyList.subList(last30DayInfoWithoutTodyList.size() - 10, last30DayInfoWithoutTodyList.size());
+        last30DayInfoWithoutTodyList = last30DayInfoWithoutTodyList.subList(last30DayInfoWithoutTodyList.size() - 25, last30DayInfoWithoutTodyList.size());
 
         List<Double> xiangDuiBiLiList = new ArrayList<>(last30DayInfoWithoutTodyList.size());
         Map<String, Double> xiangDuiBiLiMap = new HashMap<>(last30DayInfoWithoutTodyList.size());
@@ -384,16 +405,22 @@ public class Main {
         double kaipanXiangDui = e.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100;
         double zuoRiXiangDui = (e.lastDayDetail.startEndDiff - lastDapanStar2EndDiff) * 100;
         sumTodayDiffAfter1min.add(getTodayDiffAfter1min(e) * 100);
-        return String.format("板块：%-7s  \t" +
+        String sub1 = String.format("板块：%-7s  \t" +
                         //今日一分钟
                         (todayMinuteXiangDui > 0.5 && e.todayMinuteDataList.get(1).startEndDiff > 0.005 ? ANSI_RED :
                                 (todayMinuteXiangDui < 0 && e.todayMinuteDataList.get(1).startEndDiff < 0) ? ANSI_GREEN : ANSI_RESET) +
                         "今日一分钟涨跌：%.3f%% \t" + ANSI_RESET +
                         //今日开盘
                         (kaipanXiangDui < 0 ? ANSI_RED : ANSI_GREEN) + "今日开盘相对涨跌:%.3f%%" +
-                        " [即:%.3f%%] \t  " + ANSI_RESET +
-                        //昨日
-                        (zuoRiXiangDui < 0 ? ANSI_RED : "") + " 上日相比大盘涨跌：%.2f%%" +
+                        " [即:%.3f%%] \t  " + ANSI_RESET,
+                fillName(e.getBankuaiName()),
+                //今日一分钟
+                e.todayMinuteDataList.get(1).startEndDiff * 100,
+                //今日开盘
+                kaipanXiangDui,
+                e.last2StartDiff * 100);
+        String sub2 = String.format( //昨日
+                (zuoRiXiangDui < 0 ? ANSI_RED : "") + " 上日相比大盘涨跌：%.2f%%" +
                         " [即:%.2f%%]， " + ANSI_RESET +
                         //归一化收益
                         "归一化相对收益:%.3f%%" +
@@ -406,14 +433,7 @@ public class Main {
                         "   [一分钟后:%.2f%%]， " +
                         //时间
                         "\t  时间：%s" +
-                        "\n",
-                fillName(e.getBankuaiName()),
-                //今日一分钟
-                e.todayMinuteDataList.get(1).startEndDiff * 100,
-                //今日开盘
-                kaipanXiangDui,
-                e.last2StartDiff * 100,
-                //昨日
+                        "\n",//昨日
                 zuoRiXiangDui,
                 e.lastDayDetail.startEndDiff * 100,
                 //归一化收益
@@ -427,8 +447,8 @@ public class Main {
                 //一分钟后
                 getTodayDiffAfter1min(e) * 100,
                 //时间
-                e.todayMinuteDataList.get(1).dateTime
-        );
+                e.todayMinuteDataList.get(1).dateTime);
+        return sub1 + sub2;
     }
 
     private static String etfTodayOneMinutteDesc(BankuaiWithData etf, BankuaiWithData bankuai) {
@@ -548,9 +568,11 @@ public class Main {
         double testMinuteShouYiSum = 0.0;
         double test0_EndIndexShouyim = 0.0;
         double last2StartDiff;//今日开盘涨跌
+        int last2StartDiffSort;//开盘涨跌排名，值越小排名越小
         List<上证.Main.OneDayDataDetail> last30DayInfoList;
         Map<String, 上证.Main.OneDayDataDetail> last30DayInfoMap;
         上证.Main.OneDayDataDetail lastDayDetail;
+        int lastDayZhangFuSort;//昨日日内涨跌排名，值越小排名越小
         XiangDuiBiLi30Day xiangDuiBiLi30Day;
         //板块对应的 etf 信息
         BankuaiWithData etfBankuaiWithData;
@@ -657,3 +679,7 @@ public class Main {
  * 猜想：
  * 1 美元降息 ； 美股+a股涨； 但是美股可能吸收a股的资金，a股不升反降； 如果人民币跟着降息，则a股升；
  */
+
+
+//今日一分钟涨跌：0.680% 	今日开盘相对涨跌:0.858% [即:0.912%] 一分钟主流流入 1.45 :1 ;2分钟 0.8:1.1
+//中药：0.4:0.04  0.7:0.08
