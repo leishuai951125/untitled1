@@ -50,9 +50,26 @@ public class Main {
 //        return bankuaiWithData.testMinuteShouYiSum;
 //        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
-//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-        return getTodayDiffAfter1min(bankuaiWithData);
+        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+//        return getTodayDiffAfter1min(bankuaiWithData);
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
+    }
+
+    private static int getDeFen(BankuaiWithData e) {
+        int deFen = (int) (e.todayMinuteSort * 2) - e.lastDayZhangFuSort - e.getXiangDuiBiLi30Day().guiyiHuaPaiMing - e.last2StartDiffSort / 5;
+        if (ANSI_GREEN.equals(getLastDayZhangFuColor(e))) {
+            deFen -= 20;
+        }
+        if (ANSI_GREEN.equals(getJiaGePaiMingColor(e.getXiangDuiBiLi30Day()))) {
+            deFen -= 20;
+        }
+        if (ANSI_GREEN.equals(getEtfXiangDuiBanKuaiColor(e.getEtfBankuaiWithData(), e))) {
+            deFen -= 10;
+        }
+        if (!CollectionUtils.isEmpty(e.zhuLiList) && e.zhuLiList.get(0).getZhuLi() < -1 && e.zhuLiList.get(0).getChaoDaDan() < -1) {
+            deFen -= 10;
+        }
+        return deFen;
     }
 
     static ExecutorService executorService = Executors.newFixedThreadPool(300);
@@ -77,6 +94,7 @@ public class Main {
     //不允许：昨日排名过高 、开盘涨幅过高、etf 溢价>0.5%
 
     //上午开盘3分钟和收盘3分钟不可信
+    //谨慎购买涨幅反常的头部股票
 
     //盘中选股：排名 10～60 ，归一化为正，已有涨幅较小
     @Test
@@ -504,22 +522,6 @@ public class Main {
         return sub1 + sub2;
     }
 
-    private static int getDeFen(BankuaiWithData e) {
-        int deFen = (int) (e.todayMinuteSort * 2) - e.lastDayZhangFuSort - e.getXiangDuiBiLi30Day().guiyiHuaPaiMing - e.last2StartDiffSort / 5;
-        if (ANSI_GREEN.equals(getLastDayZhangFuColor(e))) {
-            deFen -= 20;
-        }
-        if (ANSI_GREEN.equals(getJiaGePaiMingColor(e.getXiangDuiBiLi30Day()))) {
-            deFen -= 20;
-        }
-        if (ANSI_GREEN.equals(getEtfXiangDuiBanKuaiColor(e.getEtfBankuaiWithData(), e))) {
-            deFen -= 10;
-        }
-        if (!CollectionUtils.isEmpty(e.zhuLiList) && e.zhuLiList.get(0).getZhuLi() < -1 && e.zhuLiList.get(0).getChaoDaDan() < -1) {
-            deFen -= 10;
-        }
-        return deFen;
-    }
 
     static String getEtfXiangDuiBanKuaiColor(BankuaiWithData etf, BankuaiWithData bankuai) {
         double todayMinuteXiangDui = etf.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100;
