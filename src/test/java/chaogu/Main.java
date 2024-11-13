@@ -39,6 +39,7 @@ public class Main {
     static boolean needFilter = false;
     static boolean isSimpleMode = false;//简要模式
     static boolean filterNoEtf = true;//过滤没有etf的板块
+    static boolean needLogZhuLi = false;//是否打印主力信息
 
     static int testStartTimeIndex = 1;//当前时间是多少分钟
     static int testEndTimeIndex = 166;//当前时间是多少分钟
@@ -350,13 +351,17 @@ public class Main {
     }
 
     static String getZiJinDesc(BankuaiWithData e) {
+        if (!needLogZhuLi) {
+            return "";
+        }
         StringBuilder sb = new StringBuilder();
         String sub3 = "\nhttps://data.eastmoney.com/bkzj/" + e.banKuai.code.split("\\.")[1] + ".html";
         sb.append(sub3);
         if (CollectionUtils.isEmpty(e.zhuLiList)) {
             return sb.toString();
         }
-        sb.append(String.format("      [超大单，主力] [%.2f，%.2f]",
+        sb.append(String.format("      [超大单，主力] 开始时间：%s  [%.2f，%.2f]",
+                e.zhuLiList.get(0).time,
                 e.zhuLiList.get(0).chaoDaDan, e.zhuLiList.get(0).getZhuLi()));
         for (int i = 1; i < e.zhuLiList.size() && i < 5; i++) {
             ZiJin i0ZiJin = e.zhuLiList.get(i);
