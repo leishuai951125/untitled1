@@ -9,6 +9,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import 上证.Utils;
 
@@ -343,6 +344,8 @@ public class Main {
         sb.append(String.format("过去最大：%.2f  |  ", xiangDuiBiLi30Day.maxXiangDuiBiLi * 100 - 100));
         sb.append(String.format("过去最小：%.2f  |  ", xiangDuiBiLi30Day.minXiangDuiBiLi * 100 - 100));
         sb.append(String.format("过去平均：%.2f  |  ", xiangDuiBiLi30Day.avgXiangDuiBiLi * 100 - 100));
+        String sub3 = "\nhttps://data.eastmoney.com/bkzj/" + e.banKuai.code.split("\\.")[1] + ".html";
+        sb.append(sub3);
         sb.append("\n");
         return sb.toString();
     }
@@ -438,9 +441,7 @@ public class Main {
                         " [即:%.3f%%] %d \t" + ANSI_RESET +
                         //昨日
                         getLastDayZhangFuColor(e) + " 上日相比大盘涨跌：%.2f%%" +
-                        " [即:%.2f%%] %d， " + ANSI_RESET
-                        //资金
-                        + "%s\t",
+                        " [即:%.2f%%] %d， " + ANSI_RESET,
                 fillName(e.getBankuaiName()),
                 //今日一分钟
                 e.todayMinuteDataList.get(1).startEndDiff * 100,
@@ -450,9 +451,7 @@ public class Main {
                 e.last2StartDiff * 100, e.last2StartDiffSort,
                 //昨日
                 zuoRiXiangDui,
-                e.lastDayDetail.startEndDiff * 100, e.lastDayZhangFuSort,
-                //资金
-                e.zhuLi
+                e.lastDayDetail.startEndDiff * 100, e.lastDayZhangFuSort
         );
         String sub2 = String.format(
                 //归一化收益
@@ -493,7 +492,7 @@ public class Main {
         if (ANSI_GREEN.equals(getEtfXiangDuiBanKuaiColor(e.getEtfBankuaiWithData(), e))) {
             deFen -= 10;
         }
-        if (e.zhuLi.startsWith(ANSI_GREEN)) {
+        if (!CollectionUtils.isEmpty(e.zhuLiList) && e.zhuLiList.get(0).daDan + e.zhuLiList.get(0).chaoDaDan < -1) {
             deFen -= 10;
         }
         return deFen;
@@ -582,7 +581,7 @@ public class Main {
                         bankuaiWithData.setTodayMinuteDataList(getTodayMinuteDataList(code));
                     },
                     () -> {
-                        bankuaiWithData.setZhuLi(getZiJin(code));
+                        bankuaiWithData.setZhuLiList(getZiJin(code));
                     },
                     () -> {
                         bankuaiWithData.setLast30DayInfoList(getLast30DayData(code));
@@ -634,7 +633,7 @@ public class Main {
         String bankuaiName;
         List<OneData> todayMinuteDataList;
         int todayMinuteSort;
-        String zhuLi;
+        List<ZiJin> zhuLiList;
         double testMinuteShouYiSum = 0.0;
         double test0_EndIndexShouyim = 0.0;
         double last2StartDiff;//今日开盘涨跌
@@ -710,35 +709,39 @@ public class Main {
     }
 
     @SneakyThrows
-    private static String getZiJin(String bankuaiCode) {
+    private static List<ZiJin> getZiJin(String bankuaiCode) {
         try {
             long ms = System.currentTimeMillis();
             String url = "https://push2.eastmoney.com/api/qt/stock/fflow/kline/get?cb=jQuery1123007371597491709281_" +
                     +ms + "&lmt=0&klt=1&fields1=f1%2Cf2%2Cf3%2Cf7&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf62%2Cf63%2Cf64%2Cf65&ut=b2884a393a59ad64002292a3e90d46a5&secid=" +
                     bankuaiCode + "&_=" + (ms + 50);
-            ;
             String jqueryString = getData(url);
             String arr[] = jqueryString.split("\\(|\\)");
             JSONArray jsonArray = JSON.parseObject(arr[1]).getJSONObject("data").getJSONArray("klines");
             if (jsonArray != null && jsonArray.size() != 0) {
-                String oneLine = (String) (jsonArray.get(0));
-                String[] arr2 = oneLine.split(",");
-                if (arr2[0].endsWith("09:31")) {
+                jsonArray.stream().map(e -> {
+                    String oneLine = (String) (e);
+                    String[] arr2 = oneLine.split(",");
+                    String time = arr2[0];
                     double dadan = Double.parseDouble(arr2[4]) / 1e8;
                     double chaodadan = Double.parseDouble(arr2[5]) / 1e8;
-                    String prefix = ANSI_RESET;
-                    if (chaodadan + dadan > 1) {
-//                        prefix = ANSI_RED;
-                    } else if (dadan + chaodadan < -1) {
-                        prefix = ANSI_GREEN;
-                    }
-                    return String.format(prefix + "大单:%.2f,超大单:%.2f" + ANSI_RESET, dadan, chaodadan);
-                }
+                    return new ZiJin(time, dadan, chaodadan);
+                }).collect(Collectors.toList());
             }
         } catch (Exception e) {
             System.out.println(bankuaiCode + "获取主力资金出错");
         }
-        return "主力资金未知";
+        return new ArrayList<>();
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ZiJin {
+        String time;
+        //两者之和表示主力
+        double daDan;
+        double chaoDaDan;
     }
 
     @NotNull
