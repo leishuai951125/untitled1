@@ -39,7 +39,7 @@ public class Main {
     static boolean needFilter = false;
     static boolean isSimpleMode = false;//简要模式
     static boolean filterNoEtf = true;//过滤没有etf的板块
-    static boolean needLogZhuLi = false;//是否打印主力信息
+    static boolean needLogZhuLi = true;//是否打印主力信息
 
     static int testStartTimeIndex = 1;//当前时间是多少分钟
     static int testEndTimeIndex = 166;//当前时间是多少分钟
@@ -515,7 +515,7 @@ public class Main {
         if (ANSI_GREEN.equals(getEtfXiangDuiBanKuaiColor(e.getEtfBankuaiWithData(), e))) {
             deFen -= 10;
         }
-        if (!CollectionUtils.isEmpty(e.zhuLiList) && e.zhuLiList.get(0).daDan + e.zhuLiList.get(0).chaoDaDan < -1) {
+        if (!CollectionUtils.isEmpty(e.zhuLiList) && e.zhuLiList.get(0).getZhuLi() < -1 && e.zhuLiList.get(0).getChaoDaDan() < -1) {
             deFen -= 10;
         }
         return deFen;
