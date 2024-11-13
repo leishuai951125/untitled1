@@ -344,9 +344,27 @@ public class Main {
         sb.append(String.format("过去最大：%.2f  |  ", xiangDuiBiLi30Day.maxXiangDuiBiLi * 100 - 100));
         sb.append(String.format("过去最小：%.2f  |  ", xiangDuiBiLi30Day.minXiangDuiBiLi * 100 - 100));
         sb.append(String.format("过去平均：%.2f  |  ", xiangDuiBiLi30Day.avgXiangDuiBiLi * 100 - 100));
+        sb.append(getZiJinDesc(e));
+        sb.append("\n");
+        return sb.toString();
+    }
+
+    static String getZiJinDesc(BankuaiWithData e) {
+        StringBuilder sb = new StringBuilder();
         String sub3 = "\nhttps://data.eastmoney.com/bkzj/" + e.banKuai.code.split("\\.")[1] + ".html";
         sb.append(sub3);
-        sb.append("\n");
+        if (CollectionUtils.isEmpty(e.zhuLiList)) {
+            return sb.toString();
+        }
+        sb.append(String.format("      [超大单，主力] [%.2f，%.2f]",
+                e.zhuLiList.get(0).chaoDaDan, e.zhuLiList.get(0).getZhuLi()));
+        for (int i = 1; i < e.zhuLiList.size() && i < 5; i++) {
+            ZiJin i0ZiJin = e.zhuLiList.get(i);
+            ZiJin i_1ZiJin = e.zhuLiList.get(i - 1);
+            sb.append(String.format("  [%.2f，%.2f]",
+                    i0ZiJin.getChaoDaDan() - i_1ZiJin.getChaoDaDan(),
+                    i0ZiJin.getZhuLi() - i_1ZiJin.getZhuLi()));
+        }
         return sb.toString();
     }
 
@@ -719,7 +737,7 @@ public class Main {
             String arr[] = jqueryString.split("\\(|\\)");
             JSONArray jsonArray = JSON.parseObject(arr[1]).getJSONObject("data").getJSONArray("klines");
             if (jsonArray != null && jsonArray.size() != 0) {
-                jsonArray.stream().map(e -> {
+                return jsonArray.stream().map(e -> {
                     String oneLine = (String) (e);
                     String[] arr2 = oneLine.split(",");
                     String time = arr2[0];
@@ -742,6 +760,10 @@ public class Main {
         //两者之和表示主力
         double daDan;
         double chaoDaDan;
+
+        double getZhuLi() {
+            return daDan + chaoDaDan;
+        }
     }
 
     @NotNull
