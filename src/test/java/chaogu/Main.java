@@ -48,8 +48,8 @@ public class Main {
 //        return bankuaiWithData.testMinuteShouYiSum;
 //        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
-        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-//        return getTodayDiffAfter1min(bankuaiWithData);
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+        return getTodayDiffAfter1min(bankuaiWithData);
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
     }
 
@@ -106,6 +106,8 @@ public class Main {
         fillKapPanZhangFuPaiMing(bankuaiWithDataList);
         //填充开盘涨幅排名
         fillZuoRiZhangFuPaiMing(bankuaiWithDataList);
+        //一分钟涨幅排名
+        fillTodayMinuteSort(bankuaiWithDataList);
         //过滤
         bankuaiWithDataList = bankuaiWithDataList.stream().filter(Main::filter).collect(Collectors.toList());
         //过滤
@@ -172,6 +174,14 @@ public class Main {
         bankuaiWithDataList.stream().sorted((a, b) -> (int) ((a.last2StartDiff - b.last2StartDiff) * 1000))
                 .collect(Collectors.toList())
                 .forEach(e -> e.last2StartDiffSort = sort.incrementAndGet());
+    }
+
+    private static void fillTodayMinuteSort(List<BankuaiWithData> bankuaiWithDataList) {
+        AtomicInteger sort = new AtomicInteger(0);
+        bankuaiWithDataList.stream().sorted((a, b) -> (int) ((a.getTodayMinuteDataList().get(1).startEndDiff
+                        - b.getTodayMinuteDataList().get(1).startEndDiff) * 1000))
+                .collect(Collectors.toList())
+                .forEach(e -> e.todayMinuteSort = sort.incrementAndGet());
     }
 
     private static void fillZuoRiZhangFuPaiMing(List<BankuaiWithData> bankuaiWithDataList) {
@@ -421,7 +431,7 @@ public class Main {
                         (todayMinuteXiangDui > 0.5 && e.todayMinuteDataList.get(1).startEndDiff > 0.005 ? ANSI_RED :
                                 (todayMinuteXiangDui < 0 && e.todayMinuteDataList.get(1).startEndDiff < 0) ? ANSI_GREEN : ANSI_RESET) +
                         "今日一分钟涨跌：%.3f%% " + ANSI_RESET +
-                        (deFen > 120 ? ANSI_RED : (deFen < 90 ? ANSI_GREEN : "")) + "得分【%d】\t" + ANSI_RESET +
+                        (deFen > 50 ? ANSI_RED : (deFen < 0 ? ANSI_GREEN : "")) + "得分【%d】\t" + ANSI_RESET +
                         //今日开盘
 //                        (kaipanXiangDui < 0 ? ANSI_RED : ANSI_GREEN) + "今日开盘相对涨跌:%.3f%%" +
                         (e.last2StartDiffSort > 0 && e.last2StartDiffSort <= 50 ? ANSI_RED : "") + "今日开盘相对涨跌:%.3f%%" +
@@ -473,7 +483,7 @@ public class Main {
     }
 
     private static int getDeFen(BankuaiWithData e) {
-        int deFen = 200 - e.lastDayZhangFuSort - e.getXiangDuiBiLi30Day().guiyiHuaPaiMing - e.last2StartDiffSort / 5;
+        int deFen = (int) (e.todayMinuteSort * 2) - e.lastDayZhangFuSort - e.getXiangDuiBiLi30Day().guiyiHuaPaiMing - e.last2StartDiffSort / 5;
         if (ANSI_GREEN.equals(getLastDayZhangFuColor(e))) {
             deFen -= 20;
         }
@@ -623,6 +633,7 @@ public class Main {
         BanKuai banKuai;
         String bankuaiName;
         List<OneData> todayMinuteDataList;
+        int todayMinuteSort;
         String zhuLi;
         double testMinuteShouYiSum = 0.0;
         double test0_EndIndexShouyim = 0.0;
