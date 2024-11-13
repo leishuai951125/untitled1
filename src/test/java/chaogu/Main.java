@@ -28,10 +28,10 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-11";
-    static String todayDate = "2024-11-12";
+    static String lastDate = "2024-11-12";
+    static String todayDate = "2024-11-13";
 
-    static double lastDapanStar2EndDiff = 0.5 / 100.0;
+    static double lastDapanStar2EndDiff = -1 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
 
@@ -368,7 +368,7 @@ public class Main {
             last30DayInfoWithoutTodyList = last30DayInfoWithoutTodyList.subList(0, last30DayInfoWithoutTodyList.size() - 1);
         }
         //todo 取 x 天试试
-        last30DayInfoWithoutTodyList = last30DayInfoWithoutTodyList.subList(last30DayInfoWithoutTodyList.size() - 25, last30DayInfoWithoutTodyList.size());
+        last30DayInfoWithoutTodyList = last30DayInfoWithoutTodyList.subList(last30DayInfoWithoutTodyList.size() - 15, last30DayInfoWithoutTodyList.size());
 
         List<Double> xiangDuiBiLiList = new ArrayList<>(last30DayInfoWithoutTodyList.size());
         Map<String, Double> xiangDuiBiLiMap = new HashMap<>(last30DayInfoWithoutTodyList.size());
@@ -405,7 +405,7 @@ public class Main {
         double kaipanXiangDui = e.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100;
         double zuoRiXiangDui = (e.lastDayDetail.startEndDiff - lastDapanStar2EndDiff) * 100;
         sumTodayDiffAfter1min.add(getTodayDiffAfter1min(e) * 100);
-        int deFen = 200 - e.lastDayZhangFuSort - e.getXiangDuiBiLi30Day().guiyiHuaPaiMing / 2 - e.last2StartDiffSort / 5;
+        int deFen = 200 - e.lastDayZhangFuSort - e.getXiangDuiBiLi30Day().guiyiHuaPaiMing - e.last2StartDiffSort / 5;
         String sub1 = String.format("板块：%-7s \t" +
                         //今日一分钟
                         (todayMinuteXiangDui > 0.5 && e.todayMinuteDataList.get(1).startEndDiff > 0.005 ? ANSI_RED :
