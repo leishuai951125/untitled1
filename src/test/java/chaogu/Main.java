@@ -48,8 +48,8 @@ public class Main {
 //        return bankuaiWithData.testMinuteShouYiSum;
 //        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
-//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-        return getTodayDiffAfter1min(bankuaiWithData);
+        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+//        return getTodayDiffAfter1min(bankuaiWithData);
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
     }
 
@@ -480,7 +480,24 @@ public class Main {
         if (ANSI_GREEN.equals(getJiaGePaiMingColor(e.getXiangDuiBiLi30Day()))) {
             deFen -= 20;
         }
+        if (ANSI_GREEN.equals(getEtfXiangDuiBanKuaiColor(e.getEtfBankuaiWithData(), e))) {
+            deFen -= 10;
+        }
+        if (e.zhuLi.startsWith(ANSI_GREEN)) {
+            deFen -= 10;
+        }
         return deFen;
+    }
+
+    static String getEtfXiangDuiBanKuaiColor(BankuaiWithData etf, BankuaiWithData bankuai) {
+        double todayMinuteXiangDui = etf.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100;
+        double kaipanXiangDui = etf.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100;
+
+        double bankuaiTodayMinuteXiangDui = bankuai.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100;
+        double bankuaiKaipanXiangDui = bankuai.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100;
+
+        double etfXiangDuiBanKuai = (todayMinuteXiangDui + kaipanXiangDui) - (bankuaiTodayMinuteXiangDui + bankuaiKaipanXiangDui);
+        return (etfXiangDuiBanKuai < -0.5 ? ANSI_RED : (etfXiangDuiBanKuai > 0.2 ? ANSI_GREEN : ""));
     }
 
     private static String etfTodayOneMinutteDesc(BankuaiWithData etf, BankuaiWithData bankuai) {
@@ -699,11 +716,11 @@ public class Main {
                     double dadan = Double.parseDouble(arr2[4]) / 1e8;
                     double chaodadan = Double.parseDouble(arr2[5]) / 1e8;
                     String prefix = ANSI_RESET;
-//                    if (chaodadan + dadan > 1) {
+                    if (chaodadan + dadan > 1) {
 //                        prefix = ANSI_RED;
-//                    } else if (dadan + chaodadan < -1) {
-//                        prefix = ANSI_GREEN;
-//                    }
+                    } else if (dadan + chaodadan < -1) {
+                        prefix = ANSI_GREEN;
+                    }
                     return String.format(prefix + "大单:%.2f,超大单:%.2f" + ANSI_RESET, dadan, chaodadan);
                 }
             }
