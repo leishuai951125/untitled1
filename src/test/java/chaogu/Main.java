@@ -415,13 +415,7 @@ public class Main {
         double kaipanXiangDui = e.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100;
         double zuoRiXiangDui = (e.lastDayDetail.startEndDiff - lastDapanStar2EndDiff) * 100;
         sumTodayDiffAfter1min.add(getTodayDiffAfter1min(e) * 100);
-        int deFen = 200 - e.lastDayZhangFuSort - e.getXiangDuiBiLi30Day().guiyiHuaPaiMing - e.last2StartDiffSort / 5;
-        if (ANSI_GREEN.equals(getLastDayZhangFuColor(e))) {
-            deFen -= 20;
-        }
-        if (ANSI_GREEN.equals(getJiaGePaiMingColor(e.getXiangDuiBiLi30Day()))) {
-            deFen -= 20;
-        }
+        int deFen = getDeFen(e);
         String sub1 = String.format("板块：%-7s \t" +
                         //今日一分钟
                         (todayMinuteXiangDui > 0.5 && e.todayMinuteDataList.get(1).startEndDiff > 0.005 ? ANSI_RED :
@@ -476,6 +470,17 @@ public class Main {
                 //时间
                 e.todayMinuteDataList.get(1).dateTime);
         return sub1 + sub2;
+    }
+
+    private static int getDeFen(BankuaiWithData e) {
+        int deFen = 200 - e.lastDayZhangFuSort - e.getXiangDuiBiLi30Day().guiyiHuaPaiMing - e.last2StartDiffSort / 5;
+        if (ANSI_GREEN.equals(getLastDayZhangFuColor(e))) {
+            deFen -= 20;
+        }
+        if (ANSI_GREEN.equals(getJiaGePaiMingColor(e.getXiangDuiBiLi30Day()))) {
+            deFen -= 20;
+        }
+        return deFen;
     }
 
     private static String etfTodayOneMinutteDesc(BankuaiWithData etf, BankuaiWithData bankuai) {
