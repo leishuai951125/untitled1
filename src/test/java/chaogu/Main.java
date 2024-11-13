@@ -48,8 +48,8 @@ public class Main {
 //        return bankuaiWithData.testMinuteShouYiSum;
 //        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
-        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-//        return getTodayDiffAfter1min(bankuaiWithData);
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+        return getTodayDiffAfter1min(bankuaiWithData);
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
     }
 
@@ -323,11 +323,7 @@ public class Main {
         XiangDuiBiLi30Day xiangDuiBiLi30Day = e.getXiangDuiBiLi30Day();
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("过去十天：%s  |", xiangDuiBiLi30Day.xiangDuiBiLiList10Day.stream().map(v -> String.format("%.2f", v * 100 - 100)).collect(Collectors.toList())));
-        String color = ANSI_GREEN;
-        //归一化 35（涨幅80名）～80（涨幅47名）
-        if (xiangDuiBiLi30Day.guiyiHuaPaiMing <= 60 && xiangDuiBiLi30Day.guiyiHuaPaiMing >= 10) {
-            color = ANSI_RED;
-        }
+        String color = getJiaGePaiMingColor(xiangDuiBiLi30Day);
         if (isSimpleMode) {
             return String.format(color + "相对价格：%.1f " + ANSI_RESET, xiangDuiBiLi30Day.zuoRiGuiYiHua);
         }
@@ -339,6 +335,16 @@ public class Main {
         sb.append(String.format("过去平均：%.2f  |  ", xiangDuiBiLi30Day.avgXiangDuiBiLi * 100 - 100));
         sb.append("\n");
         return sb.toString();
+    }
+
+    @NotNull
+    private static String getJiaGePaiMingColor(XiangDuiBiLi30Day xiangDuiBiLi30Day) {
+        String color = ANSI_GREEN;
+        //归一化 35（涨幅80名）～80（涨幅47名）
+        if (xiangDuiBiLi30Day.guiyiHuaPaiMing <= 60 && xiangDuiBiLi30Day.guiyiHuaPaiMing >= 10) {
+            color = ANSI_RED;
+        }
+        return color;
     }
 
 
@@ -397,6 +403,10 @@ public class Main {
     public static List<Double> sumTodayDiffAfter1min = new ArrayList<>(100);
     public static List<Double> etfSumTodayDiffAfter1min = new ArrayList<>(100);
 
+    static String getLastDayZhangFuColor(BankuaiWithData e) {
+        return (e.lastDayZhangFuSort > 5 && e.lastDayZhangFuSort <= 50 ? ANSI_RED : ANSI_GREEN);
+    }
+
     private static String todayOneMinutteDesc(BankuaiWithData e) {
         if (isSimpleMode) {
             return "板块： " + fillName(e.getBankuaiName()) + "  \t";
@@ -417,7 +427,7 @@ public class Main {
                         (e.last2StartDiffSort > 0 && e.last2StartDiffSort <= 50 ? ANSI_RED : "") + "今日开盘相对涨跌:%.3f%%" +
                         " [即:%.3f%%] %d \t" + ANSI_RESET +
                         //昨日
-                        (e.lastDayZhangFuSort > 5 && e.lastDayZhangFuSort <= 50 ? ANSI_RED : ANSI_GREEN) + " 上日相比大盘涨跌：%.2f%%" +
+                        getLastDayZhangFuColor(e) + " 上日相比大盘涨跌：%.2f%%" +
                         " [即:%.2f%%] %d， " + ANSI_RESET
                         //资金
                         + "%s\t",
