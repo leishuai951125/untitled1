@@ -48,8 +48,8 @@ public class Main {
 //        return bankuaiWithData.testMinuteShouYiSum;
 //        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
-//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-        return getTodayDiffAfter1min(bankuaiWithData);
+        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+//        return getTodayDiffAfter1min(bankuaiWithData);
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
     }
 
@@ -431,7 +431,7 @@ public class Main {
                         (todayMinuteXiangDui > 0.5 && e.todayMinuteDataList.get(1).startEndDiff > 0.005 ? ANSI_RED :
                                 (todayMinuteXiangDui < 0 && e.todayMinuteDataList.get(1).startEndDiff < 0) ? ANSI_GREEN : ANSI_RESET) +
                         "今日一分钟涨跌：%.3f%% " + ANSI_RESET +
-                        (deFen > 50 ? ANSI_RED : (deFen < 0 ? ANSI_GREEN : "")) + "得分【%d】\t" + ANSI_RESET +
+                        (deFen > 80 ? ANSI_RED : (deFen < 0 ? ANSI_GREEN : "")) + "得分【%d】\t" + ANSI_RESET +
                         //今日开盘
 //                        (kaipanXiangDui < 0 ? ANSI_RED : ANSI_GREEN) + "今日开盘相对涨跌:%.3f%%" +
                         (e.last2StartDiffSort > 0 && e.last2StartDiffSort <= 50 ? ANSI_RED : "") + "今日开盘相对涨跌:%.3f%%" +
