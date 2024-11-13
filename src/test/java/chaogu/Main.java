@@ -50,8 +50,8 @@ public class Main {
 //        return bankuaiWithData.testMinuteShouYiSum;
 //        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
-        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-//        return getTodayDiffAfter1min(bankuaiWithData);
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+        return getTodayDiffAfter1min(bankuaiWithData);
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
     }
 
