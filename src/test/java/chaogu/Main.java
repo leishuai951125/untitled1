@@ -34,10 +34,10 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    //    static String lastDate = "2024-11-14";
-//    static String todayDate = "2024-11-15";
-    static String lastDate = "2024-11-13";
-    static String todayDate = "2024-11-14";
+    static String lastDate = "2024-11-14";
+    static String todayDate = "2024-11-15";
+    //    static String lastDate = "2024-11-13";
+//    static String todayDate = "2024-11-14";
     static double lastDapanStar2EndDiff = -2 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
@@ -120,7 +120,7 @@ public class Main {
     //盘中选股：排名 10～60 ，归一化为正，已有涨幅较小
     @Test
     public void main() throws IOException {
-        boolean readDataByFile = true;
+        boolean readDataByFile = false;
         long starMs = System.currentTimeMillis();
         List<BankuaiWithData> bankuaiWithDataList = getBankuaiWithData(readDataByFile);
         if (hushen300BanKuaiData.todayMinuteDataList.size() >= testEndTimeIndex) {
@@ -224,7 +224,7 @@ public class Main {
     public static void saveFile(SaveFileData saveFileData) {
         String fileName = "/Users/leishuai/IdeaProjects/untitled1/src/test/java/chaogu/beifen/" + todayDate + ".txt";
         try {
-            if (!new File(fileName).exists() && saveFileData.hushen300BanKuaiData.todayMinuteDataList.size() >= 2) {
+            if (!new File(fileName).exists() && saveFileData.hushen300BanKuaiData.todayMinuteDataList.size() >= 4) {
                 FileWriter fileWriter2 = new FileWriter(fileName);
                 fileWriter2.write(JSON.toJSONString(saveFileData));
                 fileWriter2.flush();
