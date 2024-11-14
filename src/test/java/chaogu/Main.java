@@ -512,7 +512,7 @@ public class Main {
                         "   [一分钟后:%.2f%%]， " +
                         "波动:%.2f%%  " +
                         //时间
-                        "\t 时间：%s " +
+                        "\t | 时间：%s " +
                         //归一化收益
                         "\t归一化相对收益:%.3f%%" +
                         " [即:%.3f%%]\t" + ANSI_RESET +
@@ -568,12 +568,12 @@ public class Main {
                         (etfXiangDuiBanKuai < -0.5 ? ANSI_RED : (etfXiangDuiBanKuai > 0.2 ? ANSI_GREEN : "")) + "【截止开盘一分钟etf相对板块:%.3f%%】" + ANSI_RESET +
                         //已有收益
                         " [已有收益:%.3f%%] \t  " +
-                        //今日
-                        " 今日相比大盘涨跌：%.2f%%" +
-                        " [即:%.2f%%]， " +
+//                        //今日
+//                        " 今日相比大盘涨跌：%.2f%%" +
+//                        " [即:%.2f%%]， " +
                         "   [一分钟后:%.2f%%]， " +
                         //时间
-                        "\t  时间：%s  " +
+                        "\t | 时间：%s  " +
                         //归一化收益
                         "\t归一化相对收益:%.3f%%" +
                         " [即:%.3f%%] \t  " + ANSI_RESET +
@@ -588,9 +588,9 @@ public class Main {
                 etfXiangDuiBanKuai,
                 //已有收益
                 etf.test0_EndIndexShouyim * 100,
-                //今日
-                (etf.getLast30DayInfoMap().get(todayDate).startEndDiff - hushen300BanKuaiData.getLast30DayInfoMap().get(todayDate).startEndDiff) * 100,
-                etf.getLast30DayInfoMap().get(todayDate).startEndDiff * 100,
+//                //今日
+//                (etf.getLast30DayInfoMap().get(todayDate).startEndDiff - hushen300BanKuaiData.getLast30DayInfoMap().get(todayDate).startEndDiff) * 100,
+//                etf.getLast30DayInfoMap().get(todayDate).startEndDiff * 100,
                 //一分钟后
                 getTodayDiffAfter1min(etf) * 100,
                 //时间
