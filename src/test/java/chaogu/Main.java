@@ -14,8 +14,11 @@ import org.springframework.util.StringUtils;
 import shangZheng.Utils;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -31,9 +34,10 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
+    //    static String lastDate = "2024-11-14";
+//    static String todayDate = "2024-11-15";
     static String lastDate = "2024-11-13";
     static String todayDate = "2024-11-14";
-
     static double lastDapanStar2EndDiff = -2 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
@@ -116,21 +120,9 @@ public class Main {
     //盘中选股：排名 10～60 ，归一化为正，已有涨幅较小
     @Test
     public void main() throws IOException {
-        waitAll(() -> {
-            KeChuang50BanKuaiData = getBankuaiWithData("科技创新50", "1.588000");
-        }, () -> {
-            hushen300BanKuaiData = getBankuaiWithData("沪深300", "1.000300");
-        });
-        List<BanKuai> banKuaiList = parseAllBanKuai();
+        boolean readDataByFile = true;
         long starMs = System.currentTimeMillis();
-        List<BankuaiWithData> bankuaiWithDataList = banKuaiList.stream().parallel().map(e -> {
-            BankuaiWithData bankuaiWithData = getBankuaiWithData(e.getName(), e.getCode());
-            bankuaiWithData.banKuai = e;
-            if (!StringUtils.isEmpty(e.getEtfCode())) {
-                bankuaiWithData.etfBankuaiWithData = getBankuaiWithData(e.getEftName(), e.getEtfCode());
-            }
-            return bankuaiWithData;
-        }).collect(Collectors.toList());
+        List<BankuaiWithData> bankuaiWithDataList = getBankuaiWithData(readDataByFile);
         if (hushen300BanKuaiData.todayMinuteDataList.size() >= testEndTimeIndex) {
             fillGuiYihuaShouyi(bankuaiWithDataList);
         }
@@ -200,8 +192,32 @@ public class Main {
         resultListt.forEach(System.out::println);
         tongji(bankuaiWithDataList);
         executorService.shutdown();
-        saveFile(new SaveFileData(KeChuang50BanKuaiData, hushen300BanKuaiData, bankuaiWithDataList));
         System.out.println("结束");
+    }
+
+    private static List<BankuaiWithData> getBankuaiWithData(boolean readDataByFile) {
+        if (readDataByFile) {
+            SaveFileData getByFile = getFile();
+            KeChuang50BanKuaiData = getByFile.KeChuang50BanKuaiData;
+            hushen300BanKuaiData = getByFile.hushen300BanKuaiData;
+            return getByFile.bankuaiWithDataList;
+        }
+        waitAll(() -> {
+            KeChuang50BanKuaiData = getBankuaiWithData("科技创新50", "1.588000");
+        }, () -> {
+            hushen300BanKuaiData = getBankuaiWithData("沪深300", "1.000300");
+        });
+        List<BanKuai> banKuaiList = parseAllBanKuai();
+        List<BankuaiWithData> bankuaiWithDataList = banKuaiList.stream().parallel().map(e -> {
+            BankuaiWithData bankuaiWithData = getBankuaiWithData(e.getName(), e.getCode());
+            bankuaiWithData.banKuai = e;
+            if (!StringUtils.isEmpty(e.getEtfCode())) {
+                bankuaiWithData.etfBankuaiWithData = getBankuaiWithData(e.getEftName(), e.getEtfCode());
+            }
+            return bankuaiWithData;
+        }).collect(Collectors.toList());
+        saveFile(new SaveFileData(KeChuang50BanKuaiData, hushen300BanKuaiData, bankuaiWithDataList));
+        return bankuaiWithDataList;
     }
 
 
@@ -214,6 +230,22 @@ public class Main {
                 fileWriter2.flush();
                 fileWriter2.close();
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static SaveFileData getFile() {
+        String fileName = "/Users/leishuai/IdeaProjects/untitled1/src/test/java/chaogu/beifen/" + todayDate + ".txt";
+        try {
+//            StringBuilder sb = new StringBuilder();
+//            Scanner sc = new Scanner(new FileReader(fileName));
+//            if (sc.hasNextLine()) {
+//                sb.append(sc.nextLine());
+//            }
+//            String body=sb.toString();
+            String body = new String(Files.readAllBytes(Paths.get(fileName)));
+            return JSON.parseObject(body, SaveFileData.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
