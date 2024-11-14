@@ -54,8 +54,8 @@ public class Main {
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
 //        return getTodayDiffAfter1min(bankuaiWithData);
 //常用的两个除系数
-        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.lastDayDetail.last10dayBoDong, 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
-//        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.lastDayDetail.last10dayBoDong;
+        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
+//        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
     }
 
@@ -170,13 +170,13 @@ public class Main {
                     lastDapanStar2EndDiff * 100,
                     hushen300BanKuaiData.last2StartDiff * 100, hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100,
                     getTodayDiffAfter1min(hushen300BanKuaiData) * 100,
-                    hushen300BanKuaiData.lastDayDetail.last10dayBoDong * 100
+                    hushen300BanKuaiData.getBoDong() * 100
             );
         }
         System.out.printf("科创50开盘涨跌：%.2f%%,今日大盘一分钟涨跌：%.2f%%, 一分钟后的收益：%.2f%%， 波动：%.2f%% \n",
                 KeChuang50BanKuaiData.last2StartDiff * 100, KeChuang50BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100,
                 getTodayDiffAfter1min(KeChuang50BanKuaiData) * 100,
-                KeChuang50BanKuaiData.lastDayDetail.last10dayBoDong * 100
+                KeChuang50BanKuaiData.getBoDong() * 100
         );
         System.out.printf("时间区间：[%d~%d],大盘归一化收益：%.2f%% , 大盘从[1~%d] 的收益：%.2f%% \n",
                 testStartTimeIndex, testEndTimeIndex, hushen300BanKuaiData.testMinuteShouYiSum * 100,
@@ -199,8 +199,8 @@ public class Main {
     private static void fillKapPanZhangFuPaiMing(List<BankuaiWithData> bankuaiWithDataList) {
         AtomicInteger sort = new AtomicInteger(0);
         bankuaiWithDataList.stream().sorted((a, b) -> (int) ((
-                        a.last2StartDiff / a.lastDayDetail.last10dayBoDong -
-                                b.last2StartDiff / b.lastDayDetail.last10dayBoDong
+                        a.last2StartDiff / a.getBoDong() -
+                                b.last2StartDiff / b.getBoDong()
                 ) * 10000))
                 .collect(Collectors.toList())
                 .forEach(e -> e.last2StartDiffSort = sort.incrementAndGet());
@@ -209,8 +209,8 @@ public class Main {
     private static void fillTodayMinuteSort(List<BankuaiWithData> bankuaiWithDataList) {
         AtomicInteger sort = new AtomicInteger(0);
         bankuaiWithDataList.stream().sorted((a, b) -> (int) ((
-                        a.getTodayMinuteDataList().get(1).startEndDiff / a.lastDayDetail.last10dayBoDong
-                                - b.getTodayMinuteDataList().get(1).startEndDiff / b.lastDayDetail.last10dayBoDong
+                        a.getTodayMinuteDataList().get(1).startEndDiff / a.getBoDong()
+                                - b.getTodayMinuteDataList().get(1).startEndDiff / b.getBoDong()
                 ) * 10000))
                 .collect(Collectors.toList())
                 .forEach(e -> e.todayMinuteSort = sort.incrementAndGet());
@@ -525,7 +525,7 @@ public class Main {
 //                e.getLast30DayInfoMap().get(todayDate).startEndDiff * 100,
                 //一分钟后
                 getTodayDiffAfter1min(e) * 100,
-                e.lastDayDetail.last10dayBoDong * 100,
+                e.getBoDong() * 100,
                 //时间
                 e.todayMinuteDataList.get(1).dateTime,
                 //已有收益
@@ -594,7 +594,7 @@ public class Main {
 //                etf.getLast30DayInfoMap().get(todayDate).startEndDiff * 100,
                 //一分钟后
                 getTodayDiffAfter1min(etf) * 100,
-                etf.lastDayDetail.last10dayBoDong * 100,
+                etf.getBoDong() * 100,
                 //时间
                 etf.todayMinuteDataList.get(1).dateTime,
                 //已有收益
@@ -686,6 +686,10 @@ public class Main {
         XiangDuiBiLi30Day xiangDuiBiLi30Day;
         //板块对应的 etf 信息
         BankuaiWithData etfBankuaiWithData;
+
+        public double getBoDong() {
+            return lastDayDetail.last20dayBoDong;
+        }
     }
 
     @Data

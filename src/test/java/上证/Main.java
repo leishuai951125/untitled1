@@ -29,6 +29,7 @@ public class Main {
         public Double last10dayEndAvg;
         public Double last10dayBoDong;
         public Double last20dayEndAvg;
+        public Double last20dayBoDong;
         public Double last30dayEndAvg;
         public Double last30dayBoDong2;
     }

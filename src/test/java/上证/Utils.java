@@ -140,6 +140,7 @@ public class Utils {
             }
             if (i >= 20) {
                 kechuangOneDayDataDetail.last20dayEndAvg = getLastAvg(kechuangList, i, 20);
+                kechuangOneDayDataDetail.last20dayBoDong = avgBoDong(kechuangList.subList(i - 20, i));
             }
             if (i >= 30) {
                 kechuangOneDayDataDetail.last30dayEndAvg = getLastAvg(kechuangList, i, 30);
