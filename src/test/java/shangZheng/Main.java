@@ -1,4 +1,4 @@
-package 上证;
+package shangZheng;
 
 import com.alibaba.fastjson.JSON;
 import lombok.AllArgsConstructor;

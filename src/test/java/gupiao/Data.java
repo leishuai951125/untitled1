@@ -44,7 +44,7 @@ public class Data {
         Response response = client.newCall(request).execute();
         JSONObject resp = JSON.parseObject(response.body().string());
         AtomicInteger atomicInteger = new AtomicInteger(0);
-        Map<String, List<Stock>> allStock = resp.getJSONObject("上证/data").getJSONArray("items").stream().map(e -> {
+        Map<String, List<Stock>> allStock = resp.getJSONObject("shangZheng/data").getJSONArray("items").stream().map(e -> {
             Stock stock = new Stock();
             JSONObject quote = ((JSONObject) e).getJSONObject("quote");
             stock.setName(quote.getString("name"));
@@ -96,7 +96,7 @@ public class Data {
                 .build();
         Response response = client.newCall(request).execute();
         JSONObject resp = JSON.parseObject(response.body().string());
-        return resp.getJSONObject("result").getJSONArray("上证/data").getJSONObject(0).getString("BELONG_INDUSTRY");
+        return resp.getJSONObject("result").getJSONArray("shangZheng/data").getJSONObject(0).getString("BELONG_INDUSTRY");
     }
 
 

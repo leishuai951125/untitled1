@@ -11,8 +11,10 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import 上证.Utils;
+import shangZheng.Utils;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -29,10 +31,10 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-13";
-    static String todayDate = "2024-11-14";
+    static String lastDate = "2024-11-14";
+    static String todayDate = "2024-11-15";
 
-    static double lastDapanStar2EndDiff = 0.5 / 100.0;
+    static double lastDapanStar2EndDiff = -2 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
 
@@ -55,6 +57,7 @@ public class Main {
 //        return getTodayDiffAfter1min(bankuaiWithData);
 //常用的两个除系数
         return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
+//        return getDeFen(bankuaiWithData);
 //        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
     }
@@ -100,10 +103,35 @@ public class Main {
     //上午开盘3分钟和收盘3分钟不可信
     //谨慎购买涨幅反常的头部股票
 
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class SaveFileData {
+        BankuaiWithData KeChuang50BanKuaiData;
+        BankuaiWithData hushen300BanKuaiData;
+        List<BankuaiWithData> bankuaiWithDataList;
+    }
+
+    public void saveFile(SaveFileData saveFileData) {
+        String fileName = "/Users/leishuai/IdeaProjects/untitled1/src/test/java/chaogu/beifen/" + todayDate + ".txt";
+        String fileName2 = "/Users/leishuai/IdeaProjects/untitled1/src/test/java/chaogu/beifen/" + todayDate + ".txt";
+        File file = new File(fileName);
+        File file2 = new File(fileName2);
+        file.deleteOnExit();
+        try {
+            FileWriter fileWriter = new FileWriter(fileName);
+            fileWriter.write(JSON.toJSONString(saveFileData));
+            if (!file2.exists()) {
+                new FileWriter(fileName2).write(JSON.toJSONString(saveFileData));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     //盘中选股：排名 10～60 ，归一化为正，已有涨幅较小
     @Test
     public void main() throws IOException {
-        List<Future> futureList = new ArrayList<>();
         waitAll(() -> {
             KeChuang50BanKuaiData = getBankuaiWithData("科技创新50", "1.588000");
         }, () -> {
@@ -122,6 +150,7 @@ public class Main {
         if (hushen300BanKuaiData.todayMinuteDataList.size() >= testEndTimeIndex) {
             fillGuiYihuaShouyi(bankuaiWithDataList);
         }
+        saveFile(new SaveFileData(KeChuang50BanKuaiData, hushen300BanKuaiData, bankuaiWithDataList));
         //填充归一化、比例
         bankuaiWithDataList.forEach(e -> e.setXiangDuiBiLi30Day(getXiangDuiBiLi30Day(e)));
         //填充归一化排名
@@ -433,7 +462,7 @@ public class Main {
 
     static XiangDuiBiLi30Day getXiangDuiBiLi30Day(BankuaiWithData e) {
         XiangDuiBiLi30Day xiangDuiBiLi30Day = new XiangDuiBiLi30Day();
-        List<上证.Main.OneDayDataDetail> last30DayInfoWithoutTodyList = e.last30DayInfoList;
+        List<shangZheng.Main.OneDayDataDetail> last30DayInfoWithoutTodyList = e.last30DayInfoList;
 
         if (last30DayInfoWithoutTodyList.get(last30DayInfoWithoutTodyList.size() - 1).date.equals(todayDate)) {
             //去掉今天
@@ -444,8 +473,8 @@ public class Main {
 
         List<Double> xiangDuiBiLiList = new ArrayList<>(last30DayInfoWithoutTodyList.size());
         Map<String, Double> xiangDuiBiLiMap = new HashMap<>(last30DayInfoWithoutTodyList.size());
-        for (上证.Main.OneDayDataDetail dayDataDetail : last30DayInfoWithoutTodyList) {
-            上证.Main.OneDayDataDetail hushenDayDataDetail = hushen300BanKuaiData.getLast30DayInfoMap().get(dayDataDetail.date);
+        for (shangZheng.Main.OneDayDataDetail dayDataDetail : last30DayInfoWithoutTodyList) {
+            shangZheng.Main.OneDayDataDetail hushenDayDataDetail = hushen300BanKuaiData.getLast30DayInfoMap().get(dayDataDetail.date);
             Double xiangDuiBiLi = dayDataDetail.todayEndDiv30Avg / hushenDayDataDetail.todayEndDiv30Avg;
             xiangDuiBiLiMap.put(dayDataDetail.date, xiangDuiBiLi);
             xiangDuiBiLiList.add(xiangDuiBiLi);
@@ -659,10 +688,10 @@ public class Main {
 
     //30天
     @SneakyThrows
-    private static List<上证.Main.OneDayDataDetail> getLast30DayData(String bankuaiCode) {
+    private static List<shangZheng.Main.OneDayDataDetail> getLast30DayData(String bankuaiCode) {
         JSONArray jsonArray = getDayData(bankuaiCode);
         List<String> list = jsonArray.stream().map(e -> (String) e).collect(Collectors.toList());
-        List<上证.Main.OneDayDataDetail> detailList = Utils.parseDongFangCaiFuList(list);
+        List<shangZheng.Main.OneDayDataDetail> detailList = Utils.parseDongFangCaiFuList(list);
         return detailList.subList(detailList.size() - 30, detailList.size());
     }
 
@@ -679,9 +708,9 @@ public class Main {
         double test0_EndIndexShouyim = 0.0;
         double last2StartDiff;//今日开盘涨跌
         int last2StartDiffSort;//开盘涨跌排名，值越小排名越小
-        List<上证.Main.OneDayDataDetail> last30DayInfoList;
-        Map<String, 上证.Main.OneDayDataDetail> last30DayInfoMap;
-        上证.Main.OneDayDataDetail lastDayDetail;
+        List<shangZheng.Main.OneDayDataDetail> last30DayInfoList;
+        Map<String, shangZheng.Main.OneDayDataDetail> last30DayInfoMap;
+        shangZheng.Main.OneDayDataDetail lastDayDetail;
         int lastDayZhangFuSort;//昨日日内涨跌排名，值越小排名越小
         XiangDuiBiLi30Day xiangDuiBiLi30Day;
         //板块对应的 etf 信息
