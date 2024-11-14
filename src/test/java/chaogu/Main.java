@@ -54,7 +54,7 @@ public class Main {
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
 //        return getTodayDiffAfter1min(bankuaiWithData);
 //常用的两个除系数
-        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.lastDayDetail.last10dayBoDong;
+        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.lastDayDetail.last10dayBoDong, 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
 //        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.lastDayDetail.last10dayBoDong;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
     }
