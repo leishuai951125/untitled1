@@ -31,8 +31,8 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-14";
-    static String todayDate = "2024-11-15";
+    static String lastDate = "2024-11-13";
+    static String todayDate = "2024-11-14";
 
     static double lastDapanStar2EndDiff = -2 / 100.0;
 
@@ -48,7 +48,7 @@ public class Main {
 
     static double shangZhangGaiLv = 0.5;
 
-    double getSortValue(BankuaiWithData bankuaiWithData) {
+    static double getSortValue(BankuaiWithData bankuaiWithData) {
 //        return bankuaiWithData.testMinuteShouYiSum;
 //        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
@@ -112,17 +112,14 @@ public class Main {
         List<BankuaiWithData> bankuaiWithDataList;
     }
 
-    public void saveFile(SaveFileData saveFileData) {
+    public static void saveFile(SaveFileData saveFileData) {
         String fileName = "/Users/leishuai/IdeaProjects/untitled1/src/test/java/chaogu/beifen/" + todayDate + ".txt";
-        String fileName2 = "/Users/leishuai/IdeaProjects/untitled1/src/test/java/chaogu/beifen/" + todayDate + ".txt";
-        File file = new File(fileName);
-        File file2 = new File(fileName2);
-        file.deleteOnExit();
         try {
-            FileWriter fileWriter = new FileWriter(fileName);
-            fileWriter.write(JSON.toJSONString(saveFileData));
-            if (!file2.exists()) {
-                new FileWriter(fileName2).write(JSON.toJSONString(saveFileData));
+            if (!new File(fileName).exists() && saveFileData.hushen300BanKuaiData.todayMinuteDataList.size() >= 2) {
+                FileWriter fileWriter2 = new FileWriter(fileName);
+                fileWriter2.write(JSON.toJSONString(saveFileData));
+                fileWriter2.flush();
+                fileWriter2.close();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -150,7 +147,6 @@ public class Main {
         if (hushen300BanKuaiData.todayMinuteDataList.size() >= testEndTimeIndex) {
             fillGuiYihuaShouyi(bankuaiWithDataList);
         }
-        saveFile(new SaveFileData(KeChuang50BanKuaiData, hushen300BanKuaiData, bankuaiWithDataList));
         //填充归一化、比例
         bankuaiWithDataList.forEach(e -> e.setXiangDuiBiLi30Day(getXiangDuiBiLi30Day(e)));
         //填充归一化排名
@@ -216,6 +212,9 @@ public class Main {
         System.out.println("===========");
         resultListt.forEach(System.out::println);
         tongji(bankuaiWithDataList);
+        executorService.shutdown();
+        saveFile(new SaveFileData(KeChuang50BanKuaiData, hushen300BanKuaiData, bankuaiWithDataList));
+        System.out.println("结束");
     }
 
     private static void fillGuiYiHuaPaiMing(List<BankuaiWithData> bankuaiWithDataList) {

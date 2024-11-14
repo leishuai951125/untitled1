@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class Utils {
     public static String getDataByFileName(String fileName) {
-        String filePath = "/Users/leishuai/IdeaProjects/untitled1/src/test/java/上证/data/" + fileName;
+        String filePath = "/Users/leishuai/IdeaProjects/untitled1/src/test/java/shangZheng/data/" + fileName;
         StringBuffer sb = new StringBuffer();
         Scanner scanner;
         try {
