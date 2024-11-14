@@ -184,7 +184,7 @@ public class Main {
 
     private static void fillGuiYiHuaPaiMing(List<BankuaiWithData> bankuaiWithDataList) {
         AtomicInteger sort = new AtomicInteger(0);
-        bankuaiWithDataList.stream().sorted((a, b) -> (int) ((a.xiangDuiBiLi30Day.zuoRiGuiYiHua - b.xiangDuiBiLi30Day.zuoRiGuiYiHua) * 1000))
+        bankuaiWithDataList.stream().sorted((a, b) -> (int) ((a.xiangDuiBiLi30Day.zuoRiGuiYiHua - b.xiangDuiBiLi30Day.zuoRiGuiYiHua) * 10000))
                 .collect(Collectors.toList())
                 .forEach(e -> e.xiangDuiBiLi30Day.guiyiHuaPaiMing = sort.incrementAndGet());
     }
@@ -192,9 +192,9 @@ public class Main {
     private static void fillKapPanZhangFuPaiMing(List<BankuaiWithData> bankuaiWithDataList) {
         AtomicInteger sort = new AtomicInteger(0);
         bankuaiWithDataList.stream().sorted((a, b) -> (int) ((
-                        a.last2StartDiff -
-                                b.last2StartDiff
-                ) * 1000))
+                        a.last2StartDiff / a.lastDayDetail.last10dayBoDong -
+                                b.last2StartDiff / b.lastDayDetail.last10dayBoDong
+                ) * 10000))
                 .collect(Collectors.toList())
                 .forEach(e -> e.last2StartDiffSort = sort.incrementAndGet());
     }
@@ -202,9 +202,9 @@ public class Main {
     private static void fillTodayMinuteSort(List<BankuaiWithData> bankuaiWithDataList) {
         AtomicInteger sort = new AtomicInteger(0);
         bankuaiWithDataList.stream().sorted((a, b) -> (int) ((
-                        a.getTodayMinuteDataList().get(1).startEndDiff
-                                - b.getTodayMinuteDataList().get(1).startEndDiff
-                ) * 1000))
+                        a.getTodayMinuteDataList().get(1).startEndDiff / a.lastDayDetail.last10dayBoDong
+                                - b.getTodayMinuteDataList().get(1).startEndDiff / b.lastDayDetail.last10dayBoDong
+                ) * 10000))
                 .collect(Collectors.toList())
                 .forEach(e -> e.todayMinuteSort = sort.incrementAndGet());
     }
