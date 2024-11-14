@@ -112,19 +112,6 @@ public class Main {
         List<BankuaiWithData> bankuaiWithDataList;
     }
 
-    public static void saveFile(SaveFileData saveFileData) {
-        String fileName = "/Users/leishuai/IdeaProjects/untitled1/src/test/java/chaogu/beifen/" + todayDate + ".txt";
-        try {
-            if (!new File(fileName).exists() && saveFileData.hushen300BanKuaiData.todayMinuteDataList.size() >= 2) {
-                FileWriter fileWriter2 = new FileWriter(fileName);
-                fileWriter2.write(JSON.toJSONString(saveFileData));
-                fileWriter2.flush();
-                fileWriter2.close();
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     //盘中选股：排名 10～60 ，归一化为正，已有涨幅较小
     @Test
@@ -215,6 +202,21 @@ public class Main {
         executorService.shutdown();
         saveFile(new SaveFileData(KeChuang50BanKuaiData, hushen300BanKuaiData, bankuaiWithDataList));
         System.out.println("结束");
+    }
+
+
+    public static void saveFile(SaveFileData saveFileData) {
+        String fileName = "/Users/leishuai/IdeaProjects/untitled1/src/test/java/chaogu/beifen/" + todayDate + ".txt";
+        try {
+            if (!new File(fileName).exists() && saveFileData.hushen300BanKuaiData.todayMinuteDataList.size() >= 2) {
+                FileWriter fileWriter2 = new FileWriter(fileName);
+                fileWriter2.write(JSON.toJSONString(saveFileData));
+                fileWriter2.flush();
+                fileWriter2.close();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void fillGuiYiHuaPaiMing(List<BankuaiWithData> bankuaiWithDataList) {
