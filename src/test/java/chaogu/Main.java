@@ -39,7 +39,7 @@ public class Main {
     static boolean needFilter = false;
     static boolean isSimpleMode = false;//简要模式
     static boolean filterNoEtf = true;//过滤没有etf的板块
-    static boolean needLogZhuLi = true;//是否打印主力信息
+    static boolean needLogZhuLi = false;//是否打印主力信息
 
     static int testStartTimeIndex = 1;//当前时间是多少分钟
     static int testEndTimeIndex = 166;//当前时间是多少分钟
@@ -54,8 +54,8 @@ public class Main {
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
 //        return getTodayDiffAfter1min(bankuaiWithData);
 //常用的两个除系数
-//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.lastDayDetail.last10dayEndAvg;
-        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.lastDayDetail.last10dayEndAvg;
+        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.lastDayDetail.last10dayEndAvg;
+//        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.lastDayDetail.last10dayEndAvg;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
     }
 
@@ -569,6 +569,7 @@ public class Main {
 //                        " 今日相比大盘涨跌：%.2f%%" +
 //                        " [即:%.2f%%]， " +
                         "   [一分钟后:%.2f%%]， " +
+                        "波动:%.2f%%  " +
                         //时间
                         "\t | 时间：%s  " +
                         //已有收益
@@ -590,6 +591,7 @@ public class Main {
 //                etf.getLast30DayInfoMap().get(todayDate).startEndDiff * 100,
                 //一分钟后
                 getTodayDiffAfter1min(etf) * 100,
+                etf.lastDayDetail.last10dayBoDong * 100,
                 //时间
                 etf.todayMinuteDataList.get(1).dateTime,
                 //已有收益
