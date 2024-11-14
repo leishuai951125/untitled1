@@ -133,7 +133,7 @@ public class Main {
         //一分钟涨幅排名
         fillTodayMinuteSort(bankuaiWithDataList);
         //过滤
-        bankuaiWithDataList = bankuaiWithDataList.stream().filter(Main::filter).collect(Collectors.toList());
+        bankuaiWithDataList = bankuaiWithDataList.stream().filter(e -> filter(e) && !e.banKuai.isSkipLog()).collect(Collectors.toList());
         //过滤
         bankuaiWithDataList = bankuaiWithDataList.stream()
                 .filter(e -> !filterNoEtf || !StringUtils.isEmpty(e.banKuai.etfCode)).collect(Collectors.toList());
@@ -504,22 +504,19 @@ public class Main {
                 e.lastDayDetail.startEndDiff * 100, e.lastDayZhangFuSort
         );
         String sub2 = String.format(
-                //已有收益
-                "[已有收益:%.3f%%] \t" +
-                        //今日
+                //今日
 //                        " 今日相比大盘涨跌：%.2f%%" +
 //                        " [即:%.2f%%]， " +
-                        "   [一分钟后:%.2f%%]， " +
+                "   [一分钟后:%.2f%%]， " +
                         "波动:%.2f%%  " +
                         //时间
                         "\t | 时间：%s " +
+                        //已有收益
+                        "\t[已有收益:%.3f%%]" +
                         //归一化收益
                         "\t归一化相对收益:%.3f%%" +
                         " [即:%.3f%%]\t" + ANSI_RESET +
                         "\n",//昨日
-
-                //已有收益
-                e.test0_EndIndexShouyim * 100,
                 //今日
 //                (e.getLast30DayInfoMap().get(todayDate).startEndDiff - hushen300BanKuaiData.getLast30DayInfoMap().get(todayDate).startEndDiff) * 100,
 //                e.getLast30DayInfoMap().get(todayDate).startEndDiff * 100,
@@ -528,6 +525,8 @@ public class Main {
                 e.lastDayDetail.last10dayBoDong * 100,
                 //时间
                 e.todayMinuteDataList.get(1).dateTime,
+                //已有收益
+                e.test0_EndIndexShouyim * 100,
                 //归一化收益
                 e.testMinuteShouYiSum * 100 - hushen300BanKuaiData.testMinuteShouYiSum * 100,
                 e.testMinuteShouYiSum * 100);
@@ -566,14 +565,14 @@ public class Main {
                         " [即:%.3f%%] \t  " + ANSI_RESET +
                         //etf 比 板块
                         (etfXiangDuiBanKuai < -0.5 ? ANSI_RED : (etfXiangDuiBanKuai > 0.2 ? ANSI_GREEN : "")) + "【截止开盘一分钟etf相对板块:%.3f%%】" + ANSI_RESET +
-                        //已有收益
-                        " [已有收益:%.3f%%] \t  " +
 //                        //今日
 //                        " 今日相比大盘涨跌：%.2f%%" +
 //                        " [即:%.2f%%]， " +
                         "   [一分钟后:%.2f%%]， " +
                         //时间
                         "\t | 时间：%s  " +
+                        //已有收益
+                        "\t[已有收益:%.3f%%] " +
                         //归一化收益
                         "\t归一化相对收益:%.3f%%" +
                         " [即:%.3f%%] \t  " + ANSI_RESET +
@@ -586,8 +585,6 @@ public class Main {
                 etf.last2StartDiff * 100,
                 //etf 比 板块
                 etfXiangDuiBanKuai,
-                //已有收益
-                etf.test0_EndIndexShouyim * 100,
 //                //今日
 //                (etf.getLast30DayInfoMap().get(todayDate).startEndDiff - hushen300BanKuaiData.getLast30DayInfoMap().get(todayDate).startEndDiff) * 100,
 //                etf.getLast30DayInfoMap().get(todayDate).startEndDiff * 100,
@@ -595,6 +592,8 @@ public class Main {
                 getTodayDiffAfter1min(etf) * 100,
                 //时间
                 etf.todayMinuteDataList.get(1).dateTime,
+                //已有收益
+                etf.test0_EndIndexShouyim * 100,
                 //归一化收益
                 etf.testMinuteShouYiSum * 100 - hushen300BanKuaiData.testMinuteShouYiSum * 100,
                 etf.testMinuteShouYiSum * 100
@@ -692,16 +691,13 @@ public class Main {
         String code;
         String eftName;
         String etfCode;
+        boolean isSkipLog;
     }
 
     @NotNull
     private static List<BanKuai> parseAllBanKuai() {
 //        https://data.eastmoney.com/bkzj/hy_5.html
         List<BanKuai> banKuaiList = JSON.parseArray(Utils.getDataByFileName("all_bankuai.json")).stream()
-                .filter(e -> {
-                    JSONObject jsonObject = (JSONObject) e;
-                    return !Objects.equals(jsonObject.getBoolean("isSkip"), true);
-                })
                 .map(e -> {
                     JSONObject jsonObject = (JSONObject) e;
                     BanKuai banKuai = new BanKuai();
@@ -710,6 +706,7 @@ public class Main {
                             "." + jsonObject.getString("f12"));
                     banKuai.setEftName(jsonObject.getString("etfName") != null ? jsonObject.getString("etfName") : "etf");
                     banKuai.setEtfCode(jsonObject.getString("etfCode"));
+                    banKuai.setSkipLog(Objects.equals(jsonObject.getBoolean("isSkip"), true));
                     return banKuai;
                 }).collect(Collectors.toList());
         return banKuaiList;
