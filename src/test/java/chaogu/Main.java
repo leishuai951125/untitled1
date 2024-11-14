@@ -191,15 +191,20 @@ public class Main {
 
     private static void fillKapPanZhangFuPaiMing(List<BankuaiWithData> bankuaiWithDataList) {
         AtomicInteger sort = new AtomicInteger(0);
-        bankuaiWithDataList.stream().sorted((a, b) -> (int) ((a.last2StartDiff - b.last2StartDiff) * 1000))
+        bankuaiWithDataList.stream().sorted((a, b) -> (int) ((
+                        a.last2StartDiff -
+                                b.last2StartDiff
+                ) * 1000))
                 .collect(Collectors.toList())
                 .forEach(e -> e.last2StartDiffSort = sort.incrementAndGet());
     }
 
     private static void fillTodayMinuteSort(List<BankuaiWithData> bankuaiWithDataList) {
         AtomicInteger sort = new AtomicInteger(0);
-        bankuaiWithDataList.stream().sorted((a, b) -> (int) ((a.getTodayMinuteDataList().get(1).startEndDiff
-                        - b.getTodayMinuteDataList().get(1).startEndDiff) * 1000))
+        bankuaiWithDataList.stream().sorted((a, b) -> (int) ((
+                        a.getTodayMinuteDataList().get(1).startEndDiff
+                                - b.getTodayMinuteDataList().get(1).startEndDiff
+                ) * 1000))
                 .collect(Collectors.toList())
                 .forEach(e -> e.todayMinuteSort = sort.incrementAndGet());
     }
