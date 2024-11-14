@@ -27,9 +27,10 @@ public class Main {
         //------avg-----
         public Double last5dayEndAvg;
         public Double last10dayEndAvg;
+        public Double last10dayBoDong;
         public Double last20dayEndAvg;
         public Double last30dayEndAvg;
-        public Double last30dayBoDong;
+        public Double last30dayBoDong2;
     }
 
     public static final String ANSI_RESET = "\u001B[0m";
@@ -154,12 +155,12 @@ public class Main {
 
                 if (billi < 1) {//亏钱
                     //比大盘亏的多
-                    colordiffDapan = Math.abs(billi - 1) / e.last30dayBoDong >= 30 ? ANSI_RED : ANSI_RESET; //红色表示盈利方向反向
+                    colordiffDapan = Math.abs(billi - 1) / e.last30dayBoDong2 >= 30 ? ANSI_RED : ANSI_RESET; //红色表示盈利方向反向
                     if (colordiffDapan == ANSI_RED) {
                         testShouyi += e.getLast2EndDiff();
                         dapanShouyi += baseOneDayDataDetail.getLast2EndDiff();
                         System.out.printf(ANSI_RESET + "计算收益,beishu:%.2f,beishu:%.2f,testShouyi :%.2f%%,dapanShouyi %.2f%%\n",
-                                e.last30dayBoDong / baseOneDayDataDetail.last30dayBoDong, (billi - 1) / e.last30dayBoDong,
+                                e.last30dayBoDong2 / baseOneDayDataDetail.last30dayBoDong2, (billi - 1) / e.last30dayBoDong2,
                                 testShouyi * 100, dapanShouyi * 100);
                     }
                 }

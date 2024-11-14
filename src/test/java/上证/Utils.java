@@ -136,13 +136,14 @@ public class Utils {
             }
             if (i >= 10) {
                 kechuangOneDayDataDetail.last10dayEndAvg = getLastAvg(kechuangList, i, 10);
+                kechuangOneDayDataDetail.last10dayBoDong = avgBoDong(kechuangList.subList(i - 10, i));
             }
             if (i >= 20) {
                 kechuangOneDayDataDetail.last20dayEndAvg = getLastAvg(kechuangList, i, 20);
             }
             if (i >= 30) {
                 kechuangOneDayDataDetail.last30dayEndAvg = getLastAvg(kechuangList, i, 30);
-                kechuangOneDayDataDetail.last30dayBoDong = avgBoDongV2(kechuangList.subList(i - 30, i));
+                kechuangOneDayDataDetail.last30dayBoDong2 = avgBoDongV2(kechuangList.subList(i - 30, i));
             }
         }
     }
