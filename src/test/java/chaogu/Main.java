@@ -50,8 +50,12 @@ public class Main {
 //        return bankuaiWithData.testMinuteShouYiSum;
 //        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
-        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+//常用的两个
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
 //        return getTodayDiffAfter1min(bankuaiWithData);
+//常用的两个除系数
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.lastDayDetail.last10dayEndAvg;
+        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.lastDayDetail.last10dayEndAvg;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
     }
 
@@ -484,9 +488,9 @@ public class Main {
                         //今日开盘
 //                        (kaipanXiangDui < 0 ? ANSI_RED : ANSI_GREEN) + "今日开盘相对涨跌:%.3f%%" +
                         (e.last2StartDiffSort > 0 && e.last2StartDiffSort <= 50 ? ANSI_RED : "") + "今日开盘相对涨跌:%.3f%%" +
-                        " [即:%.3f%%] %d \t" + ANSI_RESET +
+                        " [即:%.3f%%] %d\t" + ANSI_RESET +
                         //昨日
-                        getLastDayZhangFuColor(e) + " 上日相比大盘涨跌：%.2f%%" +
+                        getLastDayZhangFuColor(e) + "上日相比大盘涨跌：%.2f%%" +
                         " [即:%.2f%%] %d， " + ANSI_RESET,
                 fillName(e.getBankuaiName()),
                 //今日一分钟
@@ -500,30 +504,33 @@ public class Main {
                 e.lastDayDetail.startEndDiff * 100, e.lastDayZhangFuSort
         );
         String sub2 = String.format(
-                //归一化收益
-                "归一化相对收益:%.3f%%" +
-                        " [即:%.3f%%] \t" + ANSI_RESET +
-                        //已有收益
-                        " [已有收益:%.3f%%] \t" +
+                //已有收益
+                "[已有收益:%.3f%%] \t" +
                         //今日
-                        " 今日相比大盘涨跌：%.2f%%" +
-                        " [即:%.2f%%]， " +
+//                        " 今日相比大盘涨跌：%.2f%%" +
+//                        " [即:%.2f%%]， " +
                         "   [一分钟后:%.2f%%]， " +
+                        "波动:%.2f%%  " +
                         //时间
-                        "\t  时间：%s" +
+                        "\t 时间：%s " +
+                        //归一化收益
+                        "\t归一化相对收益:%.3f%%" +
+                        " [即:%.3f%%]\t" + ANSI_RESET +
                         "\n",//昨日
-                //归一化收益
-                e.testMinuteShouYiSum * 100 - hushen300BanKuaiData.testMinuteShouYiSum * 100,
-                e.testMinuteShouYiSum * 100,
+
                 //已有收益
                 e.test0_EndIndexShouyim * 100,
                 //今日
-                (e.getLast30DayInfoMap().get(todayDate).startEndDiff - hushen300BanKuaiData.getLast30DayInfoMap().get(todayDate).startEndDiff) * 100,
-                e.getLast30DayInfoMap().get(todayDate).startEndDiff * 100,
+//                (e.getLast30DayInfoMap().get(todayDate).startEndDiff - hushen300BanKuaiData.getLast30DayInfoMap().get(todayDate).startEndDiff) * 100,
+//                e.getLast30DayInfoMap().get(todayDate).startEndDiff * 100,
                 //一分钟后
                 getTodayDiffAfter1min(e) * 100,
+                e.lastDayDetail.last10dayBoDong * 100,
                 //时间
-                e.todayMinuteDataList.get(1).dateTime);
+                e.todayMinuteDataList.get(1).dateTime,
+                //归一化收益
+                e.testMinuteShouYiSum * 100 - hushen300BanKuaiData.testMinuteShouYiSum * 100,
+                e.testMinuteShouYiSum * 100);
         return sub1 + sub2;
     }
 
