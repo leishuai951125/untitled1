@@ -566,9 +566,6 @@ public class Main {
                         " [即:%.3f%%] \t  " + ANSI_RESET +
                         //etf 比 板块
                         (etfXiangDuiBanKuai < -0.5 ? ANSI_RED : (etfXiangDuiBanKuai > 0.2 ? ANSI_GREEN : "")) + "【截止开盘一分钟etf相对板块:%.3f%%】" + ANSI_RESET +
-                        //归一化收益
-                        "归一化相对收益:%.3f%%" +
-                        " [即:%.3f%%] \t  " + ANSI_RESET +
                         //已有收益
                         " [已有收益:%.3f%%] \t  " +
                         //今日
@@ -576,7 +573,10 @@ public class Main {
                         " [即:%.2f%%]， " +
                         "   [一分钟后:%.2f%%]， " +
                         //时间
-                        "\t  时间：%s" +
+                        "\t  时间：%s  " +
+                        //归一化收益
+                        "\t归一化相对收益:%.3f%%" +
+                        " [即:%.3f%%] \t  " + ANSI_RESET +
                         "\n",
                 fillName(etf.getBankuaiName()),
                 //今日一分钟
@@ -586,9 +586,6 @@ public class Main {
                 etf.last2StartDiff * 100,
                 //etf 比 板块
                 etfXiangDuiBanKuai,
-                //归一化收益
-                etf.testMinuteShouYiSum * 100 - hushen300BanKuaiData.testMinuteShouYiSum * 100,
-                etf.testMinuteShouYiSum * 100,
                 //已有收益
                 etf.test0_EndIndexShouyim * 100,
                 //今日
@@ -597,7 +594,10 @@ public class Main {
                 //一分钟后
                 getTodayDiffAfter1min(etf) * 100,
                 //时间
-                etf.todayMinuteDataList.get(1).dateTime
+                etf.todayMinuteDataList.get(1).dateTime,
+                //归一化收益
+                etf.testMinuteShouYiSum * 100 - hushen300BanKuaiData.testMinuteShouYiSum * 100,
+                etf.testMinuteShouYiSum * 100
         );
     }
 
