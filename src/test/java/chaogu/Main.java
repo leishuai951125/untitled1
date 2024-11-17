@@ -13,10 +13,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import shangZheng.Utils;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -37,6 +34,7 @@ public class Main {
 
     static String lastDate = "2024-11-15";
     static String todayDate = "2024-11-18";
+    static boolean readDataByFile = false;
     static double lastDapanStar2EndDiff = -2 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
@@ -112,7 +110,6 @@ public class Main {
     //盘中选股：排名 10～60 ，归一化为正，已有涨幅较小
     @Test
     public void main() throws IOException {
-        boolean readDataByFile = false;
         long starMs = System.currentTimeMillis();
         List<BankuaiWithData> bankuaiWithDataList = getBankuaiWithData(readDataByFile);
         if (hushen300BanKuaiData.todayMinuteDataList.size() >= testEndTimeIndex) {
@@ -225,7 +222,9 @@ public class Main {
     public static void saveFile(SaveFileData saveFileData) {
         String fileName = "/Users/leishuai/IdeaProjects/untitled1/src/test/java/chaogu/beifen/" + todayDate + ".txt";
         try {
-            if (!new File(fileName).exists() && saveFileData.hushen300BanKuaiData.todayMinuteDataList.size() >= 4) {
+            List<shangZheng.Main.OneDayDataDetail> last30DayInfoList = saveFileData.hushen300BanKuaiData.last30DayInfoList;
+            if (!new File(fileName).exists() && saveFileData.hushen300BanKuaiData.todayMinuteDataList.size() >= 4
+                    && last30DayInfoList.get(last30DayInfoList.size() - 1).date.equals(todayDate)) {
                 FileWriter fileWriter2 = new FileWriter(fileName);
                 fileWriter2.write((JSON.toJSONString(saveFileData)));
                 fileWriter2.flush();
@@ -239,13 +238,15 @@ public class Main {
     public static SaveFileData getFile() {
         String fileName = "/Users/leishuai/IdeaProjects/untitled1/src/test/java/chaogu/beifen/" + todayDate + ".txt";
         try {
+            long start = System.currentTimeMillis();
 //            StringBuilder sb = new StringBuilder();
-//            Scanner sc = new Scanner(new FileReader(fileName));
+//            Scanner sc = new Scanner(new BufferedReader(new FileReader(fileName), 10_000_000));
 //            if (sc.hasNextLine()) {
 //                sb.append(sc.nextLine());
 //            }
-//            String body=sb.toString();
+//            String body = sb.toString();
             String body = new String(Files.readAllBytes(Paths.get(fileName)));
+            System.out.println("cost:" + (System.currentTimeMillis() - start));
             return JSON.parseObject(body, SaveFileData.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
