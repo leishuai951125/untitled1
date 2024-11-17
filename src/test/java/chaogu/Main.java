@@ -26,6 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.zip.Deflater;
 
 public class Main {
     enum RunMode {
@@ -34,10 +35,8 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-14";
-    static String todayDate = "2024-11-15";
-    //    static String lastDate = "2024-11-13";
-//    static String todayDate = "2024-11-14";
+    static String lastDate = "2024-11-15";
+    static String todayDate = "2024-11-18";
     static double lastDapanStar2EndDiff = -2 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
@@ -76,6 +75,8 @@ public class Main {
         }
         if (ANSI_GREEN.equals(getEtfXiangDuiBanKuaiColor(e.getEtfBankuaiWithData(), e))) {
             deFen -= 10;
+        } else if (ANSI_RED.equals(getEtfXiangDuiBanKuaiColor(e.getEtfBankuaiWithData(), e))) {
+            deFen += 10;
         }
         if (!CollectionUtils.isEmpty(e.zhuLiList) && e.zhuLiList.get(0).getZhuLi() < -1 && e.zhuLiList.get(0).getChaoDaDan() < -1) {
             deFen -= 10;
@@ -106,15 +107,6 @@ public class Main {
 
     //上午开盘3分钟和收盘3分钟不可信
     //谨慎购买涨幅反常的头部股票
-
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class SaveFileData {
-        BankuaiWithData KeChuang50BanKuaiData;
-        BankuaiWithData hushen300BanKuaiData;
-        List<BankuaiWithData> bankuaiWithDataList;
-    }
 
 
     //盘中选股：排名 10～60 ，归一化为正，已有涨幅较小
@@ -195,6 +187,15 @@ public class Main {
         System.out.println("结束");
     }
 
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class SaveFileData {
+        BankuaiWithData KeChuang50BanKuaiData;
+        BankuaiWithData hushen300BanKuaiData;
+        List<BankuaiWithData> bankuaiWithDataList;
+    }
+
     private static List<BankuaiWithData> getBankuaiWithData(boolean readDataByFile) {
         if (readDataByFile) {
             SaveFileData getByFile = getFile();
@@ -226,7 +227,7 @@ public class Main {
         try {
             if (!new File(fileName).exists() && saveFileData.hushen300BanKuaiData.todayMinuteDataList.size() >= 4) {
                 FileWriter fileWriter2 = new FileWriter(fileName);
-                fileWriter2.write(JSON.toJSONString(saveFileData));
+                fileWriter2.write((JSON.toJSONString(saveFileData)));
                 fileWriter2.flush();
                 fileWriter2.close();
             }
