@@ -41,7 +41,7 @@ public class Main {
 
     static boolean needFilter = false;
     static boolean isSimpleMode = false;//简要模式
-    static boolean filterNoEtf = true;//过滤没有etf的板块
+    static boolean filterNoEtf = false;//过滤没有etf的板块
     static boolean needLogZhuLi = false;//是否打印主力信息
 
     static int testStartTimeIndex = 1;//当前时间是多少分钟
@@ -55,11 +55,10 @@ public class Main {
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
 //常用的两个
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-//        return getTodayDiffAfter1min(bankuaiWithData) / Math.pow(bankuaiWithData.getBoDong(), 0.3);
 //常用的两个除系数
-        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
+        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();
 //        return getDeFen(bankuaiWithData);
-//        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
     }
 
@@ -602,6 +601,9 @@ public class Main {
 
 
     static String getEtfXiangDuiBanKuaiColor(BankuaiWithData etf, BankuaiWithData bankuai) {
+        if (etf == null) {
+            return "";
+        }
         double todayMinuteXiangDui = etf.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100;
         double kaipanXiangDui = etf.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100;
 
