@@ -592,7 +592,8 @@ public class Main {
                 //今日
 //                        " 今日相比大盘涨跌：%.2f%%" +
 //                        " [即:%.2f%%]， " +
-                "   [一分钟后:%.2f%%] 胜率 %.1f%%， " +
+                "   [一分钟后:%.2f%%] " +
+                        "收益数学期望 %.1f%%， " +
                         "往日波动:%.2f%%  " +
                         "今日波动:%.2f%%  " +
                         //时间
@@ -607,7 +608,8 @@ public class Main {
 //                (e.getLast30DayInfoMap().get(todayDate).startEndDiff - hushen300BanKuaiData.getLast30DayInfoMap().get(todayDate).startEndDiff) * 100,
 //                e.getLast30DayInfoMap().get(todayDate).startEndDiff * 100,
                 //一分钟后
-                getTodayDiffAfter1min(e) * 100, getTodayDiffAfter1min(e) / e.getTodayBoDong() * 100,
+                getTodayDiffAfter1min(e) * 100,
+                e.getTodayShengLv() * 100,//为正就是可以的
                 e.getBoDong() * 100,
                 e.getTodayBoDong() * 100,
                 //时间
@@ -782,6 +784,12 @@ public class Main {
 
         public double getTodayBoDong() {
             return todayMaxPrice / todayMinPrice - 1;
+        }
+
+        //一分钟后的胜率
+        public double getTodayShengLv() {
+            return ((todayMaxPrice + todayMinPrice) / 2 - todayMinuteDataList.get(1).end) //中位线收益
+                    / (todayMaxPrice - todayMinPrice); //日内波动
         }
     }
 
