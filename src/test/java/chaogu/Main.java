@@ -56,9 +56,9 @@ public class Main {
 //常用的两个
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
 //常用的两个除系数，日常使用排序：*****
-//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
-//验证使用,统计收益建议使用一分钟后收益/（今日最高-今日最低）；
-        return getTodayDiffAfter1min(bankuaiWithData) / Math.pow(bankuaiWithData.getTodayBoDong(), 0.5);//1分钟后收益统计,按收益风险排序
+        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
+//验证使用,统计收益建议使用一分钟后收益/（今日最高-今日最低）；收益高于日内波动的 0.5 倍才说明该股票强势
+//        return getTodayDiffAfter1min(bankuaiWithData) / Math.pow(bankuaiWithData.getTodayBoDong(), 0.5);//1分钟后收益统计,按收益风险排序，适当偏向波动高的
 //        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();//1分钟后收益统计
 //        return bankuaiWithData.test0_EndIndexShouyim / bankuaiWithData.getBoDong();//区间收益统计
 //        return getDeFen(bankuaiWithData);//得分排序
@@ -183,7 +183,9 @@ public class Main {
                 testEndTimeIndex, hushen300BanKuaiData.test0_EndIndexShouyim * 100
         );
         System.out.printf("一分钟后平均收益：%.2f \t", sumTodayDiffAfter1min.stream().mapToDouble(e -> e).average().getAsDouble());
-//        System.out.printf("一分钟后etf平均收益：%.2f\n", etfSumTodayDiffAfter1min.stream().mapToDouble(e -> e).average().getAsDouble());
+        if (etfSumTodayDiffAfter1min.size() > 0) {
+            System.out.printf("一分钟后etf平均收益：%.2f\n", etfSumTodayDiffAfter1min.stream().mapToDouble(e -> e).average().getAsDouble());
+        }
         System.out.println("===========");
         resultListt.forEach(System.out::println);
         tongji(bankuaiWithDataList);
