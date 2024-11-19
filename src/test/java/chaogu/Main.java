@@ -770,6 +770,13 @@ public class Main {
         boolean isSkipLog;
     }
 
+    /*
+    查板块对应的股票
+    https://quote.eastmoney.com/center/boardlist.html#boards2-90.BK1015
+    https://48.push2.eastmoney.com/api/qt/clist/get?cb=jQuery112407552430561468451_1732041877603&pn=1&pz=5&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&dect=1&wbp2u=|0|0|0|web&fid=f62&fs=b:BK1015&fields=f12,f13,f14,f62&_=1732041877609
+     */
+
+
     @NotNull
     private static List<BanKuai> parseAllBanKuai() {
 //        https://data.eastmoney.com/bkzj/hy_5.html
