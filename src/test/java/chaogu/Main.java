@@ -575,8 +575,8 @@ public class Main {
                         (e.last2StartDiffSort > 0 && e.last2StartDiffSort <= 50 ? ANSI_RED : "") + "今日开盘相对涨跌:%.3f%%" +
                         " [即:%.3f%%] %d\t" + ANSI_RESET +
                         //昨日
-                        getLastDayZhangFuColor(e) + "上日相比大盘涨跌：%.2f%%" +
-                        " [即:%.2f%%] %d， " + ANSI_RESET,
+                        getLastDayZhangFuColor(e) + "上日相比大盘涨跌:%.2f%%" +
+                        " [即:%.2f%%] %d，" + ANSI_RESET,
                 fillName(e.getBankuaiName()),
                 //今日一分钟
                 e.todayMinuteDataList.get(1).startEndDiff * 100,
@@ -592,7 +592,7 @@ public class Main {
                 //今日
 //                        " 今日相比大盘涨跌：%.2f%%" +
 //                        " [即:%.2f%%]， " +
-                "   [一分钟后:%.2f%%]， " +
+                "   [一分钟后:%.2f%%]胜率 %.1f%%， " +
                         "往日波动:%.2f%%  " +
                         "今日波动:%.2f%%  " +
                         //时间
@@ -607,7 +607,7 @@ public class Main {
 //                (e.getLast30DayInfoMap().get(todayDate).startEndDiff - hushen300BanKuaiData.getLast30DayInfoMap().get(todayDate).startEndDiff) * 100,
 //                e.getLast30DayInfoMap().get(todayDate).startEndDiff * 100,
                 //一分钟后
-                getTodayDiffAfter1min(e) * 100,
+                getTodayDiffAfter1min(e) * 100, getTodayDiffAfter1min(e) / e.getTodayBoDong() * 100,
                 e.getBoDong() * 100,
                 e.getTodayBoDong() * 100,
                 //时间
