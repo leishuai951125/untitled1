@@ -32,8 +32,8 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-15";
-    static String todayDate = "2024-11-18";
+    static String lastDate = "2024-11-18";
+    static String todayDate = "2024-11-19";
     static boolean readDataByFile = false;
     static double lastDapanStar2EndDiff = -2 / 100.0;
 
@@ -55,7 +55,7 @@ public class Main {
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
 //常用的两个
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-//        return getTodayDiffAfter1min(bankuaiWithData);
+//        return getTodayDiffAfter1min(bankuaiWithData) / Math.pow(bankuaiWithData.getBoDong(), 0.3);
 //常用的两个除系数
         return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
 //        return getDeFen(bankuaiWithData);
