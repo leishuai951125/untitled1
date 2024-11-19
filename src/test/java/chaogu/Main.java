@@ -313,7 +313,7 @@ public class Main {
                     etf0_EndIndexShouyi += bankuai.etfBankuaiWithData.getTodayMinuteDataList().get(i).startEndDiff;
                 }
             }
-            for (int i = 0; i <= hushen300BanKuaiData.getTodayMinuteDataList().size() - 1; i++) {
+            for (int i = 1; i < hushen300BanKuaiData.getTodayMinuteDataList().size(); i++) {
                 OneData banuaiOneData = bankuai.getTodayMinuteDataList().get(i);
                 //板块最大最小
                 bankuai.todayMaxPrice = Math.max(bankuai.todayMaxPrice, banuaiOneData.end);
