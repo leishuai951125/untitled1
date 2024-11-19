@@ -55,12 +55,17 @@ public class Main {
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
 //常用的两个
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-//常用的两个除系数，日常使用排序：
+//常用的两个除系数，日常使用排序：*****
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
+//验证使用,统计收益建议使用一分钟后收益/（今日最高-今日最低）；
+        return getTodayDiffAfter1min(bankuaiWithData) / Math.pow(bankuaiWithData.getTodayBoDong(), 0.5);//1分钟后收益统计,按收益风险排序
 //        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();//1分钟后收益统计
-        return bankuaiWithData.test0_EndIndexShouyim / bankuaiWithData.getBoDong();//区间收益统计
+//        return bankuaiWithData.test0_EndIndexShouyim / bankuaiWithData.getBoDong();//区间收益统计
 //        return getDeFen(bankuaiWithData);//得分排序
-//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
+//        return bankuaiWithData.getBoDong();
+        //前2分钟已有收益
+//        return (bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);
+//        return (bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2) / bankuaiWithData.getBoDong();
     }
 
     private static int getDeFen(BankuaiWithData e) {
@@ -305,6 +310,12 @@ public class Main {
                 if (bankuai.etfBankuaiWithData != null) {
                     etf0_EndIndexShouyi += bankuai.etfBankuaiWithData.getTodayMinuteDataList().get(i).startEndDiff;
                 }
+            }
+            for (int i = 0; i <= hushen300BanKuaiData.getTodayMinuteDataList().size() - 1; i++) {
+                OneData banuaiOneData = bankuai.getTodayMinuteDataList().get(i);
+                //板块最大最小
+                bankuai.todayMaxPrice = Math.max(bankuai.todayMaxPrice, banuaiOneData.end);
+                bankuai.todayMinPrice = Math.min(bankuai.todayMinPrice, banuaiOneData.end);
             }
             bankuai.test0_EndIndexShouyim = bankuai0_EndIndexShouyi;
             hushen300BanKuaiData.test0_EndIndexShouyim = hushen0_EndIndexShouyi;
@@ -555,7 +566,8 @@ public class Main {
                         (todayMinuteXiangDui > 0.5 && e.todayMinuteDataList.get(1).startEndDiff > 0.005 ? ANSI_RED :
                                 (todayMinuteXiangDui < 0 && e.todayMinuteDataList.get(1).startEndDiff < 0) ? ANSI_GREEN : ANSI_RESET) +
                         "今日一分钟涨跌：%.3f%% " + ANSI_RESET +
-                        (deFen > 80 ? ANSI_RED : (deFen < 0 ? ANSI_GREEN : "")) + "得分【%d】\t" + ANSI_RESET +
+//                        (deFen > 80 ? ANSI_RED : (deFen < 0 ? ANSI_GREEN : "")) + "得分【%d】\t" + ANSI_RESET +
+                        (deFen > totalLength * 0.93 ? ANSI_RED : (deFen < 0 ? ANSI_GREEN : "")) + "得分【%d】\t" + ANSI_RESET +
                         //今日开盘
 //                        (kaipanXiangDui < 0 ? ANSI_RED : ANSI_GREEN) + "今日开盘相对涨跌:%.3f%%" +
                         (e.last2StartDiffSort > 0 && e.last2StartDiffSort <= 50 ? ANSI_RED : "") + "今日开盘相对涨跌:%.3f%%" +
@@ -579,7 +591,8 @@ public class Main {
 //                        " 今日相比大盘涨跌：%.2f%%" +
 //                        " [即:%.2f%%]， " +
                 "   [一分钟后:%.2f%%]， " +
-                        "波动:%.2f%%  " +
+                        "往日波动:%.2f%%  " +
+                        "今日波动:%.2f%%  " +
                         //时间
                         "\t | 时间：%s " +
                         //已有收益
@@ -594,6 +607,7 @@ public class Main {
                 //一分钟后
                 getTodayDiffAfter1min(e) * 100,
                 e.getBoDong() * 100,
+                e.getTodayBoDong() * 100,
                 //时间
                 e.todayMinuteDataList.get(1).dateTime,
                 //已有收益
@@ -745,6 +759,8 @@ public class Main {
         String bankuaiName;
         List<OneData> todayMinuteDataList;
         int todayMinuteSort;
+        double todayMaxPrice = -10000000;
+        double todayMinPrice = 100000000;
         List<ZiJin> zhuLiList;
         double testMinuteShouYiSum = 0.0;
         double test0_EndIndexShouyim = 0.0;
@@ -760,6 +776,10 @@ public class Main {
 
         public double getBoDong() {
             return lastDayDetail.last20dayBoDong;
+        }
+
+        public double getTodayBoDong() {
+            return todayMaxPrice / todayMinPrice - 1;
         }
     }
 
@@ -779,7 +799,6 @@ public class Main {
     https://quote.eastmoney.com/center/boardlist.html#boards2-90.BK1015
     https://48.push2.eastmoney.com/api/qt/clist/get?cb=jQuery112407552430561468451_1732041877603&pn=1&pz=5&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&dect=1&wbp2u=|0|0|0|web&fid=f62&fs=b:BK1015&fields=f12,f13,f14,f62&_=1732041877609
      */
-
 
     @NotNull
     private static List<BanKuai> parseAllBanKuai() {
