@@ -45,7 +45,7 @@ public class Main {
     static boolean needLogZhuLi = false;//是否打印主力信息
 
     static int testStartTimeIndex = 1;//当前时间是多少分钟
-    static int testEndTimeIndex = 166;//当前时间是多少分钟
+    static int testEndTimeIndex = 60;//当前时间是多少分钟
 
     static double shangZhangGaiLv = 0.5;
 
@@ -55,10 +55,11 @@ public class Main {
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
 //常用的两个
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
-//常用的两个除系数
+//常用的两个除系数，日常使用排序：
         return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
-//        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();
-//        return getDeFen(bankuaiWithData);
+//        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();//1分钟后收益统计
+//        return bankuaiWithData.test0_EndIndexShouyim / bankuaiWithData.getBoDong();//区间收益统计
+//        return getDeFen(bankuaiWithData);//得分排序
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2;
     }
 
@@ -170,7 +171,7 @@ public class Main {
                 getTodayDiffAfter1min(KeChuang50BanKuaiData) * 100,
                 KeChuang50BanKuaiData.getBoDong() * 100
         );
-        System.out.printf("时间区间：[%d~%d],大盘归一化收益：%.2f%% , 大盘从[1~%d] 的收益：%.2f%% \n",
+        System.out.printf("时间区间：[%d~%d],大盘归一化收益：%.2f%% , 大盘从[2~%d] 的收益：%.2f%% \n",
                 testStartTimeIndex, testEndTimeIndex, hushen300BanKuaiData.testMinuteShouYiSum * 100,
                 testEndTimeIndex, hushen300BanKuaiData.test0_EndIndexShouyim * 100
         );
@@ -294,7 +295,7 @@ public class Main {
             double hushen0_EndIndexShouyi = 0.0;
             double bankuai0_EndIndexShouyi = 0.0;
             double etf0_EndIndexShouyi = 0.0;
-            for (int i = 1; i <= testEndTimeIndex; i++) {
+            for (int i = 2; i <= testEndTimeIndex; i++) {
                 OneData hushenOneData = hushen300BanKuaiData.getTodayMinuteDataList().get(i);
                 OneData banuaiOneData = bankuai.getTodayMinuteDataList().get(i);
                 hushen0_EndIndexShouyi += hushenOneData.startEndDiff;
