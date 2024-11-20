@@ -192,7 +192,7 @@ public class Main {
         if (etfSumTodayDiffAfter1min.size() > 0) {
             System.out.printf("一分钟后etf平均收益：%.2f\n", etfSumTodayDiffAfter1min.stream().mapToDouble(e -> e).average().getAsDouble());
         }
-        System.out.printf("===========\t%s\t%s\n", lastDayZhangFuColorTips, jiaGePaiMingColorTips);
+        System.out.printf("===========\t                             %s\t                %s\n", jiaGePaiMingColorTips, lastDayZhangFuColorTips);
         resultListt.forEach(System.out::println);
         tongji(bankuaiWithDataList);
         executorService.shutdown();
@@ -563,14 +563,14 @@ public class Main {
     static String jiaGePaiMingColorTips = "";
 
     static String getLastDayZhangFuColor(BankuaiWithData e) {
-        lastDayZhangFuColorTips = String.format(ANSI_RED + "最佳昨日涨幅:( %d ~ %d ]" + ANSI_RESET, (int) (totalLength * 0.06), (int) (totalLength * 0.6));
+        lastDayZhangFuColorTips = String.format("最佳昨日涨幅:" + ANSI_RED + "( %d ~ %d ]" + ANSI_RESET, (int) (totalLength * 0.06), (int) (totalLength * 0.6));
 //        return (e.lastDayZhangFuSort > 5 && e.lastDayZhangFuSort <= 50 ? ANSI_RED : ANSI_GREEN);
         return (e.lastDayZhangFuSort > totalLength * 0.06 && e.lastDayZhangFuSort <= totalLength * 0.6 ? ANSI_RED : ANSI_GREEN);
     }
 
     @NotNull
     private static String getJiaGePaiMingColor(XiangDuiBiLi30Day xiangDuiBiLi30Day) {
-        jiaGePaiMingColorTips = String.format(ANSI_RED + "最佳价格排名:[ %d ~ %d ]" + ANSI_RESET, (int) (totalLength * 0.11), (int) (totalLength * 0.7));
+        jiaGePaiMingColorTips = String.format("最佳价格排名:" + ANSI_RED + "[ %d ~ %d ]" + ANSI_RESET, (int) (totalLength * 0.11), (int) (totalLength * 0.7));
         String color = ANSI_GREEN;
         //归一化 35（涨幅80名）～80（涨幅47名）
 //        if (xiangDuiBiLi30Day.guiyiHuaPaiMing <= 60 && xiangDuiBiLi30Day.guiyiHuaPaiMing >= 10) {
