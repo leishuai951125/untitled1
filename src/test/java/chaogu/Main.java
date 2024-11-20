@@ -598,7 +598,7 @@ public class Main {
                         //昨日
                         getLastDayZhangFuColor(e) + "上日相比大盘涨跌:%.2f%%" +
                         " [即:%.2f%%] %d，" + ANSI_RESET,
-                fillName(e.getBankuaiName()),
+                fillName(e),
                 //今日一分钟
                 e.todayMinuteDataList.get(1).startEndDiff * 100,
                 deFen,
@@ -718,6 +718,20 @@ public class Main {
     static String fillName(String name) {
         if (name.length() == 2) {
             return name.charAt(0) + "   " + name.charAt(1);
+        }
+        return name;
+    }
+
+    static String fillName(BankuaiWithData bankuai) {
+        String name = bankuai.bankuaiName;
+        if (bankuai.getBoDong() >= KeChuang50BanKuaiData.getBoDong() * 1.2) {
+            name += " 3*";
+        } else if (bankuai.getBoDong() >= KeChuang50BanKuaiData.getBoDong()) {
+            name += " 2*";
+        } else if (bankuai.getBoDong() >= KeChuang50BanKuaiData.getBoDong() * 0.8) {
+            name += " 1*";
+        } else {
+            name += " 0*";
         }
         return name;
     }
