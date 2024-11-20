@@ -17,10 +17,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.zip.Deflater;
@@ -56,6 +53,7 @@ public class Main {
 //常用的两个
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
 //常用的两个除系数，日常使用排序：todo **********
+        return getDeFen(bankuaiWithData) * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.5);//得分排序
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
         //实际收益排序； todo 考虑增加胜率的收益排序
 //        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();//1分钟后收益统计
@@ -63,7 +61,6 @@ public class Main {
 //        return bankuaiWithData.getTodayShengLv();//数学期望排序
 //        return bankuaiWithData.test0_EndIndexShouyim / bankuaiWithData.getBoDong();//区间收益统计
 //        return getDeFen(bankuaiWithData)  ;//得分排序
-        return getDeFen(bankuaiWithData) * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.5);//得分排序
 //        return bankuaiWithData.getBoDong();
         //前2分钟已有收益
 //        return (bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);
@@ -123,6 +120,7 @@ public class Main {
         if (hushen300BanKuaiData.todayMinuteDataList.size() >= testEndTimeIndex) {
             fillGuiYihuaShouyi(bankuaiWithDataList);
         }
+        totalLength = bankuaiWithDataList.size();
         //填充归一化、比例
         bankuaiWithDataList.forEach(e -> {
             try {
@@ -131,9 +129,6 @@ public class Main {
                 System.out.println("!!! 失败:" + e.getBankuaiName());
             }
         });
-        //过滤波动小的
-        bankuaiWithDataList = bankuaiWithDataList.stream().filter(e -> e.getBoDong() > 0.015).collect(Collectors.toList());
-        totalLength = bankuaiWithDataList.size();
         System.out.printf("总板块个数：%d\t", totalLength);
         //填充归一化排名
         fillGuiYiHuaPaiMing(bankuaiWithDataList);
@@ -204,6 +199,11 @@ public class Main {
         System.out.println("结束");
     }
 
+    //这些都是波动浮动小的大盘指标
+    static Set<String> neeSkipCode = Arrays.stream(new String[]{
+            "1.510310", "1.510500", "1.512010", "1.512040", "1.512090", "1.512120", "1.512160", "1.512190", "1.512260", "1.512280", "1.512290", "1.512360", "1.512380", "1.512390", "1.512400", "1.512510", "1.512520", "1.512530", "1.512550", "1.512640", "1.512650", "1.512700", "1.512730", "1.512750", "1.512770", "1.512800", "1.512820", "1.512890", "1.512910", "1.512950", "1.512960", "1.512970", "1.512990", "1.515020", "1.515080", "1.515100", "1.515110", "1.515120", "1.515130", "1.515150", "1.515160", "1.515180", "1.515190", "1.515200", "1.515220", "1.515290", "1.515300", "1.515310", "1.515330", "1.515350", "1.515360", "1.515380", "1.515450", "1.515530", "1.515550", "1.515580", "1.515590", "1.515600", "1.515650", "1.515660", "1.515680", "1.515760", "1.515770", "1.515800", "1.515810", "1.515860", "1.515890", "1.515900", "1.515910", "1.515920", "1.515950", "1.515960", "1.515990", "1.516020", "1.516060", "1.516080", "1.516110", "1.516120", "1.516130", "1.516210", "1.516220", "1.516300", "1.516310", "1.516500", "1.516520", "1.516530", "1.516550", "1.516560", "1.516570", "1.516600", "1.516650", "1.516670", "1.516720", "1.516750", "1.516760", "1.516810", "1.516830", "1.516910", "1.516930", "1.516950", "1.516960", "1.516970", "1.560020", "1.560030", "1.560050", "1.560060", "1.560070", "1.560080", "1.560100", "1.560150", "1.560180", "1.560280", "1.560330", "1.560350", "1.560500", "1.560520", "1.560550", "1.560560", "1.560580", "1.560650", "1.560700", "1.560860", "1.560880", "1.560950", "1.560960", "1.560990", "1.561000", "1.561060", "1.561120", "1.561130", "1.561170", "1.561180", "1.561190", "1.561320", "1.561330", "1.561350", "1.561360", "1.561500", "1.561510", "1.561550", "1.561560", "1.561580", "1.561600", "1.561700", "1.561760", "1.561790", "1.561900", "1.561920", "1.561950", "1.561960", "1.561990", "1.562000", "1.562060", "1.562310", "1.562320", "1.562330", "1.562340", "1.562350", "1.562390", "1.562510", "1.562530", "1.562550", "1.562580", "1.562600", "1.562700", "1.562850", "1.562890", "1.562900", "1.562910", "1.562960", "1.562990", "1.563000", "1.563020", "1.563030", "1.563080", "1.563090", "1.563150", "1.563180", "1.563350"
+    }).collect(Collectors.toSet());
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
@@ -226,6 +226,9 @@ public class Main {
             hushen300BanKuaiData = getBankuaiWithData("沪深300", "1.000300");
         });
         List<BanKuai> banKuaiList = parseAllBanKuai();
+        //过滤波动小的
+        banKuaiList = banKuaiList.stream().filter(e -> !neeSkipCode.contains(e.getCode())).collect(Collectors.toList());
+        //组装信息
         List<BankuaiWithData> bankuaiWithDataList = banKuaiList.stream()
                 .parallel()
                 .map(e -> {
