@@ -822,8 +822,11 @@ public class Main {
                     JSONObject jsonObject = (JSONObject) e;
                     BanKuai banKuai = new BanKuai();
                     banKuai.setName(jsonObject.getString("f14"));
-                    banKuai.setCode(jsonObject.getString("f13") +
-                            "." + jsonObject.getString("f12"));
+                    String code = jsonObject.getString("f12");
+                    if (!code.contains(".")) {
+                        code = jsonObject.getString("f13") + code;
+                    }
+                    banKuai.setCode(code);
                     banKuai.setEftName(jsonObject.getString("etfName") != null ? jsonObject.getString("etfName") : "etf");
                     banKuai.setEtfCode(jsonObject.getString("etfCode"));
                     banKuai.setSkipLog(Objects.equals(jsonObject.getBoolean("isSkip"), true));
