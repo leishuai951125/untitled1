@@ -125,7 +125,13 @@ public class Main {
             fillGuiYihuaShouyi(bankuaiWithDataList);
         }
         //填充归一化、比例
-        bankuaiWithDataList.forEach(e -> e.setXiangDuiBiLi30Day(getXiangDuiBiLi30Day(e)));
+        bankuaiWithDataList.forEach(e -> {
+            try {
+                e.setXiangDuiBiLi30Day(getXiangDuiBiLi30Day(e));
+            } catch (Exception exception) {
+                System.out.println("!!! 失败:" + e.getBankuaiName());
+            }
+        });
         //填充归一化排名
         fillGuiYiHuaPaiMing(bankuaiWithDataList);
         //填充开盘涨幅排名
@@ -228,7 +234,7 @@ public class Main {
                         }
                         return bankuaiWithData;
                     } catch (Exception exception) {
-                        System.out.println("！！！获取板块信息失败，板块" + e.eftName);
+                        System.out.println("！！！获取板块信息失败，板块:" + e.name);
                         return null;
                     }
                 }).filter(Objects::nonNull).collect(Collectors.toList());
