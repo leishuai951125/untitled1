@@ -56,13 +56,14 @@ public class Main {
 //常用的两个
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
 //常用的两个除系数，日常使用排序：todo **********
-        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
         //实际收益排序； todo 考虑增加胜率的收益排序
 //        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();//1分钟后收益统计
 //        return getTodayDiffAfter1min(bankuaiWithData) / Math.pow(bankuaiWithData.getTodayBoDong(), 0.5);//1分钟后收益统计
 //        return bankuaiWithData.getTodayShengLv();//数学期望排序
 //        return bankuaiWithData.test0_EndIndexShouyim / bankuaiWithData.getBoDong();//区间收益统计
-//        return getDeFen(bankuaiWithData);//得分排序
+//        return getDeFen(bankuaiWithData)  ;//得分排序
+        return getDeFen(bankuaiWithData) * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.5);//得分排序
 //        return bankuaiWithData.getBoDong();
         //前2分钟已有收益
 //        return (bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);
@@ -119,8 +120,6 @@ public class Main {
     public void main() throws IOException {
         long starMs = System.currentTimeMillis();
         List<BankuaiWithData> bankuaiWithDataList = getBankuaiWithData(readDataByFile);
-        System.out.printf("总板块个数：%d\t", bankuaiWithDataList.size());
-        totalLength = bankuaiWithDataList.size();
         if (hushen300BanKuaiData.todayMinuteDataList.size() >= testEndTimeIndex) {
             fillGuiYihuaShouyi(bankuaiWithDataList);
         }
@@ -132,6 +131,10 @@ public class Main {
                 System.out.println("!!! 失败:" + e.getBankuaiName());
             }
         });
+        //过滤波动小的
+        bankuaiWithDataList = bankuaiWithDataList.stream().filter(e -> e.getBoDong() > 0.015).collect(Collectors.toList());
+        totalLength = bankuaiWithDataList.size();
+        System.out.printf("总板块个数：%d\t", totalLength);
         //填充归一化排名
         fillGuiYiHuaPaiMing(bankuaiWithDataList);
         //填充开盘涨幅排名
