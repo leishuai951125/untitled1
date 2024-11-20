@@ -220,13 +220,18 @@ public class Main {
         List<BankuaiWithData> bankuaiWithDataList = banKuaiList.stream()
                 .parallel()
                 .map(e -> {
-                    BankuaiWithData bankuaiWithData = getBankuaiWithData(e.getName(), e.getCode());
-                    bankuaiWithData.banKuai = e;
-                    if (!StringUtils.isEmpty(e.getEtfCode())) {
-                        bankuaiWithData.etfBankuaiWithData = getBankuaiWithData(e.getEftName(), e.getEtfCode());
+                    try {
+                        BankuaiWithData bankuaiWithData = getBankuaiWithData(e.getName(), e.getCode());
+                        bankuaiWithData.banKuai = e;
+                        if (!StringUtils.isEmpty(e.getEtfCode())) {
+                            bankuaiWithData.etfBankuaiWithData = getBankuaiWithData(e.getEftName(), e.getEtfCode());
+                        }
+                        return bankuaiWithData;
+                    } catch (Exception exception) {
+                        System.out.println("！！！获取板块信息失败，板块" + e.eftName);
+                        return null;
                     }
-                    return bankuaiWithData;
-                }).collect(Collectors.toList());
+                }).filter(Objects::nonNull).collect(Collectors.toList());
         saveFile(new SaveFileData(KeChuang50BanKuaiData, hushen300BanKuaiData, bankuaiWithDataList));
         return bankuaiWithDataList;
     }
@@ -965,3 +970,7 @@ public class Main {
 
 //今日一分钟涨跌：0.680% 	今日开盘相对涨跌:0.858% [即:0.912%] 一分钟主流流入 1.45 :1 ;2分钟 0.8:1.1
 //中药：0.4:0.04  0.7:0.08
+
+
+//https://query.sse.com.cn/commonSoaQuery.do?jsonCallBack=jsonpCallback7107801&isPagination=true&pageHelp.pageSize=500&pageHelp.pageNo=1&pageHelp.beginPage=1&pageHelp.cacheSize=1&pageHelp.endPage=1&pagecache=false&sqlId=FUND_LIST&fundType=00&subClass=03&_=1732125094515
+//https://www.sse.com.cn/assortment/fund/etf/list/ 所有沪基etf
