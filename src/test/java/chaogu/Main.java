@@ -119,6 +119,7 @@ public class Main {
     public void main() throws IOException {
         long starMs = System.currentTimeMillis();
         List<BankuaiWithData> bankuaiWithDataList = getBankuaiWithData(readDataByFile);
+        System.out.printf("总板块个数：%d\t", bankuaiWithDataList.size());
         totalLength = bankuaiWithDataList.size();
         if (hushen300BanKuaiData.todayMinuteDataList.size() >= testEndTimeIndex) {
             fillGuiYihuaShouyi(bankuaiWithDataList);
@@ -828,7 +829,7 @@ public class Main {
                     banKuai.setSkipLog(Objects.equals(jsonObject.getBoolean("isSkip"), true));
                     return banKuai;
                 }).collect(Collectors.toList());
-//        banKuaiList = banKuaiList.stream().map(e -> {
+//        banKuaiList = banKuaiList.stream().filter(e -> !StringUtils.isEmpty(e.etfCode)).map(e -> {
 //            return new BanKuai(e.eftName, e.etfCode, e.name, e.code, e.isSkipLog);
 //        }).collect(Collectors.toList());
         return banKuaiList;
