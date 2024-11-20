@@ -824,7 +824,7 @@ public class Main {
                     banKuai.setName(jsonObject.getString("f14"));
                     String code = jsonObject.getString("f12");
                     if (!code.contains(".")) {
-                        code = jsonObject.getString("f13") + code;
+                        code = jsonObject.getString("f13") + "." + code;
                     }
                     banKuai.setCode(code);
                     banKuai.setEftName(jsonObject.getString("etfName") != null ? jsonObject.getString("etfName") : "etf");
