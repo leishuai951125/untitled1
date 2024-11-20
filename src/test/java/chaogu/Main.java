@@ -32,8 +32,8 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-18";
-    static String todayDate = "2024-11-19";
+    static String lastDate = "2024-11-19";
+    static String todayDate = "2024-11-20";
     static boolean readDataByFile = false;
     static double lastDapanStar2EndDiff = -2 / 100.0;
 
@@ -174,7 +174,7 @@ public class Main {
                     hushen300BanKuaiData.getBoDong() * 100
             );
         }
-        System.out.printf("科创50开盘涨跌：%.2f%%,今日大盘一分钟涨跌：%.2f%%, 一分钟后的收益：%.2f%%， 波动：%.2f%% \n",
+        System.out.printf("kechuang50开盘涨跌：%.2f%%,今日大盘一分钟涨跌：%.2f%%, 一分钟后的收益：%.2f%%， 波动：%.2f%% \n",
                 KeChuang50BanKuaiData.last2StartDiff * 100, KeChuang50BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100,
                 getTodayDiffAfter1min(KeChuang50BanKuaiData) * 100,
                 KeChuang50BanKuaiData.getBoDong() * 100
@@ -216,14 +216,16 @@ public class Main {
             hushen300BanKuaiData = getBankuaiWithData("沪深300", "1.000300");
         });
         List<BanKuai> banKuaiList = parseAllBanKuai();
-        List<BankuaiWithData> bankuaiWithDataList = banKuaiList.stream().parallel().map(e -> {
-            BankuaiWithData bankuaiWithData = getBankuaiWithData(e.getName(), e.getCode());
-            bankuaiWithData.banKuai = e;
-            if (!StringUtils.isEmpty(e.getEtfCode())) {
-                bankuaiWithData.etfBankuaiWithData = getBankuaiWithData(e.getEftName(), e.getEtfCode());
-            }
-            return bankuaiWithData;
-        }).collect(Collectors.toList());
+        List<BankuaiWithData> bankuaiWithDataList = banKuaiList.stream()
+                .parallel()
+                .map(e -> {
+                    BankuaiWithData bankuaiWithData = getBankuaiWithData(e.getName(), e.getCode());
+                    bankuaiWithData.banKuai = e;
+                    if (!StringUtils.isEmpty(e.getEtfCode())) {
+                        bankuaiWithData.etfBankuaiWithData = getBankuaiWithData(e.getEftName(), e.getEtfCode());
+                    }
+                    return bankuaiWithData;
+                }).collect(Collectors.toList());
         saveFile(new SaveFileData(KeChuang50BanKuaiData, hushen300BanKuaiData, bankuaiWithDataList));
         return bankuaiWithDataList;
     }
@@ -826,6 +828,9 @@ public class Main {
                     banKuai.setSkipLog(Objects.equals(jsonObject.getBoolean("isSkip"), true));
                     return banKuai;
                 }).collect(Collectors.toList());
+//        banKuaiList = banKuaiList.stream().map(e -> {
+//            return new BanKuai(e.eftName, e.etfCode, e.name, e.code, e.isSkipLog);
+//        }).collect(Collectors.toList());
         return banKuaiList;
     }
 
@@ -934,7 +939,10 @@ public class Main {
             } catch (InterruptedException ex) {
                 throw new RuntimeException(ex);
             } catch (ExecutionException ex) {
-                throw new RuntimeException(ex);
+                if (ex.getCause() instanceof RuntimeException) {
+                    throw (RuntimeException) (ex.getCause());
+                }
+                throw new RuntimeException(ex.getCause());
             }
         });
     }
