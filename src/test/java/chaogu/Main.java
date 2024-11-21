@@ -607,14 +607,15 @@ public class Main {
     }
 
     private static String getOneMinuteZhangFuColor(BankuaiWithData e) {
-        if (e.todayMinuteSort - e.last2StartDiffSort < -0.1 * totalLength
-                || e.todayMinuteDataList.get(0).startEndDiff < e.last2StartDiff) {
+        if (e.bankuaiName.contains("风电设备")) {
+//            System.out.println(e);
+        }
+        if (e.todayMinuteDataList.get(1).startEndDiff < e.last2StartDiff) {
             //一分钟后涨幅不如开盘
             return ANSI_GREEN;
         }
-        if (
-                e.todayMinuteSort - e.last2StartDiffSort > 0.1 * totalLength ||
-                        e.todayMinuteDataList.get(0).startEndDiff > e.last2StartDiff) {
+        if (e.todayMinuteSort - e.last2StartDiffSort > 0.2 * totalLength ||
+                e.todayMinuteDataList.get(1).startEndDiff > e.last2StartDiff) {
             //一分钟后涨幅增加
             return ANSI_RED;
         }
