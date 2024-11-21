@@ -587,6 +587,10 @@ public class Main {
     }
 
     private static String getKaiPanZhangFuColor(BankuaiWithData e) {
+        if (Math.abs(e.last2StartDiff) < e.getBoDong() * 0.2) {
+            //值太小，不算
+            return ANSI_RESET;
+        }
         if (e.last2StartDiffSort <= totalLength * 0.03) {
             //太差
             return ANSI_GREEN;
@@ -595,7 +599,7 @@ public class Main {
             //跌幅刚好
             return ANSI_RED;
         }
-        if (e.last2StartDiffSort >= totalLength * 0.9) {
+        if (e.last2StartDiffSort >= totalLength * 0.9 && e.last2StartDiff > e.getBoDong() * 0.5) {
             //涨幅太高, todo 根据相对值是否断层来判断是否过高
             return ANSI_GREEN;
         }
