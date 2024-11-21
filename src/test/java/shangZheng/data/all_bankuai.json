@@ -746,6 +746,7 @@
     "f12": "515780",
     "INDEX_CODE": "718711.MI",
     "f14": "浦银MSCI中国ETF",
+    "isSkip": true,
     "TRUSTEE_NAME": "中国银行股份有限公司"
   },
   {
@@ -1362,6 +1363,7 @@
     "f12": "560000",
     "INDEX_CODE": "H11052",
     "f14": "智慧电车ETF",
+    "isSkip": true,
     "TRUSTEE_NAME": "招商银行股份有限公司"
   },
   {

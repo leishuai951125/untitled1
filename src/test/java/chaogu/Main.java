@@ -29,10 +29,10 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-19";
-    static String todayDate = "2024-11-20";
+    static String lastDate = "2024-11-20";
+    static String todayDate = "2024-11-21";
     static boolean readDataByFile = false;
-    static double lastDapanStar2EndDiff = -2 / 100.0;
+    static double lastDapanStar2EndDiff = 1 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
 
@@ -587,7 +587,11 @@ public class Main {
         double todayMinuteXiangDui = e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100;
         double kaipanXiangDui = e.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100;
         double zuoRiXiangDui = (e.lastDayDetail.startEndDiff - lastDapanStar2EndDiff) * 100;
-        sumTodayDiffAfter1min.add(getTodayDiffAfter1min(e) * 100);
+        try {
+            sumTodayDiffAfter1min.add(getTodayDiffAfter1min(e) * 100);
+        } catch (Exception exception) {
+            System.out.println("！！！失败，" + e.bankuaiName);
+        }
         int deFen = getDeFen(e);
         String sub1 = String.format("板块：%-7s \t" +
                         //今日一分钟
