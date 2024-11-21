@@ -75,6 +75,12 @@ public class Main {
         if (ANSI_GREEN.equals(getJiaGePaiMingColor(e.getXiangDuiBiLi30Day()))) {
             deFen -= 20;
         }
+        if (ANSI_GREEN.equals(getOneMinuteZhangFuColor(e))) {
+            deFen -= 20;
+        }
+        if (ANSI_GREEN.equals(getKaiPanZhangFuColor(e))) {
+            deFen -= 20;
+        }
         if (ANSI_GREEN.equals(getEtfXiangDuiBanKuaiColor(e.getEtfBankuaiWithData(), e))) {
             deFen -= 10;
         } else if (ANSI_RED.equals(getEtfXiangDuiBanKuaiColor(e.getEtfBankuaiWithData(), e))) {
@@ -580,6 +586,41 @@ public class Main {
         return color;
     }
 
+    private static String getKaiPanZhangFuColor(BankuaiWithData e) {
+        if (e.last2StartDiffSort <= totalLength * 0.03) {
+            //太差
+            return ANSI_GREEN;
+        }
+        if (e.last2StartDiffSort <= totalLength * 0.4) {
+            //跌幅刚好
+            return ANSI_RED;
+        }
+        if (e.last2StartDiffSort >= totalLength * 0.9) {
+            //涨幅太高, todo 根据相对值是否断层来判断是否过高
+            return ANSI_GREEN;
+        }
+        return "";
+    }
+
+    private static String getOneMinuteZhangFuColor(BankuaiWithData e) {
+        if (e.todayMinuteSort - e.last2StartDiffSort < -0.1 * totalLength
+                || e.todayMinuteDataList.get(0).startEndDiff < e.last2StartDiff) {
+            //一分钟后涨幅不如开盘
+            return ANSI_GREEN;
+        }
+        if (
+                e.todayMinuteSort - e.last2StartDiffSort > 0.1 * totalLength ||
+                        e.todayMinuteDataList.get(0).startEndDiff > e.last2StartDiff) {
+            //一分钟后涨幅增加
+            return ANSI_RED;
+        }
+        if (e.todayMinuteSort < totalLength * 0.4) {
+            return ANSI_GREEN;
+        }
+        return ANSI_RESET;
+    }
+
+
     private static String todayOneMinutteDesc(BankuaiWithData e) {
         if (isSimpleMode) {
             return "板块： " + fillName(e.getBankuaiName()) + "  \t";
@@ -595,14 +636,11 @@ public class Main {
         int deFen = getDeFen(e);
         String sub1 = String.format("板块：%-7s \t" +
                         //今日一分钟
-                        (todayMinuteXiangDui > 0.5 && e.todayMinuteDataList.get(1).startEndDiff > 0.005 ? ANSI_RED :
-                                (todayMinuteXiangDui < 0 && e.todayMinuteDataList.get(1).startEndDiff < 0) ? ANSI_GREEN : ANSI_RESET) +
-                        "今日一分钟涨跌:%.3f%% " + ANSI_RESET +
+                        getOneMinuteZhangFuColor(e) + "今日一分钟涨跌:%.3f%% " + ANSI_RESET +
 //                        (deFen > 80 ? ANSI_RED : (deFen < 0 ? ANSI_GREEN : "")) + "得分【%d】\t" + ANSI_RESET +
                         (deFen > totalLength * 0.93 ? ANSI_RED : (deFen < 0 ? ANSI_GREEN : "")) + "得分【%d】\t" + ANSI_RESET +
                         //今日开盘
-//                        (kaipanXiangDui < 0 ? ANSI_RED : ANSI_GREEN) + "今日开盘相对涨跌:%.3f%%" +
-                        (e.last2StartDiffSort > 0 && e.last2StartDiffSort <= 50 ? ANSI_RED : "") + "今日开盘相对涨跌:%.3f%%" +
+                        getKaiPanZhangFuColor(e) + "今日开盘相对涨跌:%.3f%%" +
                         " [即:%.3f%%] %d，\t" + ANSI_RESET +
                         //昨日
                         getLastDayZhangFuColor(e) + "上日相比大盘涨跌:%.2f%%" +
