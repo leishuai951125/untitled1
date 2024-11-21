@@ -615,7 +615,7 @@ public class Main {
             return ANSI_GREEN;
         }
         if (e.todayMinuteSort - e.last2StartDiffSort > 0.2 * totalLength ||
-                e.todayMinuteDataList.get(1).startEndDiff > e.last2StartDiff) {
+                e.todayMinuteDataList.get(1).startEndDiff - e.last2StartDiff > e.getBoDong() * 0.2) {
             //一分钟后涨幅增加
             return ANSI_RED;
         }
