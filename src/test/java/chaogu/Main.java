@@ -20,7 +20,6 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.zip.Deflater;
 
 public class Main {
     enum RunMode {
@@ -29,9 +28,9 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-20";
-    static String todayDate = "2024-11-21";
-    static boolean readDataByFile = false;
+    static String lastDate = "2024-11-19";
+    static String todayDate = "2024-11-20";
+    static boolean readDataByFile = true;
     static double lastDapanStar2EndDiff = 1 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
@@ -53,7 +52,8 @@ public class Main {
 //常用的两个
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
 //常用的两个除系数，日常使用排序：todo **********
-        return getDeFen(bankuaiWithData) * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.5);//得分排序
+        return getDeFen(bankuaiWithData) * Math.pow(Math.abs(getDeFen(bankuaiWithData)), 0.2) *
+                Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.5);//得分排序
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
         //实际收益排序； todo 考虑增加胜率的收益排序
 //        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();//1分钟后收益统计
