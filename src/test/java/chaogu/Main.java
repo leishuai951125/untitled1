@@ -28,16 +28,16 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-18";
-    static String todayDate = "2024-11-19";
-    static boolean readDataByFile = true;
+    static String lastDate = "2024-11-21";
+    static String todayDate = "2024-11-22";
+    static boolean readDataByFile = false;
     static double lastDapanStar2EndDiff = 1 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
 
     static boolean needFilter = false;
     static boolean isSimpleMode = false;//简要模式
-    static boolean filterNoEtf = false;//过滤没有etf的板块
+    static boolean filterNoEtf = true;//过滤没有etf的板块
     static boolean needLogZhuLi = false;//是否打印主力信息
 
     static int testStartTimeIndex = 1;//当前时间是多少分钟
@@ -52,8 +52,10 @@ public class Main {
 //常用的两个
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
 //常用的两个除系数，日常使用排序：todo **********
-        return getDeFen(bankuaiWithData) * Math.pow(Math.abs(getDeFen(bankuaiWithData)), 0.2) *
-                Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.5);//得分排序
+        return
+                getDeFen(bankuaiWithData) *
+//                Math.pow(Math.abs(getDeFen(bankuaiWithData)), 0.2) *
+                        Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
         //实际收益排序； todo 考虑增加胜率的收益排序
 //        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();//1分钟后收益统计
@@ -68,7 +70,8 @@ public class Main {
     }
 
     private static int getDeFen(BankuaiWithData e) {
-        int deFen = (int) (e.todayMinuteSort * 2) - e.lastDayZhangFuSort - e.getXiangDuiBiLi30Day().guiyiHuaPaiMing - e.last2StartDiffSort / 5;
+        int deFen =
+                (int) (e.todayMinuteSort * 2) - e.lastDayZhangFuSort - e.getXiangDuiBiLi30Day().guiyiHuaPaiMing - e.last2StartDiffSort / 5;
         if (ANSI_GREEN.equals(getLastDayZhangFuColor(e))) {
             deFen -= 20;
         }
@@ -115,7 +118,7 @@ public class Main {
     //不允许：昨日排名过高 、开盘涨幅过高、etf 溢价>0.5%
 
     //上午开盘3分钟和收盘3分钟不可信
-    //谨慎购买涨幅反常的头部股票
+    //谨慎购买涨幅反常的头部股票、开盘前有利好消息的不买
 
 
     //盘中选股：排名 10～60 ，归一化为正，已有涨幅较小
