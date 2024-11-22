@@ -37,7 +37,7 @@ public class Main {
 
     static boolean needFilter = false;
     static boolean isSimpleMode = false;//简要模式
-    static boolean filterNoEtf = true;//过滤没有etf的板块
+    static boolean filterNoEtf = false;//过滤没有etf的板块
     static boolean needLogZhuLi = false;//是否打印主力信息
 
     static int testStartTimeIndex = 1;//当前时间是多少分钟
@@ -52,10 +52,7 @@ public class Main {
 //常用的两个
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
 //常用的两个除系数，日常使用排序：todo **********
-        return
-                getDeFen(bankuaiWithData) *
-//                Math.pow(Math.abs(getDeFen(bankuaiWithData)), 0.2) *
-                        Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
+        return getDeFen(bankuaiWithData) * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
         //实际收益排序； todo 考虑增加胜率的收益排序
 //        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();//1分钟后收益统计
@@ -71,7 +68,7 @@ public class Main {
 
     private static int getDeFen(BankuaiWithData e) {
         int deFen =
-                (int) (e.todayMinuteSort * 2) - e.lastDayZhangFuSort - e.getXiangDuiBiLi30Day().guiyiHuaPaiMing - e.last2StartDiffSort / 5;
+                e.todayMinuteSort * 2 - e.lastDayZhangFuSort - e.getXiangDuiBiLi30Day().guiyiHuaPaiMing - e.last2StartDiffSort / 5;
         if (ANSI_GREEN.equals(getLastDayZhangFuColor(e))) {
             deFen -= 20;
         }
@@ -617,12 +614,18 @@ public class Main {
             //一分钟后涨幅不如开盘
             return ANSI_GREEN;
         }
+        if (e.todayMinuteDataList.get(1).startEndDiff >= e.getBoDong() * 0.4
+                && e.todayMinuteDataList.get(1).startEndDiff <= e.getBoDong() * 0.7) {
+            //涨幅合适，todo 这种涨幅的板块太少可能也不可信；
+            return ANSI_RED;
+        }
         if (e.todayMinuteSort - e.last2StartDiffSort > 0.2 * totalLength ||
                 e.todayMinuteDataList.get(1).startEndDiff - e.last2StartDiff > e.getBoDong() * 0.2) {
             //一分钟后涨幅增加
-            return ANSI_RED;
+            return ANSI_RESET;
         }
-        if (e.todayMinuteSort < totalLength * 0.4) {
+        if (e.todayMinuteSort < totalLength * 0.2) {
+            //跌太狠
             return ANSI_GREEN;
         }
         return ANSI_RESET;
