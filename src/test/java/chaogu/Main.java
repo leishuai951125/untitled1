@@ -58,10 +58,10 @@ public class Main {
                 hushen300Diff = (hushen300Diff + kechuang50Diff) / 2;
                 double yuzhi = hushen300BanKuaiData.getBoDong() * (t <= 1 ? 0.25 : 0.35);
                 OneData oneData = hushen300BanKuaiData.todayMinuteDataList.get(i);
-                if (hushen300Diff > hushen300BanKuaiData.getBoDong() * yuzhi) {
+                if (hushen300Diff > yuzhi) {
                     System.out.printf("时间:%s,统计 %d 分钟, 大盘暴涨 ,涨幅：%.2f%%\n",
                             oneData.dateTime, t, hushen300Diff * 100);
-                } else if (hushen300Diff < -hushen300BanKuaiData.getBoDong() * yuzhi) {
+                } else if (hushen300Diff < -yuzhi) {
                     System.out.printf("时间:%s,统计 %d 分钟, 大盘暴跌 ,涨幅：%.2f%%\n",
                             oneData.dateTime, t, hushen300Diff * 100);
                 }
