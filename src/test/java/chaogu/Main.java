@@ -28,8 +28,8 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-14";
-    static String todayDate = "2024-11-15";
+    static String lastDate = "2024-11-20";
+    static String todayDate = "2024-11-21";
     static boolean readDataByFile = true;
     static double lastDapanStar2EndDiff = 1 / 100.0;
 
@@ -70,7 +70,7 @@ public class Main {
 //                    double yuzhi = 0.006;
                     double yuzhi = e.getBoDong() / 4;
                     if (hushen300Diff >= 0 && bankuaiDiff < -yuzhi) {
-                        fitDesc = "-条件1";
+                        fitDesc = ANSI_GREEN + "-条件1" + ANSI_RESET;
                     } else if (hushen300Diff <= 0.000 && bankuaiDiff > yuzhi) {
                         fitDesc = "条件1";
                     } else if (hushen300Diff <= 0.000 && bankuaiDiff > 0 && bankuaiDiff - hushen300Diff > yuzhi) {
@@ -672,7 +672,8 @@ public class Main {
             //跌幅刚好
             return ANSI_RED;
         }
-        if (e.last2StartDiffSort >= totalLength * 0.9 && e.last2StartDiff > e.getBoDong() * 0.3) {
+        if (e.last2StartDiffSort >= totalLength * 0.9 && e.last2StartDiff >= e.getBoDong() * 0.3) {
+            //开盘 last2StartDiff 压根不应该为正，正的太多问题更大
             //涨幅太高, todo 根据相对值是否断层来判断是否过高
             return ANSI_GREEN;
         }
@@ -689,7 +690,7 @@ public class Main {
         }
         if (e.todayMinuteDataList.get(1).startEndDiff >= e.getBoDong() * 0.25
                 && e.todayMinuteDataList.get(1).startEndDiff <= e.getBoDong() * 0.6) {
-            //涨幅合适，todo 这种涨幅的板块太少可能也不可信；
+            //涨幅合适，todo 这种涨幅的板块太少可能也不可信；因为此时行情大概了下跌
             return ANSI_RED;
         }
         if (e.todayMinuteSort - e.last2StartDiffSort > 0.2 * totalLength ||
