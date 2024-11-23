@@ -28,9 +28,10 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-20";
-    static String todayDate = "2024-11-21";
+    static String lastDate = "2024-11-13";
+    static String todayDate = "2024-11-14";
     static boolean readDataByFile = true;
+    static boolean needFilterChongFuBankuai = false;//一分钟后的机会中去重
     static double lastDapanStar2EndDiff = 1 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
@@ -48,7 +49,6 @@ public class Main {
     private static void testAfterOneMinuteJiHui(List<BankuaiWithData> bankuaiWithDataList) {
         Map<String, List<String>> time2desc = new HashMap<>();
         Set<String> allFitBanKuai = new HashSet<>(10);
-        boolean needFilterChongFuBankuai = false;//去重
         bankuaiWithDataList.forEach(e -> {
 //            if (needFilterChongFuBankuai && allFitBanKuai.contains(e.bankuaiName)) {
 //                return;
@@ -101,7 +101,8 @@ public class Main {
                                 e.last2StartDiff * 100, e.todayMinuteDataList.get(1).startEndDiff * 100,
                                 //截止收益,todo 截止收益差距过大可能要排除，截止收益的定义需要清晰（是否包含开盘本身）
                                 e.todayMinuteDataList.get(i).end / e.last30DayInfoMap.get(todayDate).start * 100 - 100,
-                                hushen300BanKuaiData.todayMinuteDataList.get(i).end / hushen300BanKuaiData.last30DayInfoMap.get(todayDate).start * 100 - 100
+                                hushen300BanKuaiData.todayMinuteDataList.get(i).end / hushen300BanKuaiData.last30DayInfoMap.get(todayDate).start * 50 +
+                                        KeChuang50BanKuaiData.todayMinuteDataList.get(i).end / KeChuang50BanKuaiData.last30DayInfoMap.get(todayDate).start * 50 - 100
                         );
                         time2desc.putIfAbsent(bankuaiOneData.dateTime, new ArrayList<>());
                         time2desc.get(bankuaiOneData.dateTime).add(fitDesc);
