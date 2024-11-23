@@ -48,13 +48,13 @@ public class Main {
     private static void testAfterOneMinuteJiHui(List<BankuaiWithData> bankuaiWithDataList) {
         Map<String, List<String>> time2desc = new HashMap<>();
         Set<String> allFitBanKuai = new HashSet<>(10);
-        boolean needFilterChongFuBankuai = true;//去重
+        boolean needFilterChongFuBankuai = false;//去重
         bankuaiWithDataList.forEach(e -> {
-            if (needFilterChongFuBankuai && allFitBanKuai.contains(e.bankuaiName)) {
-                return;
-            }
+//            if (needFilterChongFuBankuai && allFitBanKuai.contains(e.bankuaiName)) {
+//                return;
+//            }
             int startIndex = 2;
-            int maxSpan = 1;
+            int maxSpan = 2;
             for (int i = startIndex; i < e.todayMinuteDataList.size(); i++) {
                 for (int t = 1; t <= maxSpan; t++) {
                     if (i - t < startIndex - 1) {
@@ -68,28 +68,32 @@ public class Main {
                     hushen300Diff = (hushen300Diff + kechuang50Diff) / 2;
                     String fitDesc = null;
 //                    double yuzhi = 0.006;
-                    double yuzhi = e.getBoDong() / 4;
+                    double yuzhi = e.getBoDong() * (t <= 1 ? 0.25 : 0.35);
                     if (hushen300Diff >= 0 && bankuaiDiff < -yuzhi) {
                         fitDesc = ANSI_GREEN + "-条件1" + ANSI_RESET;
                     } else if (hushen300Diff <= 0.000 && bankuaiDiff > yuzhi) {
-                        fitDesc = "条件1";
+                        fitDesc = ANSI_RED + "+条件1" + ANSI_RESET;
                     } else if (hushen300Diff <= 0.000 && bankuaiDiff > 0 && bankuaiDiff - hushen300Diff > yuzhi) {
-//                        fitDesc = ANSI_GREEN + "条件2" + ANSI_RESET;
+//                        fitDesc = ANSI_GREEN + "+条件2" + ANSI_RESET;
                     } else if (hushen300Diff > 0 && bankuaiDiff - hushen300Diff > yuzhi &&
                             bankuaiDiff / hushen300Diff >= 3) {
-                        fitDesc = "条件3";//todo 合理的加入数据，考虑倍数
+//                        fitDesc = "+条件3";//todo 合理的加入数据，考虑倍数; 目前测试发现该分支反例较多
                     }
                     if (fitDesc != null) {
-                        if (needFilterChongFuBankuai && allFitBanKuai.contains(e.bankuaiName)) {
+                        if (needFilterChongFuBankuai && allFitBanKuai.contains(e.bankuaiName + fitDesc.charAt(0))) {
                             return;
                         }
-                        allFitBanKuai.add(e.bankuaiName);
-                        fitDesc += String.format("，时间:%s,统计 %d 分钟,板块:%s\t,涨幅：%.2f%%，板块收盘涨幅：%.2f%%，" +
+                        allFitBanKuai.add(e.bankuaiName + fitDesc.charAt(0));//把富豪带上
+                        fitDesc += String.format("，时间:%s,统计 %d 分钟," +
+                                        "板块:%s,波动:%.2f%%," +
+                                        "| 涨幅：%.2f%%，板块收盘涨幅：%.2f%% |" +
                                         "大盘收盘涨幅：%.2f%% ,50收盘涨跌:%.2f%%，" +
                                         "板块开盘：%.2f%%，板块一分钟：%.2f%%, " +
                                         "截止当前板块收益：%.2f%%,截止当前大盘收益：%.2f%% \n",
-                                bankuaiOneData.dateTime, t, e.bankuaiName.substring(0, Math.min(5, e.bankuaiName.length())), bankuaiDiff * 100,
-                                e.last30DayInfoMap.get(todayDate).end / e.todayMinuteDataList.get(i).end * 100 - 100,
+                                bankuaiOneData.dateTime.substring(11), t,
+                                e.bankuaiName.substring(0, Math.min(5, e.bankuaiName.length())), e.getBoDong() * 100,
+                                //板块
+                                bankuaiDiff * 100, e.last30DayInfoMap.get(todayDate).end / e.todayMinuteDataList.get(i).end * 100 - 100,
                                 //大盘收盘
                                 hushen300BanKuaiData.last30DayInfoMap.get(todayDate).end / hushen300BanKuaiData.todayMinuteDataList.get(i).end * 100 - 100,
                                 KeChuang50BanKuaiData.last30DayInfoMap.get(todayDate).end / KeChuang50BanKuaiData.todayMinuteDataList.get(i).end * 100 - 100,
@@ -110,7 +114,9 @@ public class Main {
         if (time2desc.size() != 0) {
             time2desc.keySet().stream().sorted().forEach(key -> {
                 System.out.println(key);
-                time2desc.get(key).forEach(desc -> System.out.printf("   %s", desc));
+                time2desc.get(key).forEach(desc -> {
+                    System.out.printf(" %s", desc);
+                });
             });
         }
         System.out.println("---------");
@@ -121,9 +127,9 @@ public class Main {
 //        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
 //常用的两个
-//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);
 //常用的两个除系数，日常使用排序：todo **********
-        return getDeFen(bankuaiWithData) * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
+//        return getDeFen(bankuaiWithData) * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
         //实际收益排序； todo 考虑增加胜率的收益排序
 //        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();//1分钟后收益统计
@@ -689,7 +695,7 @@ public class Main {
             return ANSI_GREEN;
         }
         if (e.todayMinuteDataList.get(1).startEndDiff >= e.getBoDong() * 0.25
-                && e.todayMinuteDataList.get(1).startEndDiff <= e.getBoDong() * 0.6) {
+                && e.todayMinuteDataList.get(1).startEndDiff <= e.getBoDong() * 0.5) {
             //涨幅合适，todo 这种涨幅的板块太少可能也不可信；因为此时行情大概了下跌
             return ANSI_RED;
         }
