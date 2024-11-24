@@ -28,11 +28,11 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-18";
-    static String todayDate = "2024-11-19";
+    static String lastDate = "2024-11-21";
+    static String todayDate = "2024-11-22";
     static boolean readDataByFile = true;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
-    static boolean testJiHui = true;//测试模式
+    static boolean testJiHui = false;//测试机会模式
     static double lastDapanStar2EndDiff = 1 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
@@ -428,7 +428,23 @@ public class Main {
 
     public static void saveFile(SaveFileData saveFileData) {
         String fileName = "/Users/leishuai/IdeaProjects/untitled1/src/test/java/chaogu/beifen/" + todayDate + ".txt";
+        String fileName_Full = "/Users/leishuai/IdeaProjects/untitled1/src/test/java/chaogu/beifen/" + todayDate + "_full.txt";
         try {
+            if (new File(fileName_Full).exists()) {
+                return;
+            }
+            if (System.currentTimeMillis() / 1000 / 3600 > 17 || System.currentTimeMillis() / 1000 / 3600 < 6) {
+                //是今天的数据
+                if (hushen300BanKuaiData.last30DayInfoList.get(hushen300BanKuaiData.last30DayInfoList.size() - 1).date.equals(todayDate)) {
+                    //非股市交易时间，记录完整数据
+                    FileWriter fileWriter2 = new FileWriter(fileName_Full);
+                    fileWriter2.write((JSON.toJSONString(saveFileData)));
+                    fileWriter2.flush();
+                    fileWriter2.close();
+                    return;
+                }
+            }
+            //记录非完整数据
             List<shangZheng.Main.OneDayDataDetail> last30DayInfoList = saveFileData.hushen300BanKuaiData.last30DayInfoList;
             if (!new File(fileName).exists() && saveFileData.hushen300BanKuaiData.todayMinuteDataList.size() >= 4
                     && last30DayInfoList.get(last30DayInfoList.size() - 1).date.equals(todayDate)) {
@@ -444,15 +460,15 @@ public class Main {
 
     public static SaveFileData getFile() {
         String fileName = "/Users/leishuai/IdeaProjects/untitled1/src/test/java/chaogu/beifen/" + todayDate + ".txt";
+        String fileName_Full = "/Users/leishuai/IdeaProjects/untitled1/src/test/java/chaogu/beifen/" + todayDate + "_full.txt";
         try {
             long start = System.currentTimeMillis();
-//            StringBuilder sb = new StringBuilder();
-//            Scanner sc = new Scanner(new BufferedReader(new FileReader(fileName), 10_000_000));
-//            if (sc.hasNextLine()) {
-//                sb.append(sc.nextLine());
-//            }
-//            String body = sb.toString();
-            String body = new String(Files.readAllBytes(Paths.get(fileName)));
+            String body = null;
+            if (new File(fileName_Full).exists()) {
+                body = new String(Files.readAllBytes(Paths.get(fileName_Full)));
+            } else {
+                body = new String(Files.readAllBytes(Paths.get(fileName)));
+            }
 //            System.out.println("cost:" + (System.currentTimeMillis() - start));
             return JSON.parseObject(body, SaveFileData.class);
         } catch (IOException e) {
