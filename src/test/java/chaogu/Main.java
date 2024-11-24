@@ -337,11 +337,11 @@ public class Main {
         System.out.printf("===========\t                             %s\t                %s\n", jiaGePaiMingColorTips, lastDayZhangFuColorTips);
         resultListt.forEach(System.out::println);
         tongji(bankuaiWithDataList);
+
+        loopJiHui(bankuaiWithDataList);//机会
+
         executorService.shutdown();
         System.out.println("结束");
-
-
-        loopJiHui(bankuaiWithDataList);
     }
 
     private static void loopJiHui(List<BankuaiWithData> bankuaiWithDataList) {
