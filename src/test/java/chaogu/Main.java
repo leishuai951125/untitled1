@@ -32,6 +32,7 @@ public class Main {
     static String todayDate = "2024-11-19";
     static boolean readDataByFile = true;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
+    static boolean testJiHui = true;//测试模式
     static double lastDapanStar2EndDiff = 1 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
@@ -341,16 +342,32 @@ public class Main {
 
 
         System.out.println("\n---------");
-        for (int kk = 2; kk < 100; kk++) {
-            testAfterOneMinuteJiHui(bankuaiWithDataList, kk);
+
+        long shiZhongSecond = 10;//10s一次
+        for (int kk = 2; kk < 1000000; kk++) {
+            if (System.currentTimeMillis() / 1000 % 660 < 30) {
+                sleep(2 * 1000);
+                continue;
+            }
+            System.out.println("  ...." + new Date().toLocaleString());
+            long beMs = System.currentTimeMillis();
+            testAfterOneMinuteJiHui(bankuaiWithDataList, testJiHui ? kk : 100000);
             bankuaiWithDataList = getBankuaiWithData(readDataByFile);
             if (hushen300BanKuaiData.todayMinuteDataList.size() >= testEndTimeIndex) {
                 fillGuiYihuaShouyi(bankuaiWithDataList);
             }
+            sleep(shiZhongSecond * 1000 - (System.currentTimeMillis() - beMs));
         }
         System.out.println("---------");
     }
 
+    private static void sleep(long ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     //这些都是波动浮动小的大盘指标
     static Set<String> neeSkipCode = Arrays.stream(new String[]{
