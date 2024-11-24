@@ -357,6 +357,10 @@ public class Main {
                 fillGuiYihuaShouyi(bankuaiWithDataList);
             }
             sleep(shiZhongSecond * 1000 - (System.currentTimeMillis() - beMs));
+            if (!testJiHui && hushen300BanKuaiData.todayMinuteDataList.size() >= 240) {
+                //结束
+                break;
+            }
         }
         System.out.println("---------");
     }
