@@ -28,8 +28,8 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-22";
-    static String todayDate = "2024-11-25";
+    static String lastDate = "2024-11-21";
+    static String todayDate = "2024-11-22";
     static boolean readDataByFile = false;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
     static boolean testJiHui = false;//测试机会模式
@@ -367,11 +367,11 @@ public class Main {
             if (hushen300BanKuaiData.todayMinuteDataList.size() >= testEndTimeIndex) {
                 fillGuiYihuaShouyi(bankuaiWithDataList);
             }
-            sleep(shiZhongSecond * 1000 - (System.currentTimeMillis() - beMs));
             if (!testJiHui && hushen300BanKuaiData.todayMinuteDataList.size() >= 240) {
                 //结束
                 break;
             }
+            sleep(shiZhongSecond * 1000 - (System.currentTimeMillis() - beMs));
         }
         System.out.println("---------");
     }
