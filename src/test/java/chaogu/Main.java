@@ -144,7 +144,10 @@ public class Main {
                         double dapanDangQianShouYi = hushen300BanKuaiData.todayMinuteDataList.get(i).end / hushen300BanKuaiData.last30DayInfoMap.get(todayDate).start * 0.5 +
                                 KeChuang50BanKuaiData.todayMinuteDataList.get(i).end / KeChuang50BanKuaiData.last30DayInfoMap.get(todayDate).start * 0.5 - 1;
                         String bankuaiShouYiColor = ANSI_RESET;
-                        if (bankuaiDiff > 0 && bankuaiDangQianShouYi - dapanDangQianShouYi > 2.5 * bankuaiDiff) {
+                        if (bankuaiDiff > 0 && (
+                                bankuaiDangQianShouYi - dapanDangQianShouYi > 2.5 * bankuaiDiff //涨太多
+                                        || bankuaiDangQianShouYi - dapanDangQianShouYi < -1.5 * bankuaiDiff //跌太多，反弹不可信
+                        )) {
                             bankuaiShouYiColor = ANSI_GREEN;
                         }
                         String yifenzhongShouYiColor = ANSI_RESET;
