@@ -28,8 +28,8 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-21";
-    static String todayDate = "2024-11-22";
+    static String lastDate = "2024-11-22";
+    static String todayDate = "2024-11-25";
     static boolean readDataByFile = false;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
     static boolean testJiHui = false;//测试机会模式
