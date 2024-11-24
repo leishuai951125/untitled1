@@ -136,7 +136,7 @@ public class Main {
                 }
             }
         });
-        System.out.println("\n---------");
+
         if (time2desc.size() != 0) {
             time2desc.keySet().stream().sorted().forEach(key -> {
                 if (!printedJiHuiSet.contains(key)) {
@@ -151,7 +151,6 @@ public class Main {
                 });
             });
         }
-        System.out.println("---------");
     }
 
     private static void daZengDaJiang() {
@@ -299,7 +298,9 @@ public class Main {
         }).collect(Collectors.toList());
         long endMs = System.currentTimeMillis();
 
+//        System.out.println("\n---------");
 //        testAfterOneMinuteJiHui(bankuaiWithDataList);
+//        System.out.println("---------");
 
         if (isSimpleMode) {
             System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
@@ -339,6 +340,7 @@ public class Main {
         System.out.println("结束");
 
 
+        System.out.println("\n---------");
         for (int kk = 2; kk < 100; kk++) {
             testAfterOneMinuteJiHui(bankuaiWithDataList, kk);
             bankuaiWithDataList = getBankuaiWithData(readDataByFile);
@@ -346,6 +348,7 @@ public class Main {
                 fillGuiYihuaShouyi(bankuaiWithDataList);
             }
         }
+        System.out.println("---------");
     }
 
 
@@ -426,7 +429,7 @@ public class Main {
 //            }
 //            String body = sb.toString();
             String body = new String(Files.readAllBytes(Paths.get(fileName)));
-            System.out.println("cost:" + (System.currentTimeMillis() - start));
+//            System.out.println("cost:" + (System.currentTimeMillis() - start));
             return JSON.parseObject(body, SaveFileData.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
