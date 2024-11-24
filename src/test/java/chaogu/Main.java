@@ -46,7 +46,9 @@ public class Main {
     static double shangZhangGaiLv = 0.5;
 
 
-    private static void testAfterOneMinuteJiHui(List<BankuaiWithData> bankuaiWithDataList) {
+    static Set<String> printedJiHuiSet = new HashSet<>(100);//避免重复打印
+
+    private static void testAfterOneMinuteJiHui(List<BankuaiWithData> bankuaiWithDataList, int offsetForTest) {
         Map<String, List<String>> time2desc = new HashMap<>();
         Set<String> allFitBanKuai = new HashSet<>(10);
 
@@ -58,7 +60,7 @@ public class Main {
 //            }
             int startIndex = 2;
             int maxSpan = 2;
-            for (int i = startIndex; i < e.todayMinuteDataList.size(); i++) {
+            for (int i = startIndex; i < e.todayMinuteDataList.size() && i <= offsetForTest; i++) {
                 System.out.print("");
                 for (int t = 1; t <= maxSpan; t++) {
                     if (i - t < startIndex - 1) {
@@ -87,6 +89,8 @@ public class Main {
                         if (needFilterChongFuBankuai && allFitBanKuai.contains(e.bankuaiName + fitDesc.charAt(0))) {
                             return;
                         }
+                        allFitBanKuai.add(e.bankuaiName + fitDesc.charAt(0));//把符号带上
+
                         //------颜色------
                         double bankuaiDangQianShouYi = e.todayMinuteDataList.get(i).end / e.last30DayInfoMap.get(todayDate).start - 1;
                         double dapanDangQianShouYi = hushen300BanKuaiData.todayMinuteDataList.get(i).end / hushen300BanKuaiData.last30DayInfoMap.get(todayDate).start * 0.5 +
@@ -104,7 +108,6 @@ public class Main {
                             yifenDapanColor = ANSI_GREEN;
                         }
                         //----颜色end----
-                        allFitBanKuai.add(e.bankuaiName + fitDesc.charAt(0));//把富豪带上
                         fitDesc += String.format("，时间:%s,统计 %d 分钟," +
                                         "板块:%s,波动:%.2f%%,| " +
                                         "涨幅：" + yifenzhongShouYiColor + "%.2f%%，" + yifenDapanColor + "%.2f%%" + ANSI_RESET + "，板块收盘涨幅：%.2f%% |" +
@@ -136,9 +139,15 @@ public class Main {
         System.out.println("\n---------");
         if (time2desc.size() != 0) {
             time2desc.keySet().stream().sorted().forEach(key -> {
-                System.out.println(key);
+                if (!printedJiHuiSet.contains(key)) {
+                    System.out.println(key);
+                    printedJiHuiSet.add(key);
+                }
                 time2desc.get(key).forEach(desc -> {
-                    System.out.printf(" %s", desc);
+                    if (!printedJiHuiSet.contains(desc)) {
+                        System.out.printf(" %s", desc);
+                        printedJiHuiSet.add(desc);
+                    }
                 });
             });
         }
@@ -290,7 +299,7 @@ public class Main {
         }).collect(Collectors.toList());
         long endMs = System.currentTimeMillis();
 
-        testAfterOneMinuteJiHui(bankuaiWithDataList);
+//        testAfterOneMinuteJiHui(bankuaiWithDataList);
 
         if (isSimpleMode) {
             System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
@@ -329,6 +338,14 @@ public class Main {
         executorService.shutdown();
         System.out.println("结束");
 
+
+        for (int kk = 2; kk < 100; kk++) {
+            testAfterOneMinuteJiHui(bankuaiWithDataList, kk);
+            bankuaiWithDataList = getBankuaiWithData(readDataByFile);
+            if (hushen300BanKuaiData.todayMinuteDataList.size() >= testEndTimeIndex) {
+                fillGuiYihuaShouyi(bankuaiWithDataList);
+            }
+        }
     }
 
 
