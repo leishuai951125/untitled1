@@ -341,8 +341,11 @@ public class Main {
         System.out.println("结束");
 
 
-        System.out.println("\n---------");
+        loopJiHui(bankuaiWithDataList);
+    }
 
+    private static void loopJiHui(List<BankuaiWithData> bankuaiWithDataList) {
+        System.out.println("\n---------");
         long shiZhongSecond = 30 / 3;//每秒分母次
         for (int kk = 2; kk < 1000000; kk++) {
             long beMs = System.currentTimeMillis();
