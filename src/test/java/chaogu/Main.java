@@ -108,17 +108,24 @@ public class Main {
                         if (bankuaiDiff > 0 && hushen300Diff < -hushen300BanKuaiData.getBoDong() * 0.15) {
                             yifenDapanColor = ANSI_GREEN;
                         }
+                        String banKuaiColor = ANSI_RESET;
+                        if (bankuaiDiff > 0 && !Objects.equals(bankuaiShouYiColor, ANSI_GREEN)
+                                && !Objects.equals(yifenzhongShouYiColor, ANSI_GREEN) && !Objects.equals(yifenDapanColor, ANSI_GREEN)) {
+                            banKuaiColor = ANSI_RED;
+                        }
                         //----颜色end----
                         fitDesc += String.format("，时间:%s,统计 %d 分钟," +
-                                        "板块:%s,波动:%.2f%%,| " +
+                                        banKuaiColor + "板块:%s , etf:%s" + ANSI_RESET
+                                        + ",波动:%.2f%%,| " +
                                         "涨幅：" + yifenzhongShouYiColor + "%.2f%%，" + yifenDapanColor + "%.2f%%" + ANSI_RESET + "，板块收盘涨幅：%.2f%% |" +
                                         "大盘收盘涨幅：%.2f%% ,50收盘涨跌:%.2f%%，" +
-                                        "板块开盘：%.2f%%，板块一分钟：%.2f%%, " +
+                                        "\n        板块开盘：%.2f%%，板块一分钟：%.2f%%, " +
                                         bankuaiShouYiColor + "截止当前板块收益：%.2f%%" + ANSI_RESET +
                                         ",截止当前大盘收益：%.2f%% \n",
                                 bankuaiOneData.dateTime.substring(11), t,
                                 //板块名，波动
-                                e.bankuaiName.substring(0, Math.min(5, e.bankuaiName.length())), e.getBoDong() * 100,
+                                e.bankuaiName.substring(0, Math.min(5, e.bankuaiName.length())), e.banKuai.eftName,
+                                e.getBoDong() * 100,
                                 //板块
                                 bankuaiDiff * 100, hushen300Diff * 100, e.last30DayInfoMap.get(todayDate).end / e.todayMinuteDataList.get(i).end * 100 - 100,
                                 //大盘收盘
