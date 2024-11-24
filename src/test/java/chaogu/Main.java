@@ -28,24 +28,71 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-21";
-    static String todayDate = "2024-11-22";
-    static boolean readDataByFile = true;
+    static String lastDate = "2024-11-22";
+    static String todayDate = "2024-11-25";
+    static boolean readDataByFile = false;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
     static boolean testJiHui = false;//测试机会模式
-    static double lastDapanStar2EndDiff = 1 / 100.0;
+    static double lastDapanStar2EndDiff = -3 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
 
     static boolean needFilter = false;
     static boolean isSimpleMode = false;//简要模式
-    static boolean filterNoEtf = false;//过滤没有etf的板块
+    static boolean filterNoEtf = true;//过滤没有etf的板块
     static boolean needLogZhuLi = false;//是否打印主力信息
 
     static int testStartTimeIndex = 1;//当前时间是多少分钟
     static int testEndTimeIndex = 120;//当前时间是多少分钟
     static double shangZhangGaiLv = 0.5;
 
+
+    static double getSortValue(BankuaiWithData bankuaiWithData) {
+//        return bankuaiWithData.testMinuteShouYiSum;
+//        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
+//常用的两个
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);
+//常用的两个除系数，日常使用排序：todo **********
+        return getDeFen(bankuaiWithData) * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
+//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
+        //实际收益排序； todo 考虑增加胜率的收益排序
+//        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();//1分钟后收益统计
+//        return getTodayDiffAfter1min(bankuaiWithData) / Math.pow(bankuaiWithData.getTodayBoDong(), 0.5);//1分钟后收益统计
+//        return bankuaiWithData.getTodayShengLv();//数学期望排序
+//        return bankuaiWithData.test0_EndIndexShouyim / bankuaiWithData.getBoDong();//区间收益统计
+//        return getDeFen(bankuaiWithData)  ;//得分排序
+//        return bankuaiWithData.getBoDong();
+        //前2分钟已有收益
+//        return (bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);
+//        return (bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2) / bankuaiWithData.getBoDong();
+    }
+
+    private static int getDeFen(BankuaiWithData e) {
+        int deFen =
+                e.todayMinuteSort * 2 - e.lastDayZhangFuSort - e.getXiangDuiBiLi30Day().guiyiHuaPaiMing - e.last2StartDiffSort / 5;
+        if (ANSI_GREEN.equals(getLastDayZhangFuColor(e))) {
+            deFen -= 20;
+        }
+        if (ANSI_GREEN.equals(getJiaGePaiMingColor(e.getXiangDuiBiLi30Day()))) {
+            deFen -= 20;
+        }
+        if (ANSI_GREEN.equals(getOneMinuteZhangFuColor(e))) {
+            deFen -= 20;
+        }
+        if (ANSI_GREEN.equals(getKaiPanZhangFuColor(e))) {
+            deFen -= 20;
+        }
+        if (ANSI_GREEN.equals(getEtfXiangDuiBanKuaiColor(e.getEtfBankuaiWithData(), e))) {
+            deFen -= 10;
+        } else if (ANSI_RED.equals(getEtfXiangDuiBanKuaiColor(e.getEtfBankuaiWithData(), e))) {
+            deFen += 10;
+        }
+        if (!CollectionUtils.isEmpty(e.zhuLiList) && e.zhuLiList.get(0).getZhuLi() < -1 && e.zhuLiList.get(0).getChaoDaDan() < -1) {
+            deFen -= 10;
+        }
+        return deFen;
+    }
 
     static Set<String> printedJiHuiSet = new HashSet<>(100);//避免重复打印
 
@@ -184,52 +231,6 @@ public class Main {
         }
     }
 
-    static double getSortValue(BankuaiWithData bankuaiWithData) {
-//        return bankuaiWithData.testMinuteShouYiSum;
-//        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
-//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
-//常用的两个
-        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);
-//常用的两个除系数，日常使用排序：todo **********
-//        return getDeFen(bankuaiWithData) * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
-//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
-        //实际收益排序； todo 考虑增加胜率的收益排序
-//        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();//1分钟后收益统计
-//        return getTodayDiffAfter1min(bankuaiWithData) / Math.pow(bankuaiWithData.getTodayBoDong(), 0.5);//1分钟后收益统计
-//        return bankuaiWithData.getTodayShengLv();//数学期望排序
-//        return bankuaiWithData.test0_EndIndexShouyim / bankuaiWithData.getBoDong();//区间收益统计
-//        return getDeFen(bankuaiWithData)  ;//得分排序
-//        return bankuaiWithData.getBoDong();
-        //前2分钟已有收益
-//        return (bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);
-//        return (bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff / 2) / bankuaiWithData.getBoDong();
-    }
-
-    private static int getDeFen(BankuaiWithData e) {
-        int deFen =
-                e.todayMinuteSort * 2 - e.lastDayZhangFuSort - e.getXiangDuiBiLi30Day().guiyiHuaPaiMing - e.last2StartDiffSort / 5;
-        if (ANSI_GREEN.equals(getLastDayZhangFuColor(e))) {
-            deFen -= 20;
-        }
-        if (ANSI_GREEN.equals(getJiaGePaiMingColor(e.getXiangDuiBiLi30Day()))) {
-            deFen -= 20;
-        }
-        if (ANSI_GREEN.equals(getOneMinuteZhangFuColor(e))) {
-            deFen -= 20;
-        }
-        if (ANSI_GREEN.equals(getKaiPanZhangFuColor(e))) {
-            deFen -= 20;
-        }
-        if (ANSI_GREEN.equals(getEtfXiangDuiBanKuaiColor(e.getEtfBankuaiWithData(), e))) {
-            deFen -= 10;
-        } else if (ANSI_RED.equals(getEtfXiangDuiBanKuaiColor(e.getEtfBankuaiWithData(), e))) {
-            deFen += 10;
-        }
-        if (!CollectionUtils.isEmpty(e.zhuLiList) && e.zhuLiList.get(0).getZhuLi() < -1 && e.zhuLiList.get(0).getChaoDaDan() < -1) {
-            deFen -= 10;
-        }
-        return deFen;
-    }
 
     static ExecutorService executorService = Executors.newFixedThreadPool(300);
     public static BankuaiWithData KeChuang50BanKuaiData;
