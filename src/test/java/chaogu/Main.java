@@ -343,14 +343,14 @@ public class Main {
 
         System.out.println("\n---------");
 
-        long shiZhongSecond = 10;//10s一次
+        long shiZhongSecond = 30 / 3;//每秒分母次
         for (int kk = 2; kk < 1000000; kk++) {
-            if (System.currentTimeMillis() / 1000 % 660 < 30) {
+            long beMs = System.currentTimeMillis();
+            if (beMs / 1000 % 60 <= 30 && beMs / 1000 % 60 >= 5) {
                 sleep(2 * 1000);
                 continue;
             }
             System.out.println("  ...." + new Date().toLocaleString());
-            long beMs = System.currentTimeMillis();
             testAfterOneMinuteJiHui(bankuaiWithDataList, testJiHui ? kk : 100000);
             bankuaiWithDataList = getBankuaiWithData(readDataByFile);
             if (hushen300BanKuaiData.todayMinuteDataList.size() >= testEndTimeIndex) {
