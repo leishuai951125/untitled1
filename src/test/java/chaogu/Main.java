@@ -32,7 +32,7 @@ public class Main {
     static String todayDate = "2024-11-25";
     static boolean readDataByFile = false;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
-    static boolean testJiHui = false;//测试机会模式
+    static boolean testJiHui = true;//测试机会模式
     static double lastDapanStar2EndDiff = -3 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
@@ -71,7 +71,6 @@ public class Main {
     private static int getDeFen(BankuaiWithData e) {
         int deFen =
                 e.todayMinuteSort * 2
-//                2 * totalLength
                         - e.lastDayZhangFuSort - e.getXiangDuiBiLi30Day().guiyiHuaPaiMing
                         - e.last2StartDiffSort / 5;
         if (ANSI_GREEN.equals(getLastDayZhangFuColor(e))) {
@@ -333,9 +332,9 @@ public class Main {
         }).collect(Collectors.toList());
         long endMs = System.currentTimeMillis();
 
-        System.out.println("\n---------");
-        testAfterOneMinuteJiHui(bankuaiWithDataList, 1000000);
-        System.out.println("---------");
+//        System.out.println("\n---------");
+//        testAfterOneMinuteJiHui(bankuaiWithDataList, 1000000);
+//        System.out.println("---------");
 
         if (isSimpleMode) {
             System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
@@ -372,7 +371,7 @@ public class Main {
         resultListt.forEach(System.out::println);
         tongji(bankuaiWithDataList);
 
-//        loopJiHui(bankuaiWithDataList);//机会
+        loopJiHui(bankuaiWithDataList);//机会
 
         executorService.shutdown();
         System.out.println("结束");
@@ -825,6 +824,10 @@ public class Main {
             //涨幅太高, todo 根据相对值是否断层来判断是否过高
             return ANSI_GREEN;
         }
+        if (e.last2StartDiffSort > totalLength * 0.8) {
+            //涨太多
+            return ANSI_YELLOW;
+        }
         return "";
     }
 
@@ -835,6 +838,10 @@ public class Main {
         if (e.todayMinuteDataList.get(1).startEndDiff < e.last2StartDiff) {
             //一分钟后涨幅不如开盘
             return ANSI_GREEN;
+        }
+        if (e.todayMinuteDataList.get(1).startEndDiff > e.getBoDong() * 0.5) {
+            //涨太多
+            return ANSI_YELLOW;
         }
         if (e.todayMinuteDataList.get(1).startEndDiff >= e.getBoDong() * 0.25
                 && e.todayMinuteDataList.get(1).startEndDiff <= e.getBoDong() * 0.5) {
