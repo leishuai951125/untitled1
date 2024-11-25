@@ -847,7 +847,7 @@ public class Main {
         int deFen = getDeFen(e);
         String sub1 = String.format("板块：%-7s \t" +
                         //今日一分钟
-                        getOneMinuteZhangFuColor(e) + "今日一分钟涨跌:%.3f%% " + ANSI_RESET +
+                        getOneMinuteZhangFuColor(e) + "今日一分钟涨跌:%.3f%%【%.0f】" + ANSI_RESET +
 //                        (deFen > 80 ? ANSI_RED : (deFen < 0 ? ANSI_GREEN : "")) + "得分【%d】\t" + ANSI_RESET +
                         (deFen > totalLength * 0.93 ? ANSI_RED : (deFen < 0 ? ANSI_GREEN : "")) + "得分【%d】\t" + ANSI_RESET +
                         //今日开盘
@@ -858,7 +858,7 @@ public class Main {
                         " [即:%.2f%%] %d，" + ANSI_RESET,
                 fillName(e),
                 //今日一分钟
-                e.todayMinuteDataList.get(1).startEndDiff * 100,
+                e.todayMinuteDataList.get(1).startEndDiff * 100, e.todayMinuteDataList.get(1).startEndDiff / e.getBoDong() * 100,
                 deFen,
                 //今日开盘
                 kaipanXiangDui,
