@@ -159,6 +159,7 @@ public class Main {
                         if (bankuaiDiff > 0 &&
                                 (
                                         isWeiXianShouYi(bankuaiDangQianShouYi, dapanDangQianShouYi, bankuaiDiff, i, e)
+                                                //todo 打印结果
                                                 || isWeiXianShouYi(bankuaiDangQianShouYi2, dapanDangQianShouYi2, bankuaiDiff, i, e)
                                 )
                         ) {
@@ -184,8 +185,8 @@ public class Main {
                                         "涨幅：" + yifenzhongShouYiColor + "%.2f%%，" + yifenDapanColor + "%.2f%%" + ANSI_RESET + "，板块收盘涨幅：%.2f%% |" +
                                         "大盘收盘涨幅：%.2f%% ,50收盘涨跌:%.2f%%，" +
                                         "\n        板块开盘：%.2f%%，板块一分钟：%.2f%%, " +
-                                        bankuaiShouYiColor + "截止当前板块收益：%.2f%%" + ANSI_RESET +
-                                        ",截止当前大盘收益：%.2f%% \n",
+                                        bankuaiShouYiColor + "截止当前板块收益：%.2f%%【%.2f%%】" + ANSI_RESET +
+                                        ",截止当前大盘收益：%.2f%%【%.2f%%】\n",
                                 bankuaiOneData.dateTime.substring(11), t,
                                 //板块名，波动
                                 e.bankuaiName.substring(0, Math.min(5, e.bankuaiName.length())), e.banKuai.eftName,
@@ -198,8 +199,8 @@ public class Main {
                                 //板块
                                 e.last2StartDiff * 100, e.todayMinuteDataList.get(1).startEndDiff * 100,
                                 //截止收益,todo 截止收益差距过大可能要排除，截止收益的定义需要清晰（是否包含开盘本身）
-                                bankuaiDangQianShouYi * 100,
-                                dapanDangQianShouYi * 100
+                                bankuaiDangQianShouYi * 100, bankuaiDangQianShouYi2 * 100,
+                                dapanDangQianShouYi * 100, dapanDangQianShouYi2 * 100
                         );
                         time2desc.putIfAbsent(bankuaiOneData.dateTime, new ArrayList<>());
                         time2desc.get(bankuaiOneData.dateTime).add(fitDesc);
