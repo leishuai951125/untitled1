@@ -39,7 +39,7 @@ public class Main {
 
     static boolean needFilter = false;
     static boolean isSimpleMode = false;//简要模式
-    static boolean filterNoEtf = true;//过滤没有etf的板块
+    static boolean filterNoEtf = false;//过滤没有etf的板块
     static boolean needLogZhuLi = false;//是否打印主力信息
 
     static int testStartTimeIndex = 1;//当前时间是多少分钟
@@ -61,7 +61,7 @@ public class Main {
 //        return getTodayDiffAfter1min(bankuaiWithData) / Math.pow(bankuaiWithData.getTodayBoDong(), 0.5);//1分钟后收益统计
 //        return bankuaiWithData.getTodayShengLv();//数学期望排序
 //        return bankuaiWithData.test0_EndIndexShouyim / bankuaiWithData.getBoDong();//区间收益统计
-//        return getDeFen(bankuaiWithData)  ;//得分排序
+//        return getDeFen(bankuaiWithData);//得分排序
 //        return bankuaiWithData.getBoDong();
         //前2分钟已有收益
 //        return (bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff - bankuaiWithData.last2StartDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);
@@ -70,7 +70,10 @@ public class Main {
 
     private static int getDeFen(BankuaiWithData e) {
         int deFen =
-                e.todayMinuteSort * 2 - e.lastDayZhangFuSort - e.getXiangDuiBiLi30Day().guiyiHuaPaiMing - e.last2StartDiffSort / 5;
+                e.todayMinuteSort * 2
+//                2 * totalLength
+                        - e.lastDayZhangFuSort - e.getXiangDuiBiLi30Day().guiyiHuaPaiMing
+                        - e.last2StartDiffSort / 5;
         if (ANSI_GREEN.equals(getLastDayZhangFuColor(e))) {
             deFen -= 20;
         }
@@ -120,6 +123,7 @@ public class Main {
                     double hushen300Diff = hushen300BanKuaiData.todayMinuteDataList.get(i).end / hushen300BanKuaiData.todayMinuteDataList.get(i - t).end - 1;
                     double kechuang50Diff = KeChuang50BanKuaiData.todayMinuteDataList.get(i).end / KeChuang50BanKuaiData.todayMinuteDataList.get(i - t).end - 1;
                     hushen300Diff = (hushen300Diff + kechuang50Diff) / 2;
+                    double dapanBodong = hushen300BanKuaiData.getBoDong() / 2 + KeChuang50BanKuaiData.getBoDong() / 2;
                     String fitDesc = null;
 //                    double yuzhi = 0.006;
                     double yuzhi = e.getBoDong() * (t <= 1 ? 0.25 : 0.35);
@@ -127,6 +131,10 @@ public class Main {
                         fitDesc = ANSI_GREEN + "-条件1" + ANSI_RESET;
                     } else if (hushen300Diff <= 0.00 && bankuaiDiff > yuzhi) {
                         fitDesc = ANSI_RED + "+条件1" + ANSI_RESET;
+                    } else if (hushen300Diff > 0.00 && hushen300Diff < dapanBodong * 0.1 &&
+                            bankuaiDiff / e.getBoDong() / (hushen300Diff / dapanBodong) > 4) {
+                        //比大盘涨幅高4倍
+                        fitDesc = ANSI_RED + "+条件1.1" + ANSI_RESET;
                     } else if (hushen300Diff <= 0.000 && bankuaiDiff > 0 && bankuaiDiff - hushen300Diff > yuzhi) {
 //                        fitDesc = ANSI_GREEN + "+条件2" + ANSI_RESET;
                     } else if (hushen300Diff > 0 && bankuaiDiff - hushen300Diff > yuzhi &&
@@ -146,7 +154,9 @@ public class Main {
                         String bankuaiShouYiColor = ANSI_RESET;
                         if (bankuaiDiff > 0 && (
                                 bankuaiDangQianShouYi - dapanDangQianShouYi > 2.5 * bankuaiDiff //涨太多
+                                        || bankuaiDangQianShouYi - dapanDangQianShouYi > (i < 15 ? 0.4 : 0.5) * e.getBoDong() //涨太多
                                         || bankuaiDangQianShouYi - dapanDangQianShouYi < -1.5 * bankuaiDiff //跌太多，反弹不可信
+                                        || bankuaiDangQianShouYi - dapanDangQianShouYi < -(i < 15 ? 0.4 : 0.6) * e.getBoDong() //跌太多，反弹不可信
                         )) {
                             bankuaiShouYiColor = ANSI_GREEN;
                         }
