@@ -106,7 +106,7 @@ public class Main {
 //        daZengDaJiang();
 
         bankuaiWithDataList.forEach(e -> {
-//            if (e.bankuaiName.contains("汽车服务")) { //打断点查问题
+//            if (e.bankuaiName.contains("黄金股票")) { //打断点查问题
 //                System.out.print("");
 //            }
             int startIndex = 2;
@@ -132,6 +132,7 @@ public class Main {
                     } else if (hushen300Diff <= 0.00 && bankuaiDiff > yuzhi) {
                         fitDesc = ANSI_RED + "+条件1" + ANSI_RESET;
                     } else if (hushen300Diff > 0.00 && hushen300Diff < dapanBodong * 0.1 &&
+                            bankuaiDiff > yuzhi &&
                             bankuaiDiff / e.getBoDong() / (hushen300Diff / dapanBodong) > 4) {
                         //比大盘涨幅高4倍
                         fitDesc = ANSI_RED + "+条件1.1" + ANSI_RESET;
@@ -149,15 +150,18 @@ public class Main {
 
                         //------颜色------
                         double bankuaiDangQianShouYi = e.todayMinuteDataList.get(i).end / e.last30DayInfoMap.get(todayDate).start - 1;
+                        double bankuaiDangQianShouYi2 = e.todayMinuteDataList.get(i).end / e.last30DayInfoMap.get(lastDate).end - 1;
                         double dapanDangQianShouYi = hushen300BanKuaiData.todayMinuteDataList.get(i).end / hushen300BanKuaiData.last30DayInfoMap.get(todayDate).start * 0.5 +
                                 KeChuang50BanKuaiData.todayMinuteDataList.get(i).end / KeChuang50BanKuaiData.last30DayInfoMap.get(todayDate).start * 0.5 - 1;
+                        double dapanDangQianShouYi2 = hushen300BanKuaiData.todayMinuteDataList.get(i).end / hushen300BanKuaiData.last30DayInfoMap.get(lastDate).end * 0.5 +
+                                KeChuang50BanKuaiData.todayMinuteDataList.get(i).end / KeChuang50BanKuaiData.last30DayInfoMap.get(lastDate).end * 0.5 - 1;
                         String bankuaiShouYiColor = ANSI_RESET;
-                        if (bankuaiDiff > 0 && (
-                                bankuaiDangQianShouYi - dapanDangQianShouYi > 2.5 * bankuaiDiff //涨太多
-                                        || bankuaiDangQianShouYi - dapanDangQianShouYi > (i < 15 ? 0.4 : 0.5) * e.getBoDong() //涨太多
-                                        || bankuaiDangQianShouYi - dapanDangQianShouYi < -1.5 * bankuaiDiff //跌太多，反弹不可信
-                                        || bankuaiDangQianShouYi - dapanDangQianShouYi < -(i < 15 ? 0.4 : 0.6) * e.getBoDong() //跌太多，反弹不可信
-                        )) {
+                        if (bankuaiDiff > 0 &&
+                                (
+                                        isWeiXianShouYi(bankuaiDangQianShouYi, dapanDangQianShouYi, bankuaiDiff, i, e)
+                                                || isWeiXianShouYi(bankuaiDangQianShouYi2, dapanDangQianShouYi2, bankuaiDiff, i, e)
+                                )
+                        ) {
                             bankuaiShouYiColor = ANSI_GREEN;
                         }
                         String yifenzhongShouYiColor = ANSI_RESET;
@@ -219,6 +223,14 @@ public class Main {
                 });
             });
         }
+    }
+
+    private static boolean isWeiXianShouYi(double bankuaiDangQianShouYi, double dapanDangQianShouYi, double bankuaiDiff, int i, BankuaiWithData e) {
+        return bankuaiDangQianShouYi - dapanDangQianShouYi > 2.5 * bankuaiDiff //涨太多
+                || bankuaiDangQianShouYi - dapanDangQianShouYi > (i < 15 ? 0.4 : 0.5) * e.getBoDong() //涨太多
+                || bankuaiDangQianShouYi - dapanDangQianShouYi < -1.5 * bankuaiDiff //跌太多，反弹不可信
+                || bankuaiDangQianShouYi - dapanDangQianShouYi < -(i < 15 ? 0.4 : 0.6) * e.getBoDong() //跌太多，反弹不可信
+                ;
     }
 
     private static void daZengDaJiang() {
@@ -320,9 +332,9 @@ public class Main {
         }).collect(Collectors.toList());
         long endMs = System.currentTimeMillis();
 
-//        System.out.println("\n---------");
-//        testAfterOneMinuteJiHui(bankuaiWithDataList);
-//        System.out.println("---------");
+        System.out.println("\n---------");
+        testAfterOneMinuteJiHui(bankuaiWithDataList, 1000000);
+        System.out.println("---------");
 
         if (isSimpleMode) {
             System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
@@ -359,7 +371,7 @@ public class Main {
         resultListt.forEach(System.out::println);
         tongji(bankuaiWithDataList);
 
-        loopJiHui(bankuaiWithDataList);//机会
+//        loopJiHui(bankuaiWithDataList);//机会
 
         executorService.shutdown();
         System.out.println("结束");
