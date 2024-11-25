@@ -444,7 +444,7 @@ public class Main {
             if (new File(fileName_Full).exists()) {
                 return;
             }
-            if (System.currentTimeMillis() / 1000 / 3600 > 17 || System.currentTimeMillis() / 1000 / 3600 < 6) {
+            if ((System.currentTimeMillis() / 1000 / 3600 % 24) > 17 || (System.currentTimeMillis() / 1000 / 3600 % 24) < 6) {
                 //是今天的数据
                 if (hushen300BanKuaiData.last30DayInfoList.get(hushen300BanKuaiData.last30DayInfoList.size() - 1).date.equals(todayDate)) {
                     //非股市交易时间，记录完整数据
