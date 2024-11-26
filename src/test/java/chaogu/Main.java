@@ -130,7 +130,7 @@ public class Main {
                     double dapanBodong = hushen300BanKuaiData.getBoDong() / 2 + KeChuang50BanKuaiData.getBoDong() / 2;
                     String fitDesc = null;
 //                    double yuzhi = 0.006;
-                    double yuzhi = e.getBoDong() * (t <= 1 ? 0.25 : 0.35);
+                    double yuzhi = e.getBoDong() * (t <= 1 ? 0.3 : 0.35);
                     if (hushen300Diff >= -0.00 && bankuaiDiff < -yuzhi) {
                         fitDesc = ANSI_GREEN + "-条件1" + ANSI_RESET;
                     } else if (hushen300Diff <= 0.00 && bankuaiDiff > yuzhi) {
@@ -186,7 +186,7 @@ public class Main {
                         fitDesc += String.format("，时间:%s,统计 %d 分钟," +
                                         banKuaiColor + "板块:%s , etf:%s" + ANSI_RESET
                                         + ",波动:%.2f%%,| " +
-                                        "涨幅：" + yifenzhongShouYiColor + "%.2f%%，" + yifenDapanColor + "%.2f%%" + ANSI_RESET + "，板块收盘涨幅：%.2f%% |" +
+                                        "涨幅：" + yifenzhongShouYiColor + "%.2f%%【%.0f%%】，" + yifenDapanColor + "%.2f%%" + ANSI_RESET + "，板块收盘涨幅：%.2f%% |" +
                                         "大盘收盘涨幅：%.2f%% ,50收盘涨跌:%.2f%%，" +
                                         "\n        板块开盘：%.2f%%，板块一分钟：%.2f%%, " +
                                         bankuaiShouYiColor + "截止当前板块收益：%.2f%%【%.2f%%】" + ANSI_RESET +
@@ -196,7 +196,7 @@ public class Main {
                                 e.bankuaiName.substring(0, Math.min(5, e.bankuaiName.length())), e.banKuai.eftName,
                                 e.getBoDong() * 100,
                                 //板块
-                                bankuaiDiff * 100, hushen300Diff * 100, e.last30DayInfoMap.get(todayDate).end / e.todayMinuteDataList.get(i).end * 100 - 100,
+                                bankuaiDiff * 100, bankuaiDiff / e.getBoDong() * 100, hushen300Diff * 100, e.last30DayInfoMap.get(todayDate).end / e.todayMinuteDataList.get(i).end * 100 - 100,
                                 //大盘收盘
                                 hushen300BanKuaiData.last30DayInfoMap.get(todayDate).end / hushen300BanKuaiData.todayMinuteDataList.get(i).end * 100 - 100,
                                 KeChuang50BanKuaiData.last30DayInfoMap.get(todayDate).end / KeChuang50BanKuaiData.todayMinuteDataList.get(i).end * 100 - 100,
