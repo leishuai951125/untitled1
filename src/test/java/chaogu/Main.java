@@ -22,17 +22,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class Main {
+    public static void main(String[] args) {
+        long ms = System.currentTimeMillis();
+        System.out.println(ms / 1000 / 3600 % 24);
+    }
+
     enum RunMode {
         YuCe, JiaoYan;
     }
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-22";
-    static String todayDate = "2024-11-25";
+    static String lastDate = "2024-11-25";
+    static String todayDate = "2024-11-26";
     static boolean readDataByFile = false;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
-    static boolean testJiHui = true;//测试机会模式
+    static boolean testJiHui = false;//测试机会模式
     static double lastDapanStar2EndDiff = -3 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
@@ -386,6 +391,7 @@ public class Main {
                 sleep(2 * 1000);
                 continue;
             }
+            beMs = System.currentTimeMillis();
             System.out.println("  ...." + new Date().toLocaleString());
             testAfterOneMinuteJiHui(bankuaiWithDataList, testJiHui ? kk : 100000);
             bankuaiWithDataList = getBankuaiWithData(readDataByFile);
@@ -466,7 +472,7 @@ public class Main {
             if (new File(fileName_Full).exists()) {
                 return;
             }
-            if ((System.currentTimeMillis() / 1000 / 3600 % 24) > 17 || (System.currentTimeMillis() / 1000 / 3600 % 24) < 6) {
+            if ((System.currentTimeMillis() / 1000 / 3600 + 8) % 24 > 17 || (System.currentTimeMillis() / 1000 / 3600 + 8) % 24 < 6) {
                 //是今天的数据
                 if (hushen300BanKuaiData.last30DayInfoList.get(hushen300BanKuaiData.last30DayInfoList.size() - 1).date.equals(todayDate)) {
                     //非股市交易时间，记录完整数据
