@@ -33,10 +33,11 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-25";
-    static String todayDate = "2024-11-26";
+    static String lastDate = "2024-11-26";
+    static String todayDate = "2024-11-27";
     static boolean readDataByFile = false;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
+    static boolean zhiDingJiHui = true;
     static boolean testJiHui = false;//测试机会模式
     static double lastDapanStar2EndDiff = -3 / 100.0;
 
@@ -48,7 +49,7 @@ public class Main {
     static boolean needLogZhuLi = false;//是否打印主力信息
 
     static int testStartTimeIndex = 1;//当前时间是多少分钟
-    static int testEndTimeIndex = 120;//当前时间是多少分钟
+    static int testEndTimeIndex = 30;//当前时间是多少分钟
     static double shangZhangGaiLv = 0.5;
 
 
@@ -59,12 +60,13 @@ public class Main {
 //常用的两个
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);
 //常用的两个除系数，日常使用排序：todo **********
-        return getDeFen(bankuaiWithData) * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
+//        return getDeFen(bankuaiWithData) * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
         //实际收益排序； todo 考虑增加胜率的收益排序
 //        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();//1分钟后收益统计
 //        return getTodayDiffAfter1min(bankuaiWithData) / Math.pow(bankuaiWithData.getTodayBoDong(), 0.5);//1分钟后收益统计
 //        return bankuaiWithData.getTodayShengLv();//数学期望排序
+        return bankuaiWithData.testMinuteShouYiSum / bankuaiWithData.getBoDong();//归一化收益
 //        return bankuaiWithData.test0_EndIndexShouyim / bankuaiWithData.getBoDong();//区间收益统计
 //        return getDeFen(bankuaiWithData);//得分排序
 //        return bankuaiWithData.getBoDong();
@@ -128,8 +130,8 @@ public class Main {
                     double kechuang50Diff = KeChuang50BanKuaiData.todayMinuteDataList.get(i).end / KeChuang50BanKuaiData.todayMinuteDataList.get(i - t).end - 1;
                     hushen300Diff = (hushen300Diff + kechuang50Diff) / 2;
                     double dapanBodong = hushen300BanKuaiData.getBoDong() / 2 + KeChuang50BanKuaiData.getBoDong() / 2;
+//                    double bankuaiBodong = i <= 5 ? e.getBoDong() : e.getTodayBoDongByMinutes(i);
                     String fitDesc = null;
-//                    double yuzhi = 0.006;
                     double yuzhi = e.getBoDong() * (t <= 1 ? 0.3 : 0.35);
                     if (hushen300Diff >= -0.00 && bankuaiDiff < -yuzhi) {
                         fitDesc = ANSI_GREEN + "-条件1" + ANSI_RESET;
@@ -337,9 +339,12 @@ public class Main {
         }).collect(Collectors.toList());
         long endMs = System.currentTimeMillis();
 
-//        System.out.println("\n---------");
-//        testAfterOneMinuteJiHui(bankuaiWithDataList, 1000000);
-//        System.out.println("---------");
+        if (zhiDingJiHui) {
+            System.out.println("\n---------");
+            testAfterOneMinuteJiHui(bankuaiWithDataList, 1000000);
+            System.out.println("---------");
+        }
+
 
         if (isSimpleMode) {
             System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
@@ -376,7 +381,12 @@ public class Main {
         resultListt.forEach(System.out::println);
         tongji(bankuaiWithDataList);
 
-        loopJiHui(bankuaiWithDataList);//机会
+//        loopJiHui(bankuaiWithDataList);//机会
+        if (!zhiDingJiHui) {
+            System.out.println("\n---------");
+            testAfterOneMinuteJiHui(bankuaiWithDataList, 1000000);
+            System.out.println("---------");
+        }
 
         executorService.shutdown();
         System.out.println("结束");
@@ -436,6 +446,8 @@ public class Main {
             hushen300BanKuaiData = getByFile.hushen300BanKuaiData;
             return getByFile.bankuaiWithDataList;
         }
+
+        //A股平均股价：47.800005
         waitAll(() -> {
             KeChuang50BanKuaiData = getBankuaiWithData("科技创新50", "1.588000");
         }, () -> {
@@ -1114,6 +1126,11 @@ public class Main {
 
         public double getTodayBoDong() {
             return todayMaxPrice / todayMinPrice - 1;
+        }
+
+        public double getTodayBoDongByMinutes(int endMinute) {
+            return todayMinuteDataList.subList(1, Math.min(endMinute + 1, todayMinuteDataList.size())).stream()
+                    .mapToDouble(e -> Math.abs(e.startEndDiff)).average().getAsDouble();
         }
 
         //一分钟后的胜率
