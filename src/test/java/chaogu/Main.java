@@ -33,8 +33,8 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-26";
-    static String todayDate = "2024-11-27";
+    static String lastDate = "2024-11-27";
+    static String todayDate = "2024-11-28";
     static boolean readDataByFile = false;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
     static boolean zhiDingJiHui = true;
@@ -49,7 +49,7 @@ public class Main {
     static boolean needLogZhuLi = false;//是否打印主力信息
 
     static int testStartTimeIndex = 1;//当前时间是多少分钟
-    static int testEndTimeIndex = 30;//当前时间是多少分钟
+    static int testEndTimeIndex = 15;//当前时间是多少分钟
     static double shangZhangGaiLv = 0.5;
 
 
@@ -60,13 +60,14 @@ public class Main {
 //常用的两个
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);
 //常用的两个除系数，日常使用排序：todo **********
-//        return getDeFen(bankuaiWithData) * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
+        return getDeFen(bankuaiWithData) * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
         //实际收益排序； todo 考虑增加胜率的收益排序
 //        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();//1分钟后收益统计
 //        return getTodayDiffAfter1min(bankuaiWithData) / Math.pow(bankuaiWithData.getTodayBoDong(), 0.5);//1分钟后收益统计
 //        return bankuaiWithData.getTodayShengLv();//数学期望排序
-        return bankuaiWithData.testMinuteShouYiSum / bankuaiWithData.getBoDong();//归一化收益
+        //todo 没有头部板块时看这个
+//        return bankuaiWithData.testMinuteShouYiSum / Math.pow(bankuaiWithData.getBoDong(), 0.3);//归一化收益
 //        return bankuaiWithData.test0_EndIndexShouyim / bankuaiWithData.getBoDong();//区间收益统计
 //        return getDeFen(bankuaiWithData);//得分排序
 //        return bankuaiWithData.getBoDong();
@@ -288,6 +289,16 @@ public class Main {
 
     //上午开盘3分钟和收盘3分钟不可信
     //谨慎购买涨幅反常的头部股票、开盘前有利好消息的不买
+    private static void testAfterOneMinuteJiHuiV2(List<BankuaiWithData> bankuaiWithDataList) {
+        int offset = 40;
+        bankuaiWithDataList.stream().map((a) -> {
+                    a.shouyiTemp = (a.todayMinuteDataList.get(offset).end / a.todayMinuteDataList.get(0).end - 1) / a.getTodayBoDongByMinutes(offset);
+                    return a;
+                }).sorted((a, b) -> -(int) ((a.shouyiTemp - b.shouyiTemp) * 10000))
+                .forEach(e -> {
+                    System.out.printf("name:%s ; shouyiTmp:%.2f%% \n", e.getBankuaiName(), e.shouyiTemp * 100);
+                });
+    }
 
 
     //盘中选股：排名 10～60 ，归一化为正，已有涨幅较小
@@ -298,6 +309,7 @@ public class Main {
         if (hushen300BanKuaiData.todayMinuteDataList.size() >= testEndTimeIndex) {
             fillGuiYihuaShouyi(bankuaiWithDataList);
         }
+//        testAfterOneMinuteJiHuiV2(bankuaiWithDataList);
         totalLength = bankuaiWithDataList.size();
         //填充归一化、比例
         bankuaiWithDataList.forEach(e -> {
@@ -1101,6 +1113,7 @@ public class Main {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class BankuaiWithData {
+        double shouyiTemp;//仅 testAfterOneMinuteJiHuiV2 使用
         BanKuai banKuai;
         String bankuaiName;
         List<OneData> todayMinuteDataList;
