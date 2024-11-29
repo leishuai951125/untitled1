@@ -400,7 +400,7 @@ public class Main {
         String keChuangSortColor = keChuangSort / bankuaiWithDataList.size() * 1.0 < 0.3 ? ANSI_RED :
                 (keChuangSort / bankuaiWithDataList.size() * 1.0 > 0.7 ? ANSI_GREEN : "");
         System.out.printf("kechuang50开盘涨跌：%.2f%%,今日一分钟涨跌：%.2f%%, 一分钟后的收益：%.2f%%， 波动：%.2f%%  ," +
-                        keChuangSortColor + "排位: %d/%d \n" + ANSI_RESET,
+                        keChuangSortColor + "评分排位: %d/%d \n" + ANSI_RESET,
                 KeChuang50BanKuaiData.last2StartDiff * 100, KeChuang50BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100,
                 getTodayDiffAfter1min(KeChuang50BanKuaiData) * 100,
                 KeChuang50BanKuaiData.getBoDong() * 100,
