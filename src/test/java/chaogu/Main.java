@@ -191,9 +191,12 @@ public class Main {
                         }
                         //----颜色end----
                         fitDesc += String.format("，时间:%s,统计 %d 分钟," +
+                                        //板块名，波动
                                         banKuaiColor + "板块:%s , etf:%s" + ANSI_RESET
                                         + ",波动:%.2f%%,| " +
+                                        //板块
                                         "涨幅：" + yifenzhongShouYiColor + "%.2f%%【%.0f%%】，" + yifenDapanColor + "%.2f%%" + ANSI_RESET + "，板块收盘涨幅：%.2f%% |" +
+                                        //大盘收盘
                                         "大盘收盘涨幅：%.2f%% ,50收盘涨跌:%.2f%%，" +
                                         "\n        板块开盘：%.2f%%，板块一分钟：%.2f%%, " +
                                         bankuaiShouYiColor + "截止当前板块收益：%.2f%%【%.2f%%】" + ANSI_RESET +
