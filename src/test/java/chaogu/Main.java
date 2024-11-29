@@ -33,8 +33,8 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-27";
-    static String todayDate = "2024-11-28";
+    static String lastDate = "2024-11-21";
+    static String todayDate = "2024-11-22";
     static boolean readDataByFile = true;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
     static boolean zhiDingJiHui = true;
@@ -382,14 +382,14 @@ public class Main {
                 hushen300Sort = i + 1;
             }
         }
-        String keChuangSortColor = keChuangSort * 1.0 / bankuaiWithDataList.size() < 0.3 ? ANSI_RED :
+        String keChuangSortColor = keChuangSort * 1.0 / bankuaiWithDataList.size() < 0.2 ? ANSI_RED :
                 (keChuangSort * 1.0 / bankuaiWithDataList.size() > 0.5 ? ANSI_GREEN : "");
-        String hushen300SortColor = hushen300Sort * 1.0 / bankuaiWithDataList.size() < 0.3 ? ANSI_RED :
+        String hushen300SortColor = hushen300Sort * 1.0 / bankuaiWithDataList.size() < 0.2 ? ANSI_RED :
                 (hushen300Sort * 1.0 / bankuaiWithDataList.size() > 0.5 ? ANSI_GREEN : "");
 
         System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
                         "昨日大盘涨跌：%.2f%% \n" +
-                        "今日沪深300开盘涨跌：%.2f%%,今日一分钟涨跌：%.2f%%, 一分钟后的收益：%.2f%%， 波动：%.2f%% ," +
+                        "今日沪深300开盘涨跌：%.2f%%,今日一分钟涨跌：%.2f%%, 一分钟后的收益：%.2f%%， 波动：%.2f%% , " +
                         hushen300SortColor + "评分排位: %d/%d \n" + ANSI_RESET,
                 new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0,
                 lastDapanStar2EndDiff * 100,
