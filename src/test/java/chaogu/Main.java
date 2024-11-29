@@ -47,7 +47,7 @@ public class Main {
     static boolean isSimpleMode = false;//简要模式
     static boolean filterNoEtf = false;//过滤没有etf的板块
     static boolean needLogZhuLi = false;//是否打印主力信息
-
+    static boolean show2minuteShouYi = false;//是否打印第二分钟收益
     static int testStartTimeIndex = 1;//当前时间是多少分钟
     static int testEndTimeIndex = 15;//当前时间是多少分钟
     static double shangZhangGaiLv = 0.5;
@@ -55,6 +55,7 @@ public class Main {
 
     static double getSortValue(BankuaiWithData bankuaiWithData) {
         double oneDiff = bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+        double twoDiff = bankuaiWithData.getTodayMinuteDataList().size() < 3 ? 0 : bankuaiWithData.getTodayMinuteDataList().get(2).startEndDiff;
         int defen = getDeFen(bankuaiWithData);
         //1分钟etf涨跌；
 //        return bankuaiWithData.getEtfBankuaiWithData() == null ? 0 : bankuaiWithData.etfBankuaiWithData.todayMinuteDataList.get(1).startEndDiff;
@@ -63,8 +64,12 @@ public class Main {
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
 //常用的两个
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);
+        //第二分钟涨幅排序
+//        return twoDiff / (twoDiff + oneDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);
+//        return Math.abs(twoDiff * (twoDiff - oneDiff)) / bankuaiWithData.getBoDong() / bankuaiWithData.getBoDong() * (twoDiff < 0 ? -1 : 1);
+        return (twoDiff - oneDiff / 2) * (oneDiff - bankuaiWithData.last2StartDiff / 2) / bankuaiWithData.getBoDong() / bankuaiWithData.getBoDong();
 //常用的两个除系数，日常使用排序：todo **********
-        return (oneDiff < 0 || defen < 0 ? -1 : 1) * Math.abs(oneDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
+//        return (oneDiff < 0 || defen < 0 ? -1 : 1) * Math.abs(oneDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
 //        return oneDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
         //实际收益排序； todo 考虑增加胜率的收益排序
 //        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();//1分钟后收益统计
@@ -902,13 +907,16 @@ public class Main {
         if (isSimpleMode) {
             return "板块： " + fillName(e.getBankuaiName()) + "  \t";
         }
-        double todayMinuteXiangDui = e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100;
         double kaipanXiangDui = e.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100;
         double zuoRiXiangDui = (e.lastDayDetail.startEndDiff - lastDapanStar2EndDiff) * 100;
         int deFen = getDeFen(e);
+        String twoMinuteShouYiDesc = String.format("今日2分钟涨跌:%.3f%%【%.1f】",
+                e.todayMinuteDataList.get(2).startEndDiff * 100, e.todayMinuteDataList.get(2).startEndDiff / e.getBoDong() * 100);
         String sub1 = String.format("板块：%-7s \t" +
                         //今日一分钟
-                        getOneMinuteZhangFuColor(e) + "今日一分钟涨跌:%.3f%%【%.0f】" + ANSI_RESET +
+                        getOneMinuteZhangFuColor(e) + "今日一分钟涨跌:%.3f%%【%.1f】" + ANSI_RESET +
+                        //第二分钟收益
+                        (show2minuteShouYi ? twoMinuteShouYiDesc : "") +
 //                        (deFen > 80 ? ANSI_RED : (deFen < 0 ? ANSI_GREEN : "")) + "得分【%d】\t" + ANSI_RESET +
                         (deFen > totalLength * 0.93 ? ANSI_RED : (deFen < 0 ? ANSI_GREEN : "")) + "得分【%d】\t" + ANSI_RESET +
                         //今日开盘
