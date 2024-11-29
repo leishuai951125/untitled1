@@ -383,9 +383,9 @@ public class Main {
             }
         }
         String keChuangSortColor = keChuangSort * 1.0 / bankuaiWithDataList.size() < 0.3 ? ANSI_RED :
-                (keChuangSort * 1.0 / bankuaiWithDataList.size() > 0.7 ? ANSI_GREEN : "");
+                (keChuangSort * 1.0 / bankuaiWithDataList.size() > 0.5 ? ANSI_GREEN : "");
         String hushen300SortColor = hushen300Sort * 1.0 / bankuaiWithDataList.size() < 0.3 ? ANSI_RED :
-                (hushen300Sort * 1.0 / bankuaiWithDataList.size() > 0.7 ? ANSI_GREEN : "");
+                (hushen300Sort * 1.0 / bankuaiWithDataList.size() > 0.5 ? ANSI_GREEN : "");
 
         System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
                         "昨日大盘涨跌：%.2f%% \n" +
