@@ -372,33 +372,32 @@ public class Main {
             System.out.println("---------");
         }
 
-        if (isSimpleMode) {
-            System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
-                            "昨日大盘涨跌：%.2f%% \n" +
-                            "今日大盘开盘涨跌：%.2f%%\n",
-                    new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0,
-                    lastDapanStar2EndDiff * 100,
-                    hushen300BanKuaiData.last2StartDiff * 100);
-        } else {
-            System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
-                            "昨日大盘涨跌：%.2f%% \n" +
-                            "今日沪深300开盘涨跌：%.2f%%,今日一分钟涨跌：%.2f%%, 一分钟后的收益：%.2f%%， 波动：%.2f%% \n",
-                    new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0,
-                    lastDapanStar2EndDiff * 100,
-                    hushen300BanKuaiData.last2StartDiff * 100, hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100,
-                    getTodayDiffAfter1min(hushen300BanKuaiData) * 100,
-                    hushen300BanKuaiData.getBoDong() * 100
-            );
-        }
 
         int keChuangSort = 0;
+        int hushen300Sort = 0;
         for (int i = 0; i < bankuaiWithDataList.size(); i++) {
             if (bankuaiWithDataList.get(i).getBankuaiName().contains("科创50")) {
                 keChuangSort = i + 1;
+            } else if (bankuaiWithDataList.get(i).getBankuaiName().contains("沪深300")) {
+                hushen300Sort = i + 1;
             }
         }
         String keChuangSortColor = keChuangSort / bankuaiWithDataList.size() * 1.0 < 0.3 ? ANSI_RED :
                 (keChuangSort / bankuaiWithDataList.size() * 1.0 > 0.7 ? ANSI_GREEN : "");
+        String hushen300SortColor = hushen300Sort / bankuaiWithDataList.size() * 1.0 < 0.3 ? ANSI_RED :
+                (hushen300Sort / bankuaiWithDataList.size() * 1.0 > 0.7 ? ANSI_GREEN : "");
+
+        System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
+                        "昨日大盘涨跌：%.2f%% \n" +
+                        "今日沪深300开盘涨跌：%.2f%%,今日一分钟涨跌：%.2f%%, 一分钟后的收益：%.2f%%， 波动：%.2f%% ," +
+                        hushen300SortColor + "评分排位: %d/%d \n" + ANSI_RESET,
+                new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0,
+                lastDapanStar2EndDiff * 100,
+                hushen300BanKuaiData.last2StartDiff * 100, hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100,
+                getTodayDiffAfter1min(hushen300BanKuaiData) * 100,
+                hushen300BanKuaiData.getBoDong() * 100,
+                hushen300Sort, bankuaiWithDataList.size()
+        );
         System.out.printf("kechuang50开盘涨跌：%.2f%%,今日一分钟涨跌：%.2f%%, 一分钟后的收益：%.2f%%， 波动：%.2f%%  ," +
                         keChuangSortColor + "评分排位: %d/%d \n" + ANSI_RESET,
                 KeChuang50BanKuaiData.last2StartDiff * 100, KeChuang50BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100,
