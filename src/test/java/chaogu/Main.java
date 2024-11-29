@@ -33,9 +33,9 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-15";
-    static String todayDate = "2024-11-18";
-    static boolean readDataByFile = false;
+    static String lastDate = "2024-11-25";
+    static String todayDate = "2024-11-26";
+    static boolean readDataByFile = true;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
     static boolean zhiDingJiHui = true;
     static boolean showJiHui = false;
@@ -373,7 +373,6 @@ public class Main {
             System.out.println("---------");
         }
 
-
         int keChuangSort = 0;
         int hushen300Sort = 0;
         for (int i = 0; i < bankuaiWithDataList.size(); i++) {
@@ -388,6 +387,7 @@ public class Main {
         String hushen300SortColor = hushen300Sort * 1.0 / bankuaiWithDataList.size() < 0.2 ? ANSI_RED :
                 (hushen300Sort * 1.0 / bankuaiWithDataList.size() > 0.5 ? ANSI_GREEN : "");
 
+        //todo 科创和上证评分排名都是红色的时候可能可以考虑多买点，需要多点数据验证
         System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
                         "昨日大盘涨跌：%.2f%% \n" +
                         "今日沪深300开盘涨跌：%.2f%%,今日一分钟涨跌：%.2f%%, 一分钟后的收益：%.2f%%， 波动：%.2f%% , " +
