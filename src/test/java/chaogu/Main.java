@@ -33,11 +33,12 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-21";
-    static String todayDate = "2024-11-22";
-    static boolean readDataByFile = true;
+    static String lastDate = "2024-11-15";
+    static String todayDate = "2024-11-18";
+    static boolean readDataByFile = false;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
     static boolean zhiDingJiHui = true;
+    static boolean showJiHui = false;
     static boolean testJiHui = false;//测试机会模式
     static double lastDapanStar2EndDiff = -3 / 100.0;
 
@@ -366,7 +367,7 @@ public class Main {
         }).collect(Collectors.toList());
         long endMs = System.currentTimeMillis();
 
-        if (zhiDingJiHui) {
+        if (zhiDingJiHui && showJiHui) {
             System.out.println("\n---------");
             testAfterOneMinuteJiHui(bankuaiWithDataList, 1000000);
             System.out.println("---------");
@@ -420,7 +421,7 @@ public class Main {
         tongji(bankuaiWithDataList);
 
 //        loopJiHui(bankuaiWithDataList);//机会
-        if (!zhiDingJiHui) {
+        if (!zhiDingJiHui && showJiHui) {
             System.out.println("\n---------");
             testAfterOneMinuteJiHui(bankuaiWithDataList, 1000000);
             System.out.println("---------");
