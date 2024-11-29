@@ -33,9 +33,9 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-28";
-    static String todayDate = "2024-11-29";
-    static boolean readDataByFile = false;
+    static String lastDate = "2024-11-27";
+    static String todayDate = "2024-11-28";
+    static boolean readDataByFile = true;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
     static boolean zhiDingJiHui = true;
     static boolean testJiHui = false;//测试机会模式
@@ -378,14 +378,14 @@ public class Main {
         for (int i = 0; i < bankuaiWithDataList.size(); i++) {
             if (bankuaiWithDataList.get(i).getBankuaiName().contains("科创50")) {
                 keChuangSort = i + 1;
-            } else if (bankuaiWithDataList.get(i).getBankuaiName().contains("沪深300")) {
+            } else if (bankuaiWithDataList.get(i).getBankuaiName().contains("沪深300") || bankuaiWithDataList.get(i).getBankuaiName().contains("上证指数")) {
                 hushen300Sort = i + 1;
             }
         }
-        String keChuangSortColor = keChuangSort / bankuaiWithDataList.size() * 1.0 < 0.3 ? ANSI_RED :
-                (keChuangSort / bankuaiWithDataList.size() * 1.0 > 0.7 ? ANSI_GREEN : "");
-        String hushen300SortColor = hushen300Sort / bankuaiWithDataList.size() * 1.0 < 0.3 ? ANSI_RED :
-                (hushen300Sort / bankuaiWithDataList.size() * 1.0 > 0.7 ? ANSI_GREEN : "");
+        String keChuangSortColor = keChuangSort * 1.0 / bankuaiWithDataList.size() < 0.3 ? ANSI_RED :
+                (keChuangSort * 1.0 / bankuaiWithDataList.size() > 0.7 ? ANSI_GREEN : "");
+        String hushen300SortColor = hushen300Sort * 1.0 / bankuaiWithDataList.size() < 0.3 ? ANSI_RED :
+                (hushen300Sort * 1.0 / bankuaiWithDataList.size() > 0.7 ? ANSI_GREEN : "");
 
         System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
                         "昨日大盘涨跌：%.2f%% \n" +
