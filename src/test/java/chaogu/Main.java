@@ -33,8 +33,8 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-27";
-    static String todayDate = "2024-11-28";
+    static String lastDate = "2024-11-28";
+    static String todayDate = "2024-11-29";
     static boolean readDataByFile = false;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
     static boolean zhiDingJiHui = true;
@@ -54,14 +54,18 @@ public class Main {
 
 
     static double getSortValue(BankuaiWithData bankuaiWithData) {
+        double oneDiff = bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+        int defen = getDeFen(bankuaiWithData);
+        //1分钟etf涨跌；
+//        return bankuaiWithData.getEtfBankuaiWithData() == null ? 0 : bankuaiWithData.etfBankuaiWithData.todayMinuteDataList.get(1).startEndDiff;
 //        return bankuaiWithData.testMinuteShouYiSum;
 //        return bankuaiWithData.getLast30DayInfoMap().get(todayDate).getStartEndDiff() - bankuaiWithData.test0_EndIndexShouyim;
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
 //常用的两个
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);
 //常用的两个除系数，日常使用排序：todo **********
-        return getDeFen(bankuaiWithData) * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
-//        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
+        return (oneDiff < 0 || defen < 0 ? -1 : 1) * Math.abs(oneDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
+//        return oneDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
         //实际收益排序； todo 考虑增加胜率的收益排序
 //        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();//1分钟后收益统计
 //        return getTodayDiffAfter1min(bankuaiWithData) / Math.pow(bankuaiWithData.getTodayBoDong(), 0.5);//1分钟后收益统计
@@ -385,10 +389,12 @@ public class Main {
                 testStartTimeIndex, testEndTimeIndex, hushen300BanKuaiData.testMinuteShouYiSum * 100,
                 testEndTimeIndex, hushen300BanKuaiData.test0_EndIndexShouyim * 100
         );
-        System.out.printf("一分钟后平均收益：%.2f \t", sumTodayDiffAfter1min.stream().mapToDouble(e -> e).average().getAsDouble());
-        if (etfSumTodayDiffAfter1min.size() > 0) {
-            System.out.printf("一分钟后etf平均收益：%.2f\n", etfSumTodayDiffAfter1min.stream().mapToDouble(e -> e).average().getAsDouble());
-        }
+        System.out.printf("一分钟后平均收益：%.2f [%.0f] \t",
+                bankuaiWithDataList.stream().mapToDouble(e -> getTodayDiffAfter1min(e)).average().getAsDouble() * 100,
+                bankuaiWithDataList.stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong()).average().getAsDouble() * 100);
+        System.out.printf("一分钟后etf平均收益：%.2f [%.0f]\n",
+                bankuaiWithDataList.stream().filter(e -> e.getEtfBankuaiWithData() != null).mapToDouble(e -> getTodayDiffAfter1min(e.getEtfBankuaiWithData())).average().getAsDouble() * 100,
+                bankuaiWithDataList.stream().filter(e -> e.getEtfBankuaiWithData() != null).mapToDouble(e -> getTodayDiffAfter1min(e.getEtfBankuaiWithData()) / e.getEtfBankuaiWithData().getBoDong()).average().getAsDouble() * 100);
         System.out.printf("===========\t                             %s\t                %s\n", jiaGePaiMingColorTips, lastDayZhangFuColorTips);
         resultListt.forEach(System.out::println);
         tongji(bankuaiWithDataList);
@@ -812,9 +818,6 @@ public class Main {
         return xiangDuiBiLi30Day;
     }
 
-    public static List<Double> sumTodayDiffAfter1min = new ArrayList<>(100);
-    public static List<Double> etfSumTodayDiffAfter1min = new ArrayList<>(100);
-
     static String lastDayZhangFuColorTips = "";
     static String jiaGePaiMingColorTips = "";
 
@@ -899,11 +902,6 @@ public class Main {
         double todayMinuteXiangDui = e.todayMinuteDataList.get(1).startEndDiff * 100 - hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100;
         double kaipanXiangDui = e.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100;
         double zuoRiXiangDui = (e.lastDayDetail.startEndDiff - lastDapanStar2EndDiff) * 100;
-        try {
-            sumTodayDiffAfter1min.add(getTodayDiffAfter1min(e) * 100);
-        } catch (Exception exception) {
-            System.out.println("！！！失败，" + e.bankuaiName);
-        }
         int deFen = getDeFen(e);
         String sub1 = String.format("板块：%-7s \t" +
                         //今日一分钟
@@ -988,7 +986,6 @@ public class Main {
         double bankuaiKaipanXiangDui = bankuai.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100;
 
         double etfXiangDuiBanKuai = (todayMinuteXiangDui + kaipanXiangDui) - (bankuaiTodayMinuteXiangDui + bankuaiKaipanXiangDui);
-        etfSumTodayDiffAfter1min.add(getTodayDiffAfter1min(etf) * 100);
         return String.format("板块：%-7s  \t" +
                         //今日一分钟
                         "今日一分钟涨跌：%.3f%% \t" + ANSI_RESET +
