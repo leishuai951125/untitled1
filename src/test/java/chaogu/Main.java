@@ -64,14 +64,14 @@ public class Main {
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff * Math.abs(bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / bankuaiWithData.getLast30DayInfoMap().get(todayDate).last10dayEndAvg);
 //常用的两个
 //        return bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);
-        //第二分钟涨幅排序
+        //第二分钟涨幅排序，效果不佳
 //        return twoDiff / (twoDiff + oneDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);
 //        return Math.abs(twoDiff * (twoDiff - oneDiff)) / bankuaiWithData.getBoDong() / bankuaiWithData.getBoDong() * (twoDiff < 0 ? -1 : 1);
-        return (twoDiff - oneDiff / 2) * (oneDiff - bankuaiWithData.last2StartDiff / 2) / bankuaiWithData.getBoDong() / bankuaiWithData.getBoDong();
+//        return (twoDiff - oneDiff / 2) * (oneDiff - bankuaiWithData.last2StartDiff / 2) / bankuaiWithData.getBoDong() / bankuaiWithData.getBoDong();
 //常用的两个除系数，日常使用排序：todo **********
-//        return (oneDiff < 0 || defen < 0 ? -1 : 1) * Math.abs(oneDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
+        return (oneDiff < 0 || defen < 0 ? -1 : 1) * Math.abs(oneDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
 //        return oneDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
-        //实际收益排序； todo 考虑增加胜率的收益排序
+        //实际收益排序； todo ****** 考虑增加胜率的收益排序
 //        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();//1分钟后收益统计
 //        return getTodayDiffAfter1min(bankuaiWithData) / Math.pow(bankuaiWithData.getTodayBoDong(), 0.5);//1分钟后收益统计
 //        return bankuaiWithData.getTodayShengLv();//数学期望排序
@@ -194,6 +194,8 @@ public class Main {
                                 && !Objects.equals(yifenzhongShouYiColor, ANSI_GREEN) && !Objects.equals(yifenDapanColor, ANSI_GREEN)) {
                             banKuaiColor = ANSI_RED;
                         }
+                        String dapanShouYi = ANSI_RESET;
+//                        if()
                         //----颜色end----
                         fitDesc += String.format("，时间:%s,统计 %d 分钟," +
                                         //板块名，波动
@@ -346,9 +348,10 @@ public class Main {
         bankuaiWithDataList = bankuaiWithDataList.stream()
                 .filter(e -> !filterNoEtf || !StringUtils.isEmpty(e.banKuai.etfCode)).collect(Collectors.toList());
         //打印
-        List<String> resultListt = bankuaiWithDataList.stream().filter(Main::filter).sorted((a, b) -> {
+        bankuaiWithDataList = bankuaiWithDataList.stream().filter(Main::filter).sorted((a, b) -> {
             return getSortValue(b) > getSortValue(a) ? 1 : -1;
-        }).map(e -> {
+        }).collect(Collectors.toList());
+        List<String> resultListt = bankuaiWithDataList.stream().map(e -> {
             String ret = todayOneMinutteDesc(e);
             if (e.etfBankuaiWithData != null) {
                 try {
@@ -369,7 +372,6 @@ public class Main {
             System.out.println("---------");
         }
 
-
         if (isSimpleMode) {
             System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
                             "昨日大盘涨跌：%.2f%% \n" +
@@ -380,7 +382,7 @@ public class Main {
         } else {
             System.out.printf("开始时间：%s, 花费时间：%.2f s  \n" +
                             "昨日大盘涨跌：%.2f%% \n" +
-                            "今日大盘开盘涨跌：%.2f%%,今日大盘一分钟涨跌：%.2f%%, 一分钟后的收益：%.2f%%， 波动：%.2f%% \n",
+                            "今日沪深300开盘涨跌：%.2f%%,今日一分钟涨跌：%.2f%%, 一分钟后的收益：%.2f%%， 波动：%.2f%% \n",
                     new Date(starMs).toLocaleString(), (endMs - starMs) / 1000.0,
                     lastDapanStar2EndDiff * 100,
                     hushen300BanKuaiData.last2StartDiff * 100, hushen300BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100,
@@ -388,10 +390,21 @@ public class Main {
                     hushen300BanKuaiData.getBoDong() * 100
             );
         }
-        System.out.printf("kechuang50开盘涨跌：%.2f%%,今日大盘一分钟涨跌：%.2f%%, 一分钟后的收益：%.2f%%， 波动：%.2f%% \n",
+
+        int keChuangSort = 0;
+        for (int i = 0; i < bankuaiWithDataList.size(); i++) {
+            if (bankuaiWithDataList.get(i).getBankuaiName().contains("科创50")) {
+                keChuangSort = i + 1;
+            }
+        }
+        String keChuangSortColor = keChuangSort / bankuaiWithDataList.size() * 1.0 < 0.3 ? ANSI_RED :
+                (keChuangSort / bankuaiWithDataList.size() * 1.0 > 0.7 ? ANSI_GREEN : "");
+        System.out.printf("kechuang50开盘涨跌：%.2f%%,今日一分钟涨跌：%.2f%%, 一分钟后的收益：%.2f%%， 波动：%.2f%%  ," +
+                        keChuangSortColor + "排位: %d/%d \n" + ANSI_RESET,
                 KeChuang50BanKuaiData.last2StartDiff * 100, KeChuang50BanKuaiData.todayMinuteDataList.get(1).startEndDiff * 100,
                 getTodayDiffAfter1min(KeChuang50BanKuaiData) * 100,
-                KeChuang50BanKuaiData.getBoDong() * 100
+                KeChuang50BanKuaiData.getBoDong() * 100,
+                keChuangSort, bankuaiWithDataList.size()
         );
         System.out.printf("时间区间：[%d~%d],大盘归一化收益：%.2f%% , 大盘从[2~%d] 的收益：%.2f%% \n",
                 testStartTimeIndex, testEndTimeIndex, hushen300BanKuaiData.testMinuteShouYiSum * 100,
@@ -475,7 +488,7 @@ public class Main {
 
         //A股平均股价：47.800005
         waitAll(() -> {
-            KeChuang50BanKuaiData = getBankuaiWithData("科技创新50", "1.588000");
+            KeChuang50BanKuaiData = getBankuaiWithData("科技创新50", "1.588190"); //"1.588190" 科创100， "1.588000" 科创50
         }, () -> {
             hushen300BanKuaiData = getBankuaiWithData("沪深300", "1.000300");
         });
