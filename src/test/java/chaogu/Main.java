@@ -1265,7 +1265,7 @@ public class Main {
     }
 
     @SneakyThrows
-    private static JSONArray getDayData(String bankuaiCode) throws IOException {
+    public static JSONArray getDayData(String bankuaiCode) throws IOException {
         long ms = System.currentTimeMillis();
         String url = "https://push2his.eastmoney.com/api/qt/stock/kline/get?cb=jQuery35105715717072793236_"
                 + ms + "&secid=" + bankuaiCode +
