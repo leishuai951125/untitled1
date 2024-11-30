@@ -33,9 +33,9 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-28";
-    static String todayDate = "2024-11-29";
-    static boolean readDataByFile = false;
+    static String lastDate = "2024-11-22";
+    static String todayDate = "2024-11-25";
+    static boolean readDataByFile = true;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
     static boolean zhiDingJiHui = true;
     static boolean showJiHui = false;
@@ -416,15 +416,14 @@ public class Main {
                 bankuaiWithDataList.stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong()).average().getAsDouble() * 100,
                 bankuaiWithDataList.size()
         );
-
         List<BankuaiWithData> haozhibiaoList = new ArrayList<>();
         if (resultListt.size() != bankuaiWithDataList.size()) {
             throw new RuntimeException("size 错误");
         }
         for (int i = 0; i < bankuaiWithDataList.size(); i++) {
             if (
-                    resultListt.get(i).contains(ANSI_GREEN)
-//                    resultListt.get(i).contains(ANSI_YELLOW)
+                    resultListt.get(i).contains(ANSI_GREEN) ||
+                            resultListt.get(i).contains(ANSI_YELLOW)
 //                            bankuaiWithDataList.get(i).todayMinuteDataList.get(1).startEndDiff < 0 ||
 //                            bankuaiWithDataList.get(i).getLast2StartDiff() > 0
 //                            getDeFen(bankuaiWithDataList.get(i)) < 0
@@ -433,14 +432,20 @@ public class Main {
             }
             haozhibiaoList.add(bankuaiWithDataList.get(i));
         }
-        System.out.printf("只看指标好的一分钟后平均收益：%.2f [%.0f] 个数 %d \t",
+        System.out.printf("只看指标好的一分钟后平均收益：%.2f [%.0f] 个数 %d \t\n",
                 haozhibiaoList.stream().mapToDouble(e -> getTodayDiffAfter1min(e)).average().getAsDouble() * 100,
                 haozhibiaoList.stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong()).average().getAsDouble() * 100,
                 haozhibiaoList.size());
 
-        System.out.printf("一分钟后etf平均收益：%.2f [%.0f]\n",
+        System.out.printf("一分钟后etf平均收益：%.2f [%.0f] 个数 %d \t",
                 bankuaiWithDataList.stream().filter(e -> e.getEtfBankuaiWithData() != null).mapToDouble(e -> getTodayDiffAfter1min(e.getEtfBankuaiWithData())).average().orElse(0) * 100,
-                bankuaiWithDataList.stream().filter(e -> e.getEtfBankuaiWithData() != null).mapToDouble(e -> getTodayDiffAfter1min(e.getEtfBankuaiWithData()) / e.getEtfBankuaiWithData().getBoDong()).average().orElse(0) * 100);
+                bankuaiWithDataList.stream().filter(e -> e.getEtfBankuaiWithData() != null).mapToDouble(e -> getTodayDiffAfter1min(e.getEtfBankuaiWithData()) / e.getEtfBankuaiWithData().getBoDong()).average().orElse(0) * 100,
+                bankuaiWithDataList.stream().filter(e -> e.getEtfBankuaiWithData() != null).collect(Collectors.toList()).size());
+        System.out.printf("只看指标好的一分钟后平均收益：%.2f [%.0f] 个数 %d \t\n",
+                haozhibiaoList.stream().filter(e -> e.getEtfBankuaiWithData() != null).mapToDouble(e -> getTodayDiffAfter1min(e)).average().getAsDouble() * 100,
+                haozhibiaoList.stream().filter(e -> e.getEtfBankuaiWithData() != null).mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong()).average().getAsDouble() * 100,
+                haozhibiaoList.stream().filter(e -> e.getEtfBankuaiWithData() != null).collect(Collectors.toList()).size());
+
         System.out.printf("===========\t                             %s\t                %s\n", jiaGePaiMingColorTips, lastDayZhangFuColorTips);
         resultListt.forEach(System.out::println);
         tongji(bankuaiWithDataList);
@@ -871,6 +876,7 @@ public class Main {
         lastDayZhangFuColorTips = String.format("最佳昨日涨幅:" + ANSI_RED + "( %d ~ %d ]" + ANSI_RESET, (int) (totalLength * 0.06), (int) (totalLength * 0.6));
 //        return (e.lastDayZhangFuSort > 5 && e.lastDayZhangFuSort <= 50 ? ANSI_RED : ANSI_GREEN);
         return (e.lastDayZhangFuSort > totalLength * 0.06 && e.lastDayZhangFuSort <= totalLength * 0.6 ? ANSI_RED : ANSI_GREEN);
+//        return (e.lastDayZhangFuSort > totalLength * 0.1 && e.lastDayZhangFuSort <= totalLength * 0.4 ? ANSI_RED : ANSI_GREEN);
     }
 
     @NotNull
@@ -880,6 +886,7 @@ public class Main {
         //归一化 35（涨幅80名）～80（涨幅47名）
 //        if (xiangDuiBiLi30Day.guiyiHuaPaiMing <= 60 && xiangDuiBiLi30Day.guiyiHuaPaiMing >= 10) {
         if (xiangDuiBiLi30Day.guiyiHuaPaiMing <= totalLength * 0.7 && xiangDuiBiLi30Day.guiyiHuaPaiMing >= totalLength * 0.11) {
+//        if (xiangDuiBiLi30Day.guiyiHuaPaiMing <= totalLength * 0.5 && xiangDuiBiLi30Day.guiyiHuaPaiMing >= totalLength * 0.0) {
             color = ANSI_RED;
         }
         return color;
