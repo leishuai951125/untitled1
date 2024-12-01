@@ -23,10 +23,11 @@ public class ZhangTing {
         }
         System.out.println(code2Name);
         List<List<shangZheng.Main.OneDayDataDetail>> list2list = code2Name.keySet().parallelStream().map(code -> {
-            return getLast30DayData("1." + code);
+            return getLast30DayData(successCodePrefixMap.get(code.substring(0, 3)) + "." + code);
         }).filter(Objects::nonNull).collect(Collectors.toList());
         System.out.println(list2list.size());
 
+        //1.512200 房地产 ， 1.561600 消费电子
         List<shangZheng.Main.OneDayDataDetail> etfList = getLast30DayData("1.512200");
         List<shangZheng.Main.OneDayDataDetail> etf300List = getLast30DayData("1.561600");
 
@@ -79,6 +80,21 @@ public class ZhangTing {
                             "策略总收益：%.2f%% ,无脑总收益：%.2f%%,策略2总收益：%.2f%%,300 总收益：%.2f%% \n" + ANSI_RESET,
                     date, zhangting, dieting, desc, bankuaiMingRiShouYi * 100, shouYiSum1 * 100, shouYiSum2 * 100, shouYiSum3 * 100, shouYiSum4 * 100);
         }
+        System.out.println("成功:" + successSet);
+        System.out.println("失败：" + failSet);
+    }
+
+    static Set<String> successSet = new HashSet<>();
+    static Set<String> failSet = new HashSet<>();
+
+    static Map<String, String> successCodePrefixMap = new HashMap<>();
+
+    static {
+        String successCodeJSONArr = "1.600, 1.688, 1.512, 1.601, 1.603, 1.000, 1.561, 0.300, 0.301";
+        Arrays.stream(successCodeJSONArr.split(", ")).forEach(sub -> {
+            String[] sub2 = sub.split("\\.");
+            successCodePrefixMap.put(sub2[1], sub2[0]);
+        });
     }
 
     //    https://push2his.eastmoney.com/api/qt/stock/kline/get?fields1=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61&beg=0&end=20500101&ut=fa5fd1943c7b386f172d6893dbfba10b&rtntype=6&secid=1.000558&klt=101&fqt=1&cb=jsonp1732998219242
@@ -87,11 +103,14 @@ public class ZhangTing {
         JSONArray jsonArray = null;
         try {
             jsonArray = Main.getDayData(bankuaiCode);
+            successSet.add(bankuaiCode.substring(0, 5));
+//            System.out.println("成功" + bankuaiCode);
             if (jsonArray.size() < 100) {
                 System.out.println("<100 " + bankuaiCode);
                 return null;
             }
         } catch (Exception e) {
+            failSet.add(bankuaiCode.substring(0, 5));
 //            System.out.println("失败" + bankuaiCode);
 //            throw new RuntimeException(e);
             return null;
