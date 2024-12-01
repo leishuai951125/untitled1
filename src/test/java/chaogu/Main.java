@@ -1224,7 +1224,7 @@ public class Main {
      */
 
     @NotNull
-    private static List<BanKuai> parseAllBanKuai() {
+    public static List<BanKuai> parseAllBanKuai() {
 //        https://data.eastmoney.com/bkzj/hy_5.html
         List<BanKuai> banKuaiList = JSON.parseArray(Utils.getDataByFileName("all_bankuai.json")).stream()
                 .map(e -> {
@@ -1319,7 +1319,7 @@ public class Main {
 
     @NotNull
     @SneakyThrows
-    private static String getData(String url) {
+    public static String getData(String url) {
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         Request request = new Request.Builder()
