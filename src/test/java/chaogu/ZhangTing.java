@@ -148,12 +148,12 @@ public class ZhangTing {
 
         System.out.println("================");
         for (int i = 0; i < 10; i++) {
-            test(kechuang50, banKuaiWithGuPiaoList);
+            test(kechuang50, banKuaiWithGuPiaoList, i);
             System.out.println("end ================");
         }
     }
 
-    private static void test(GuPiaoData kechuang50, List<BanKuaiWithGuPiao> banKuaiWithGuPiaoList) {
+    private static void test(GuPiaoData kechuang50, List<BanKuaiWithGuPiao> banKuaiWithGuPiaoList, int offset) {
         double shouyiSum = 1;
         double shouyiSum2 = 1;
         double shouyiSum3 = 1;
@@ -170,16 +170,19 @@ public class ZhangTing {
 //                return dayDataDetail.last2EndDiff / dayDataDetail.getLast10dayBoDong();
 //            }).filter(e -> e != null).mapToDouble(k -> k).average().orElse(1);
             //按策略计算的最优板块
-            BanKuaiWithGuPiao zuiYouBanKuai = banKuaiWithGuPiaoList.get(0);
-            for (BanKuaiWithGuPiao tmp : banKuaiWithGuPiaoList) {
-                shangZheng.Main.OneDayDataDetail tmpDateDetail = tmp.getBankuaiData().dayDataDetailMap.get(date);
-                if (tmp.getZhangTingLv(date) > zuiYouBanKuai.getZhangTingLv(date)
-//                        && tmpDateDetail.last2EndDiff / tmpDateDetail.getLast10dayBoDong() > avgZhangDie
-//                        && tmp.getZhangTingLv(date) >= tmp.getZhangTingLv(lastDate)
-                ) {
-                    zuiYouBanKuai = tmp;
-                }
-            }
+
+            List<BanKuaiWithGuPiao> newList = banKuaiWithGuPiaoList.stream().sorted(Comparator.comparingDouble(tmp -> tmp.getZhangTingLv(date))).collect(Collectors.toList());
+            BanKuaiWithGuPiao zuiYouBanKuai = newList.get(newList.size() * offset / 10);
+//            BanKuaiWithGuPiao zuiYouBanKuai = banKuaiWithGuPiaoList.get(0);
+//            for (BanKuaiWithGuPiao tmp : banKuaiWithGuPiaoList) {
+//                shangZheng.Main.OneDayDataDetail tmpDateDetail = tmp.getBankuaiData().dayDataDetailMap.get(date);
+//                if (tmp.getZhangTingLv(date) > zuiYouBanKuai.getZhangTingLv(date)
+////                        && tmpDateDetail.last2EndDiff / tmpDateDetail.getLast10dayBoDong() > avgZhangDie
+////                        && tmp.getZhangTingLv(date) >= tmp.getZhangTingLv(lastDate)
+//                ) {
+//                    zuiYouBanKuai = tmp;
+//                }
+//            }
             double mingRiShouYi = zuiYouBanKuai.getBankuaiData().dayDataDetailMap.get(nextDate).last2EndDiff;
             double bodong = zuiYouBanKuai.getBankuaiData().dayDataDetailMap.get(date).getLast10dayBoDong();
             shouyiSum *= 1 + mingRiShouYi;
