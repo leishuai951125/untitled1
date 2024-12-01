@@ -132,22 +132,22 @@ public class ZhangTing {
     @Test
     public void ff2() {
 
-        GuPiaoData kechuang50 = getLast30DayData("1.515790");
+        GuPiaoData kechuang50 = getLast30DayData("1.588000");
         List<Main.BanKuai> allBanKuai = Main.parseAllBanKuai();
         List<BanKuaiWithGuPiao> banKuaiWithGuPiaoList = new ArrayList<>(allBanKuai.size());
-//        banKuaiWithGuPiaoList.addAll(
-//                allBanKuai.subList(0, allBanKuai.size() / 2)
-//                        .parallelStream().map(banKuai -> {
-//                            return getBanKuaiWithGuPiao(banKuai);
-//                        }).collect(Collectors.toList()));
         banKuaiWithGuPiaoList.addAll(
-                allBanKuai.subList(allBanKuai.size() / 2, allBanKuai.size())
+                allBanKuai.subList(0, allBanKuai.size() / 2)
+                        .parallelStream().map(banKuai -> {
+                            return getBanKuaiWithGuPiao(banKuai);
+                        }).collect(Collectors.toList()));
+        banKuaiWithGuPiaoList.addAll(
+                allBanKuai.subList(allBanKuai.size() / 2, allBanKuai.size() - 2)
                         .parallelStream().map(banKuai -> {
                             return getBanKuaiWithGuPiao(banKuai);
                         }).collect(Collectors.toList()));
 
         System.out.println("================");
-        for (int i = 0; i < 10; i++) {
+        for (int i = 1; i <= 20; i++) {
             test(kechuang50, banKuaiWithGuPiaoList, i);
             System.out.println("end ================");
         }
@@ -170,19 +170,11 @@ public class ZhangTing {
 //                return dayDataDetail.last2EndDiff / dayDataDetail.getLast10dayBoDong();
 //            }).filter(e -> e != null).mapToDouble(k -> k).average().orElse(1);
             //按策略计算的最优板块
-
-            List<BanKuaiWithGuPiao> newList = banKuaiWithGuPiaoList.stream().sorted(Comparator.comparingDouble(tmp -> tmp.getZhangTingLv(date))).collect(Collectors.toList());
-            BanKuaiWithGuPiao zuiYouBanKuai = newList.get(newList.size() * offset / 10);
-//            BanKuaiWithGuPiao zuiYouBanKuai = banKuaiWithGuPiaoList.get(0);
-//            for (BanKuaiWithGuPiao tmp : banKuaiWithGuPiaoList) {
-//                shangZheng.Main.OneDayDataDetail tmpDateDetail = tmp.getBankuaiData().dayDataDetailMap.get(date);
-//                if (tmp.getZhangTingLv(date) > zuiYouBanKuai.getZhangTingLv(date)
-////                        && tmpDateDetail.last2EndDiff / tmpDateDetail.getLast10dayBoDong() > avgZhangDie
-////                        && tmp.getZhangTingLv(date) >= tmp.getZhangTingLv(lastDate)
-//                ) {
-//                    zuiYouBanKuai = tmp;
-//                }
-//            }
+            List<BanKuaiWithGuPiao> newList = banKuaiWithGuPiaoList.stream().sorted(Comparator.comparingDouble(tmp -> {
+//                return tmp.getZhangTingLv(date);
+                return tmp.getZhangTing(date);
+            })).collect(Collectors.toList());
+            BanKuaiWithGuPiao zuiYouBanKuai = newList.get(newList.size() * offset / 20 - 1);
             double mingRiShouYi = zuiYouBanKuai.getBankuaiData().dayDataDetailMap.get(nextDate).last2EndDiff;
             double bodong = zuiYouBanKuai.getBankuaiData().dayDataDetailMap.get(date).getLast10dayBoDong();
             shouyiSum *= 1 + mingRiShouYi;
@@ -262,6 +254,14 @@ public class ZhangTing {
             int dieTing;
         }
 
+        public double getZhangTing(String date) {
+            ZhangDieTing zhangDieTing = date2ZhangDieTing.get(date);
+            if (zhangDieTing == null) {
+                return 0;
+            }
+            return (zhangDieTing.zhangTing - zhangDieTing.dieTing) * 1.0;
+        }
+
         public double getZhangTingLv(String date) {
             ZhangDieTing zhangDieTing = date2ZhangDieTing.get(date);
             if (zhangDieTing == null) {
@@ -294,7 +294,7 @@ public class ZhangTing {
             }
         } catch (Exception e) {
             failSet.add(bankuaiCode.substring(0, 5));
-//            System.out.println("失败" + bankuaiCode);
+            System.out.println("失败" + bankuaiCode);
 //            throw new RuntimeException(e);
             return null;
         }
