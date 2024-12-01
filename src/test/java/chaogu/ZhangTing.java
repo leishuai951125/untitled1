@@ -131,29 +131,33 @@ public class ZhangTing {
 
     @Test
     public void ff2() {
-        Random random = new Random();
-        GuPiaoData kechuang50 = getLast30DayData("1.588000");
+
+        GuPiaoData kechuang50 = getLast30DayData("1.515790");
         List<Main.BanKuai> allBanKuai = Main.parseAllBanKuai();
         List<BanKuaiWithGuPiao> banKuaiWithGuPiaoList = new ArrayList<>(allBanKuai.size());
-        banKuaiWithGuPiaoList.addAll(
-                allBanKuai.subList(0, allBanKuai.size() / 2)
-                        .parallelStream().map(banKuai -> {
-                            return getBanKuaiWithGuPiao(banKuai);
-                        }).collect(Collectors.toList()));
+//        banKuaiWithGuPiaoList.addAll(
+//                allBanKuai.subList(0, allBanKuai.size() / 2)
+//                        .parallelStream().map(banKuai -> {
+//                            return getBanKuaiWithGuPiao(banKuai);
+//                        }).collect(Collectors.toList()));
         banKuaiWithGuPiaoList.addAll(
                 allBanKuai.subList(allBanKuai.size() / 2, allBanKuai.size())
                         .parallelStream().map(banKuai -> {
                             return getBanKuaiWithGuPiao(banKuai);
                         }).collect(Collectors.toList()));
 
-//        List<BanKuaiWithGuPiao> banKuaiWithGuPiaoList = Main.parseAllBanKuai()
-////                .subList(0, 70)
-//                .parallelStream().map(banKuai -> {
-//                    return getBanKuaiWithGuPiao(banKuai);
-//                }).collect(Collectors.toList());
-        double shouyiSum = 0;
-        double shouyiSum2 = 0;
-        double shouyiSum3 = 0;
+        System.out.println("================");
+        for (int i = 0; i < 10; i++) {
+            test(kechuang50, banKuaiWithGuPiaoList);
+            System.out.println("end ================");
+        }
+    }
+
+    private static void test(GuPiaoData kechuang50, List<BanKuaiWithGuPiao> banKuaiWithGuPiaoList) {
+        double shouyiSum = 1;
+        double shouyiSum2 = 1;
+        double shouyiSum3 = 1;
+        Random random = new Random();
         for (int i = 1; i < dateList.size() - 1; i++) {
             String lastDate = dateList.get(i);
             String date = dateList.get(i);
@@ -170,44 +174,30 @@ public class ZhangTing {
             for (BanKuaiWithGuPiao tmp : banKuaiWithGuPiaoList) {
                 shangZheng.Main.OneDayDataDetail tmpDateDetail = tmp.getBankuaiData().dayDataDetailMap.get(date);
                 if (tmp.getZhangTingLv(date) > zuiYouBanKuai.getZhangTingLv(date)
-//                        && tmpDateDetail.last2EndDiff / tmpDateDetail.getLast10dayBoDong() < avgZhangDie
-                        && tmp.getZhangTingLv(date) >= tmp.getZhangTingLv(lastDate)
+//                        && tmpDateDetail.last2EndDiff / tmpDateDetail.getLast10dayBoDong() > avgZhangDie
+//                        && tmp.getZhangTingLv(date) >= tmp.getZhangTingLv(lastDate)
                 ) {
                     zuiYouBanKuai = tmp;
                 }
             }
             double mingRiShouYi = zuiYouBanKuai.getBankuaiData().dayDataDetailMap.get(nextDate).last2EndDiff;
             double bodong = zuiYouBanKuai.getBankuaiData().dayDataDetailMap.get(date).getLast10dayBoDong();
-            shouyiSum += mingRiShouYi;
+            shouyiSum *= 1 + mingRiShouYi;
             //随机选择板块
             BanKuaiWithGuPiao zuiYouBanKuai2 = banKuaiWithGuPiaoList.get(random.nextInt(banKuaiWithGuPiaoList.size() - 1));
             double mingRiShouYi2 = zuiYouBanKuai2.getBankuaiData().dayDataDetailMap.get(nextDate).last2EndDiff;
             double bodong2 = zuiYouBanKuai2.getBankuaiData().dayDataDetailMap.get(date).getLast10dayBoDong();
-            shouyiSum2 += mingRiShouYi2 / bodong2 * bodong;
+            shouyiSum2 *= 1 + mingRiShouYi2 / bodong2 * bodong;
             //科创 50
             double mingRiShouYi3 = kechuang50.dayDataDetailMap.get(nextDate).last2EndDiff;
             double bodong3 = kechuang50.dayDataDetailMap.get(nextDate).getLast10dayBoDong();
-            shouyiSum3 += mingRiShouYi3 / bodong3 * bodong;
+            shouyiSum3 *= 1 + mingRiShouYi3 / bodong3 * bodong;
             System.out.printf("日期：%s ,策略1板块：%s,涨停率:%.2f%%, 策略1明日涨幅：%.2f%%, 策略1累积涨幅：%.2f%% ； 策略1板块：%s,涨停率:%.2f%%, 策略2明日涨幅：%.2f%%, 策略2累积涨幅：%.2f%% ; 科创50 累积涨幅：%.2f%% \n", date,
                     zuiYouBanKuai.banKuai.name, zuiYouBanKuai.getZhangTingLv(date), mingRiShouYi * 100, shouyiSum * 100,
                     zuiYouBanKuai2.banKuai.name, zuiYouBanKuai2.getZhangTingLv(date), mingRiShouYi2 * 100, shouyiSum2 * 100,
                     shouyiSum3 * 100
             );
         }
-
-//        Main.BanKuai banKuai = new Main.BanKuai();
-//        banKuai.code = "90.BK1036";
-//        banKuai.name = "半导体";
-//        BanKuaiWithGuPiao banKuaiWithGuPiao = getBanKuaiWithGuPiao(banKuai);
-//        dateList.forEach(date -> {
-//            BanKuaiWithGuPiao.ZhangDieTing zhangDie = banKuaiWithGuPiao.getDate2ZhangDieTing().get(date);
-//            if (zhangDie == null) {
-//                return;
-//            }
-//            System.out.printf("日期：%s ,涨停数： %d 跌停数：%d ，总数 %d , 板块涨幅：%.2f%% \n", date,
-//                    zhangDie.zhangTing, zhangDie.dieTing, banKuaiWithGuPiao.getAllGeGuList().size()
-//                    , banKuaiWithGuPiao.bankuaiData.dayDataDetailMap.get(date).last2EndDiff * 100);
-//        });
     }
 
     public BanKuaiWithGuPiao getBanKuaiWithGuPiao(Main.BanKuai banKuai) {
@@ -308,7 +298,7 @@ public class ZhangTing {
 //        System.out.println("成功" + bankuaiCode);
         List<String> list = jsonArray.stream().map(e -> (String) e).collect(Collectors.toList());
         List<shangZheng.Main.OneDayDataDetail> detailList = Utils.parseDongFangCaiFuList(list);
-        detailList = detailList.subList(detailList.size() - 80, detailList.size() - 10);//todo
+        detailList = detailList.subList(detailList.size() - 100, detailList.size() - 1);//todo
         Map<String, shangZheng.Main.OneDayDataDetail> dayDataDetailMap = detailList.stream().collect(Collectors.toMap(e -> e.getDate(), e -> e));
         return new GuPiaoData(bankuaiCode, "", detailList, dayDataDetailMap);
     }
