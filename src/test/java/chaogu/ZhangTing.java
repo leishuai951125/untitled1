@@ -28,7 +28,7 @@ public class ZhangTing {
         System.out.println(list2list.size());
 
         List<shangZheng.Main.OneDayDataDetail> etfList = getLast30DayData("1.512200");
-        List<shangZheng.Main.OneDayDataDetail> etf300List = getLast30DayData("1.588000");
+        List<shangZheng.Main.OneDayDataDetail> etf300List = getLast30DayData("1.561600");
 
         int lastZhangDieTingCount = 999;
         double shouYiSum1 = 0;
@@ -59,15 +59,12 @@ public class ZhangTing {
             }
             int zhangdieTingCount = zhangting - dieting;
             String color = ANSI_RESET;
-            if (zhangting > dieting) {
-                color = ANSI_RED;
-            } else if (zhangting < dieting) {
-                color = ANSI_GREEN;
-            }
             if (zhangdieTingCount >= lastZhangDieTingCount) {
+                color = ANSI_RED;
                 shouYiSum1 += bankuaiMingRiShouYi;
             } else {
                 shouYiSum1 += bankuai300MingRiShouYi;
+                color = ANSI_GREEN;
             }
             shouYiSum2 += bankuaiMingRiShouYi;
             shouYiSum4 += bankuai300MingRiShouYi;
@@ -102,7 +99,7 @@ public class ZhangTing {
 //        System.out.println("成功" + bankuaiCode);
         List<String> list = jsonArray.stream().map(e -> (String) e).collect(Collectors.toList());
         List<shangZheng.Main.OneDayDataDetail> detailList = Utils.parseDongFangCaiFuList(list);
-        return detailList.subList(detailList.size() - 100, detailList.size());
+        return detailList.subList(detailList.size() - 90, detailList.size() - 10);
     }
 
     public static final String ANSI_RESET = "\u001B[0m";
