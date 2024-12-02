@@ -132,7 +132,8 @@ public class ZhangTing {
 
     @Test
     public void ff2() {
-        GuPiaoData kechuang50 = getLast30DayData("1.588000");
+//        GuPiaoData kechuang50 = getLast30DayData("1.588000");
+        GuPiaoData kechuang50 = getLast30DayData("90.BK1036");
         List<Main.BanKuai> allBanKuai = Main.parseAllBanKuai();
         List<BanKuaiWithGuPiao> banKuaiWithGuPiaoList = new ArrayList<>(allBanKuai.size());
 //        banKuaiWithGuPiaoList.addAll(
@@ -175,7 +176,8 @@ public class ZhangTing {
             //按策略计算的最优板块
             List<BanKuaiWithGuPiao> newList = banKuaiWithGuPiaoList.stream().sorted(Comparator.comparingDouble(tmp -> {
 //                return tmp.getZhangTingLv(date);
-                return tmp.getZhangTingLv(date);
+                shangZheng.Main.OneDayDataDetail dayDataDetail = tmp.getBankuaiData().dayDataDetailMap.get(date);
+                return tmp.getZhangTingLv(date) / (dayDataDetail.last2EndDiff / dayDataDetail.last10dayBoDong);
             })).collect(Collectors.toList());
 //            BanKuaiWithGuPiao zuiYouBanKuai = newList.get(newList.size() * offset / 20 - 1);
             BanKuaiWithGuPiao zuiYouBanKuai = newList.get(newList.size() * offset / total - 1);
