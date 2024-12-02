@@ -14,6 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 public class ZhangTing {
@@ -131,32 +132,34 @@ public class ZhangTing {
 
     @Test
     public void ff2() {
-
         GuPiaoData kechuang50 = getLast30DayData("1.588000");
         List<Main.BanKuai> allBanKuai = Main.parseAllBanKuai();
         List<BanKuaiWithGuPiao> banKuaiWithGuPiaoList = new ArrayList<>(allBanKuai.size());
-        banKuaiWithGuPiaoList.addAll(
-                allBanKuai.subList(0, allBanKuai.size() / 2)
-                        .parallelStream().map(banKuai -> {
-                            return getBanKuaiWithGuPiao(banKuai);
-                        }).collect(Collectors.toList()));
+//        banKuaiWithGuPiaoList.addAll(
+//                allBanKuai.subList(0, allBanKuai.size() / 2)
+//                        .parallelStream().map(banKuai -> {
+//                            return getBanKuaiWithGuPiao(banKuai);
+//                        }).collect(Collectors.toList()));
         banKuaiWithGuPiaoList.addAll(
                 allBanKuai.subList(allBanKuai.size() / 2, allBanKuai.size() - 2)
                         .parallelStream().map(banKuai -> {
                             return getBanKuaiWithGuPiao(banKuai);
                         }).collect(Collectors.toList()));
 
+//        test22(banKuaiWithGuPiaoList);
+
         System.out.println("================");
-        for (int i = 1; i <= 20; i++) {
-            test(kechuang50, banKuaiWithGuPiaoList, i);
-            System.out.println("end ================");
+        int total = 10;
+        for (int i = 1; i <= total; i++) {
+            test(kechuang50, banKuaiWithGuPiaoList, i, total);
+            System.out.println("end ================" + i + "/" + total);
         }
     }
 
-    private static void test(GuPiaoData kechuang50, List<BanKuaiWithGuPiao> banKuaiWithGuPiaoList, int offset) {
-        double shouyiSum = 1;
-        double shouyiSum2 = 1;
-        double shouyiSum3 = 1;
+    private static void test(GuPiaoData kechuang50, List<BanKuaiWithGuPiao> banKuaiWithGuPiaoList, int offset, int total) {
+        double shouyiSum = 0;
+        double shouyiSum2 = 0;
+        double shouyiSum3 = 0;
         Random random = new Random();
         for (int i = 1; i < dateList.size() - 1; i++) {
             String lastDate = dateList.get(i);
@@ -172,21 +175,22 @@ public class ZhangTing {
             //按策略计算的最优板块
             List<BanKuaiWithGuPiao> newList = banKuaiWithGuPiaoList.stream().sorted(Comparator.comparingDouble(tmp -> {
 //                return tmp.getZhangTingLv(date);
-                return tmp.getZhangTing(date);
+                return tmp.getZhangTingLv(date);
             })).collect(Collectors.toList());
-            BanKuaiWithGuPiao zuiYouBanKuai = newList.get(newList.size() * offset / 20 - 1);
+//            BanKuaiWithGuPiao zuiYouBanKuai = newList.get(newList.size() * offset / 20 - 1);
+            BanKuaiWithGuPiao zuiYouBanKuai = newList.get(newList.size() * offset / total - 1);
             double mingRiShouYi = zuiYouBanKuai.getBankuaiData().dayDataDetailMap.get(nextDate).last2EndDiff;
             double bodong = zuiYouBanKuai.getBankuaiData().dayDataDetailMap.get(date).getLast10dayBoDong();
-            shouyiSum *= 1 + mingRiShouYi;
+            shouyiSum += mingRiShouYi;
             //随机选择板块
             BanKuaiWithGuPiao zuiYouBanKuai2 = banKuaiWithGuPiaoList.get(random.nextInt(banKuaiWithGuPiaoList.size() - 1));
             double mingRiShouYi2 = zuiYouBanKuai2.getBankuaiData().dayDataDetailMap.get(nextDate).last2EndDiff;
             double bodong2 = zuiYouBanKuai2.getBankuaiData().dayDataDetailMap.get(date).getLast10dayBoDong();
-            shouyiSum2 *= 1 + mingRiShouYi2 / bodong2 * bodong;
+            shouyiSum2 += mingRiShouYi2 / bodong2 * bodong;
             //科创 50
             double mingRiShouYi3 = kechuang50.dayDataDetailMap.get(nextDate).last2EndDiff;
             double bodong3 = kechuang50.dayDataDetailMap.get(nextDate).getLast10dayBoDong();
-            shouyiSum3 *= 1 + mingRiShouYi3 / bodong3 * bodong;
+            shouyiSum3 += mingRiShouYi3 / bodong3 * bodong;
             System.out.printf("日期：%s ,策略1板块：%s,涨停率:%.2f%%, 策略1明日涨幅：%.2f%%, 策略1累积涨幅：%.2f%% ； 策略1板块：%s,涨停率:%.2f%%, 策略2明日涨幅：%.2f%%, 策略2累积涨幅：%.2f%% ; 科创50 累积涨幅：%.2f%% \n", date,
                     zuiYouBanKuai.banKuai.name, zuiYouBanKuai.getZhangTingLv(date), mingRiShouYi * 100, shouyiSum * 100,
                     zuiYouBanKuai2.banKuai.name, zuiYouBanKuai2.getZhangTingLv(date), mingRiShouYi2 * 100, shouyiSum2 * 100,
@@ -195,40 +199,86 @@ public class ZhangTing {
         }
     }
 
+    private static void test22(List<BanKuaiWithGuPiao> banKuaiWithGuPiaoList) {
+        String lastDate = dateList.get(dateList.size() - 2);
+        String today = dateList.get(dateList.size() - 1);
+        banKuaiWithGuPiaoList.stream().sorted(Comparator.comparingDouble(e -> e.getZhangTingLv(lastDate)))
+                .forEach(e -> System.out.println(JSON.toJSONString(e.getBanKuai()) +
+                        "   " + JSON.toJSONString(e.date2ZhangDieTing.get(lastDate)) +
+                        e.getBankuaiData().dayDataDetailMap.get(today).last2EndDiff));
+    }
+
     public BanKuaiWithGuPiao getBanKuaiWithGuPiao(Main.BanKuai banKuai) {
         GuPiaoData bankuaiData = getLast30DayData(banKuai.code);
         List<Main.BanKuai> allGeGuList = getAllGeGu(banKuai.code.split("\\.")[1]);
+        Map<String, Main.BanKuai> code2GeGu = allGeGuList.stream().collect(Collectors.toMap(e -> e.code, e -> e));
+
+        double zongShiZhi = allGeGuList.stream().filter(gegu -> code2GeGu.containsKey(gegu.code)).mapToDouble(gegu -> gegu.zongShiZhi * 1.0).sum();
+
         Map<String/*code*/, GuPiaoData> geguCode2Data = allGeGuList.parallelStream().map(gegu -> {
             return getLast30DayData(gegu.code);
         }).filter(Objects::nonNull).collect(Collectors.toMap(e -> e.code, e -> e));
         Map<String/*date*/, BanKuaiWithGuPiao.ZhangDieTing> date2ZhangDieTing = new HashMap<>(dateList.size());
-        for (int i = 0; i < dateList.size(); i++) {
+
+        for (int i = 1; i < dateList.size(); i++) {
             String date = dateList.get(i);
+            String lastDate = dateList.get(i);
             AtomicInteger zhangTing = new AtomicInteger();
+            AtomicInteger lianZhang = new AtomicInteger();
             AtomicInteger dieTing = new AtomicInteger();
+            AtomicInteger lianDie = new AtomicInteger();
+            AtomicLong zhangTingShiZhi = new AtomicLong();
+            AtomicLong lianZhangShiZhi = new AtomicLong();
+            AtomicLong dieTingShiZhi = new AtomicLong();
+            AtomicLong lianDieShiZhi = new AtomicLong();
             geguCode2Data.values().stream().forEach(gegu -> {
                 shangZheng.Main.OneDayDataDetail dayDataDetail = gegu.dayDataDetailMap.get(date);
+                shangZheng.Main.OneDayDataDetail lastDayDataDetail = gegu.dayDataDetailMap.get(lastDate);
                 if (dayDataDetail == null) {
                     return;
                 }
                 if (isKeChuang(gegu.code)) {
                     if (dayDataDetail.last2EndDiff > 0.195) {
                         zhangTing.incrementAndGet();
+                        zhangTingShiZhi.addAndGet(code2GeGu.get(gegu.code).zongShiZhi);
+                        if (lastDayDataDetail != null && lastDayDataDetail.last2EndDiff > 0.195) {
+                            lianZhang.incrementAndGet();
+                            lianZhangShiZhi.addAndGet(code2GeGu.get(gegu.code).zongShiZhi);
+                        }
                     } else if (dayDataDetail.last2EndDiff < -0.195) {
                         dieTing.incrementAndGet();
+                        dieTingShiZhi.addAndGet(code2GeGu.get(gegu.code).zongShiZhi);
+                        if (lastDayDataDetail != null && lastDayDataDetail.last2EndDiff < -0.195) {
+                            lianDie.incrementAndGet();
+                            lianDieShiZhi.addAndGet(code2GeGu.get(gegu.code).zongShiZhi);
+                        }
                     }
                 } else {
                     if (dayDataDetail.last2EndDiff > 0.095) {
                         zhangTing.incrementAndGet();
+                        zhangTingShiZhi.addAndGet(code2GeGu.get(gegu.code).zongShiZhi);
+                        if (lastDayDataDetail != null && lastDayDataDetail.last2EndDiff > 0.095) {
+                            lianZhang.incrementAndGet();
+                            lianZhangShiZhi.addAndGet(code2GeGu.get(gegu.code).zongShiZhi);
+                        }
                     } else if (dayDataDetail.last2EndDiff < -0.095) {
                         dieTing.incrementAndGet();
+                        dieTingShiZhi.addAndGet(code2GeGu.get(gegu.code).zongShiZhi);
+                        if (lastDayDataDetail != null && lastDayDataDetail.last2EndDiff > -0.095) {
+                            lianDie.incrementAndGet();
+                            lianDieShiZhi.addAndGet(code2GeGu.get(gegu.code).zongShiZhi);
+                        }
                     }
                 }
             });
-            BanKuaiWithGuPiao.ZhangDieTing zhangDieTing = new BanKuaiWithGuPiao.ZhangDieTing(zhangTing.get(), dieTing.get());
+            BanKuaiWithGuPiao.ZhangDieTing zhangDieTing = new BanKuaiWithGuPiao.ZhangDieTing(
+                    zhangTing.get(), zhangTingShiZhi.get(),
+                    lianZhang.get(), lianZhangShiZhi.get(),
+                    dieTing.get(), dieTingShiZhi.get(),
+                    lianDie.get(), lianDieShiZhi.get());
             date2ZhangDieTing.put(date, zhangDieTing);
         }
-        return new BanKuaiWithGuPiao(banKuai, bankuaiData, allGeGuList, geguCode2Data, date2ZhangDieTing);
+        return new BanKuaiWithGuPiao(banKuai, bankuaiData, allGeGuList, geguCode2Data, zongShiZhi, date2ZhangDieTing);
     }
 
     static boolean isKeChuang(String geguCode) {
@@ -245,13 +295,20 @@ public class ZhangTing {
         GuPiaoData bankuaiData;//板块涨跌幅信息
         List<Main.BanKuai> allGeGuList;//所有个股；可能有过滤
         Map<String/*code*/, GuPiaoData> geguCode2Data;//所有股票的详细数据，已经过滤了获取数据失败的股票；
+        double zongShiZhi;//所有个股总市值
         Map<String/*date*/, ZhangDieTing> date2ZhangDieTing;
 
         @Data
         @AllArgsConstructor
         public static class ZhangDieTing {
             int zhangTing;
+            long zhangTingShiZhi;
+            int lianZhang;
+            long lianZhangShiZhi;
             int dieTing;
+            long dieTingShiZhi;
+            int lianDie;
+            long lianDieShiZhi;
         }
 
         public double getZhangTing(String date) {
@@ -259,7 +316,8 @@ public class ZhangTing {
             if (zhangDieTing == null) {
                 return 0;
             }
-            return (zhangDieTing.zhangTing - zhangDieTing.dieTing) * 1.0;
+            return (zhangDieTing.zhangTing + zhangDieTing.lianZhang - zhangDieTing.dieTing - zhangDieTing.lianDie) * 1.0;
+//            return (zhangDieTing.lianZhang - zhangDieTing.lianDie) * 1.0;
         }
 
         public double getZhangTingLv(String date) {
@@ -267,7 +325,9 @@ public class ZhangTing {
             if (zhangDieTing == null) {
                 return 0;
             }
-            return (zhangDieTing.zhangTing - zhangDieTing.dieTing) * 1.0 / geguCode2Data.size();
+//            return (zhangDieTing.zhangTing - zhangDieTing.dieTing) * 1.0 / geguCode2Data.size();
+            return (zhangDieTing.zhangTingShiZhi + zhangDieTing.lianZhangShiZhi -
+                    zhangDieTing.dieTingShiZhi - zhangDieTing.lianDieShiZhi) / zongShiZhi;
         }
     }
 
@@ -301,7 +361,7 @@ public class ZhangTing {
 //        System.out.println("成功" + bankuaiCode);
         List<String> list = jsonArray.stream().map(e -> (String) e).collect(Collectors.toList());
         List<shangZheng.Main.OneDayDataDetail> detailList = Utils.parseDongFangCaiFuList(list);
-        detailList = detailList.subList(detailList.size() - 100, detailList.size() - 1);//todo
+        detailList = detailList.subList(detailList.size() - 50, detailList.size() - 1);//todo
         Map<String, shangZheng.Main.OneDayDataDetail> dayDataDetailMap = detailList.stream().collect(Collectors.toMap(e -> e.getDate(), e -> e));
         return new GuPiaoData(bankuaiCode, "", detailList, dayDataDetailMap);
     }
@@ -313,7 +373,7 @@ public class ZhangTing {
             long ms = System.currentTimeMillis();
             String url = "https://33.push2.eastmoney.com/api/qt/clist/get?cb=jQuery112404930637717184252_" +
                     ms + "&pn=1&pz=300&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&dect=1&wbp2u=|0|0|0|web&fid=f3&fs=b:"
-                    + bankuaiCode + "+f:!50&fields=f12,f13,f14&_=" + (ms + 10);
+                    + bankuaiCode + "+f:!50&fields=f12,f13,f14,f20,f21&_=" + (ms + 10);
             String jqueryString = Main.getData(url);
             String arr[] = jqueryString.split("\\(|\\)");
             JSONArray jsonArray = JSON.parseObject(arr[1]).getJSONObject("data").getJSONArray("diff");
@@ -327,6 +387,8 @@ public class ZhangTing {
                         code = jsonObject.getString("f13") + "." + code;
                     }
                     banKuai.setCode(code);
+                    banKuai.setZongShiZhi(jsonObject.getLong("f20"));
+                    banKuai.setLiuDongShiZhi(jsonObject.getLong("f21"));
                     return banKuai;
                 }).collect(Collectors.toList());
             }

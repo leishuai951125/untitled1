@@ -33,12 +33,12 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-28";
-    static String todayDate = "2024-11-29";
+    static String lastDate = "2024-11-29";
+    static String todayDate = "2024-12-02";
     static boolean readDataByFile = false;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
     static boolean zhiDingJiHui = true;
-    static boolean showJiHui = false;
+    static boolean showJiHui = true;
     static boolean testJiHui = false;//测试机会模式
     static double lastDapanStar2EndDiff = -1 / 100.0;
 
@@ -433,8 +433,8 @@ public class Main {
             haozhibiaoList.add(bankuaiWithDataList.get(i));
         }
         System.out.printf("只看指标好的一分钟后平均收益：%.2f [%.0f] 个数 %d \t\n",
-                haozhibiaoList.stream().mapToDouble(e -> getTodayDiffAfter1min(e)).average().getAsDouble() * 100,
-                haozhibiaoList.stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong()).average().getAsDouble() * 100,
+                haozhibiaoList.stream().mapToDouble(e -> getTodayDiffAfter1min(e)).average().orElse(0) * 100,
+                haozhibiaoList.stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong()).average().orElse(0) * 100,
                 haozhibiaoList.size());
 
         System.out.printf("一分钟后etf平均收益：%.2f [%.0f] 个数 %d \t",
@@ -442,8 +442,8 @@ public class Main {
                 bankuaiWithDataList.stream().filter(e -> e.getEtfBankuaiWithData() != null).mapToDouble(e -> getTodayDiffAfter1min(e.getEtfBankuaiWithData()) / e.getEtfBankuaiWithData().getBoDong()).average().orElse(0) * 100,
                 bankuaiWithDataList.stream().filter(e -> e.getEtfBankuaiWithData() != null).collect(Collectors.toList()).size());
         System.out.printf("只看指标好的一分钟后平均收益：%.2f [%.0f] 个数 %d \t\n",
-                haozhibiaoList.stream().filter(e -> e.getEtfBankuaiWithData() != null).mapToDouble(e -> getTodayDiffAfter1min(e)).average().getAsDouble() * 100,
-                haozhibiaoList.stream().filter(e -> e.getEtfBankuaiWithData() != null).mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong()).average().getAsDouble() * 100,
+                haozhibiaoList.stream().filter(e -> e.getEtfBankuaiWithData() != null).mapToDouble(e -> getTodayDiffAfter1min(e)).average().orElse(0) * 100,
+                haozhibiaoList.stream().filter(e -> e.getEtfBankuaiWithData() != null).mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong()).average().orElse(0) * 100,
                 haozhibiaoList.stream().filter(e -> e.getEtfBankuaiWithData() != null).collect(Collectors.toList()).size());
 
         System.out.printf("===========\t                             %s\t                %s\n", jiaGePaiMingColorTips, lastDayZhangFuColorTips);
@@ -1215,6 +1215,9 @@ public class Main {
         String eftName;
         String etfCode;
         boolean isSkipLog;
+        //仅个股有值
+        long zongShiZhi;//总市值
+        long liuDongShiZhi;//流动市值
     }
 
     /*
