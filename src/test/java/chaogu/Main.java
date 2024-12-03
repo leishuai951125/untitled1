@@ -33,14 +33,14 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-29";
-    static String todayDate = "2024-12-02";
+    static String lastDate = "2024-12-02";
+    static String todayDate = "2024-12-03";
     static boolean readDataByFile = false;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
     static boolean zhiDingJiHui = true;
     static boolean showJiHui = true;
     static boolean testJiHui = false;//测试机会模式
-    static double lastDapanStar2EndDiff = -1 / 100.0;
+    static double lastDapanStar2EndDiff = 1 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
 
@@ -459,6 +459,22 @@ public class Main {
 
         executorService.shutdown();
         System.out.println("结束");
+        System.out.println("---------");
+        System.out.println("昨日收益对今天的影响：");
+        bankuaiWithDataList.stream().collect(Collectors.groupingBy(e -> e.lastDayZhangFuSort / 10)).entrySet()
+                .stream().sorted(Comparator.comparingDouble(entry -> entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong()).average().getAsDouble()))
+                .forEach(entry -> System.out.printf("昨日收益排名：%d, 平均收益：%.2f%%\n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100));
+        System.out.println("---------");
+        System.out.println("今日一分钟收益对今天的影响：");
+        bankuaiWithDataList.stream().collect(Collectors.groupingBy(e -> e.todayMinuteSort / 10)).entrySet()
+                .stream().sorted(Comparator.comparingDouble(entry -> entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong()).average().getAsDouble()))
+                .forEach(entry -> System.out.printf("昨日收益排名：%d, 平均收益：%.2f%%\n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100));
+        System.out.println("---------");
+        System.out.println("今日开盘收益对今天的影响：");
+        bankuaiWithDataList.stream().collect(Collectors.groupingBy(e -> e.last2StartDiffSort / 10)).entrySet()
+                .stream().sorted(Comparator.comparingDouble(entry -> entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong()).average().getAsDouble()))
+                .forEach(entry -> System.out.printf("昨日收益排名：%d, 平均收益：%.2f%%\n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100));
+
     }
 
     private static void loopJiHui(List<BankuaiWithData> bankuaiWithDataList) {
@@ -955,8 +971,8 @@ public class Main {
         double kaipanXiangDui = e.last2StartDiff * 100 - hushen300BanKuaiData.last2StartDiff * 100;
         double zuoRiXiangDui = (e.lastDayDetail.startEndDiff - lastDapanStar2EndDiff) * 100;
         int deFen = getDeFen(e);
-        String twoMinuteShouYiDesc = String.format("今日2分钟涨跌:%.3f%%【%.1f】",
-                e.todayMinuteDataList.get(2).startEndDiff * 100, e.todayMinuteDataList.get(2).startEndDiff / e.getBoDong() * 100);
+//        String twoMinuteShouYiDesc = String.format("今日2分钟涨跌:%.3f%%【%.1f】", e.todayMinuteDataList.get(2).startEndDiff * 100, e.todayMinuteDataList.get(2).startEndDiff / e.getBoDong() * 100);
+        String twoMinuteShouYiDesc = "";
         String sub1 = String.format("板块：%-7s \t" +
                         //今日一分钟
                         getOneMinuteZhangFuColor(e) + "今日一分钟涨跌:%.3f%%【%.1f】" + ANSI_RESET +
