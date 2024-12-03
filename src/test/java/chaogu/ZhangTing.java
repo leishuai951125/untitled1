@@ -147,14 +147,14 @@ public class ZhangTing {
                             return getBanKuaiWithGuPiao(banKuai);
                         }).collect(Collectors.toList()));
 
-//        test22(banKuaiWithGuPiaoList);
+        test22(banKuaiWithGuPiaoList);
 
-        System.out.println("================");
-        int total = 10;
-        for (int i = 1; i <= total; i++) {
-            test(kechuang50, banKuaiWithGuPiaoList, i, total);
-            System.out.println("end ================" + i + "/" + total);
-        }
+//        System.out.println("================");
+//        int total = 10;
+//        for (int i = 1; i <= total; i++) {
+//            test(kechuang50, banKuaiWithGuPiaoList, i, total);
+//            System.out.println("end ================" + i + "/" + total);
+//        }
     }
 
     private static void test(GuPiaoData kechuang50, List<BanKuaiWithGuPiao> banKuaiWithGuPiaoList, int offset, int total) {
@@ -205,9 +205,10 @@ public class ZhangTing {
         String lastDate = dateList.get(dateList.size() - 2);
         String today = dateList.get(dateList.size() - 1);
         banKuaiWithGuPiaoList.stream().sorted(Comparator.comparingDouble(e -> e.getZhangTingLv(lastDate)))
-                .forEach(e -> System.out.println(JSON.toJSONString(e.getBanKuai()) +
-                        "   " + JSON.toJSONString(e.date2ZhangDieTing.get(lastDate)) +
-                        e.getBankuaiData().dayDataDetailMap.get(today).last2EndDiff));
+                .forEach(e -> System.out.printf("今天: %s,%s,  涨停率 %.2f%% , %.2f%%\n",
+                        today, JSON.toJSONString(e.getBanKuai()),
+                        e.getZhangTingLv(lastDate) * 100,
+                        e.getBankuaiData().dayDataDetailMap.get(today).last2EndDiff * 100));
     }
 
     public BanKuaiWithGuPiao getBanKuaiWithGuPiao(Main.BanKuai banKuai) {
@@ -363,7 +364,7 @@ public class ZhangTing {
 //        System.out.println("成功" + bankuaiCode);
         List<String> list = jsonArray.stream().map(e -> (String) e).collect(Collectors.toList());
         List<shangZheng.Main.OneDayDataDetail> detailList = Utils.parseDongFangCaiFuList(list);
-        detailList = detailList.subList(detailList.size() - 50, detailList.size() - 1);//todo
+        detailList = detailList.subList(detailList.size() - 50, detailList.size());//todo
         Map<String, shangZheng.Main.OneDayDataDetail> dayDataDetailMap = detailList.stream().collect(Collectors.toMap(e -> e.getDate(), e -> e));
         return new GuPiaoData(bankuaiCode, "", detailList, dayDataDetailMap);
     }

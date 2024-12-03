@@ -70,8 +70,8 @@ public class Main {
 //        return Math.abs(twoDiff * (twoDiff - oneDiff)) / bankuaiWithData.getBoDong() / bankuaiWithData.getBoDong() * (twoDiff < 0 ? -1 : 1);
 //        return (twoDiff - oneDiff / 2) * (oneDiff - bankuaiWithData.last2StartDiff / 2) / bankuaiWithData.getBoDong() / bankuaiWithData.getBoDong();
 //常用的两个除系数，日常使用排序：todo **********
-        return (oneDiff < 0 || defen < 0 ? -1 : 1) * Math.abs(oneDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
-//        return oneDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
+//        return (oneDiff < 0 || defen < 0 ? -1 : 1) * Math.abs(oneDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
+        return oneDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
         //实际收益排序； todo ****** 考虑增加胜率的收益排序
 //        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();//1分钟后收益统计
 //        return getTodayDiffAfter1min(bankuaiWithData) / Math.pow(bankuaiWithData.getTodayBoDong(), 0.5);//1分钟后收益统计
@@ -843,7 +843,7 @@ public class Main {
             last30DayInfoWithoutTodyList = last30DayInfoWithoutTodyList.subList(0, last30DayInfoWithoutTodyList.size() - 1);
         }
         //todo 取 x 天试试
-        last30DayInfoWithoutTodyList = last30DayInfoWithoutTodyList.subList(last30DayInfoWithoutTodyList.size() - 15, last30DayInfoWithoutTodyList.size());
+        last30DayInfoWithoutTodyList = last30DayInfoWithoutTodyList.subList(last30DayInfoWithoutTodyList.size() - 10, last30DayInfoWithoutTodyList.size());
 
         List<Double> xiangDuiBiLiList = new ArrayList<>(last30DayInfoWithoutTodyList.size());
         Map<String, Double> xiangDuiBiLiMap = new HashMap<>(last30DayInfoWithoutTodyList.size());
