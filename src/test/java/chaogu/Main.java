@@ -473,12 +473,12 @@ public class Main {
         System.out.println("今日一分钟收益对今天的影响：");
         bankuaiWithDataList.stream().collect(Collectors.groupingBy(e -> e.todayMinuteSort / 10)).entrySet()
                 .stream().sorted(Comparator.comparingDouble(entry -> entry.getValue().stream().mapToDouble(e -> getTodayDiff(e) / e.getBoDong()).average().getAsDouble()))
-                .forEach(entry -> System.out.printf("昨日收益排名：%d, 平均收益：%.2f%%\n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiff(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100));
+                .forEach(entry -> System.out.printf("今日一分钟收排名：%d, 平均收益：%.2f%%\n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiff(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100));
         System.out.println("---------");
         System.out.println("今日开盘收益对今天的影响：");
         bankuaiWithDataList.stream().collect(Collectors.groupingBy(e -> e.last2StartDiffSort / 10)).entrySet()
                 .stream().sorted(Comparator.comparingDouble(entry -> entry.getValue().stream().mapToDouble(e -> getTodayDiff(e) / e.getBoDong()).average().getAsDouble()))
-                .forEach(entry -> System.out.printf("昨日收益排名：%d, 平均收益：%.2f%%\n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiff(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100));
+                .forEach(entry -> System.out.printf("日开盘收益排名：%d, 平均收益：%.2f%%\n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiff(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100));
 
 
         System.out.println("---------");
@@ -490,12 +490,12 @@ public class Main {
         System.out.println("今日一分钟收益对今天的影响：");
         bankuaiWithDataList.stream().collect(Collectors.groupingBy(e -> e.todayMinuteSort / 10)).entrySet()
                 .stream().sorted(Comparator.comparingDouble(entry -> entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong()).average().getAsDouble()))
-                .forEach(entry -> System.out.printf("昨日收益排名：%d, 平均收益：%.2f%%\n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100));
+                .forEach(entry -> System.out.printf("今日一分钟收益排名：%d, 平均收益：%.2f%%\n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100));
         System.out.println("---------");
         System.out.println("今日开盘收益对今天的影响：");
         bankuaiWithDataList.stream().collect(Collectors.groupingBy(e -> e.last2StartDiffSort / 10)).entrySet()
                 .stream().sorted(Comparator.comparingDouble(entry -> entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong()).average().getAsDouble()))
-                .forEach(entry -> System.out.printf("昨日收益排名：%d, 平均收益：%.2f%%\n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100));
+                .forEach(entry -> System.out.printf("日开盘收益排名：%d, 平均收益：%.2f%%\n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100));
 
     }
 
