@@ -133,6 +133,7 @@ public class Utils {
             Main.OneDayDataDetail kechuangOneDayDataDetail = kechuangList.get(i);
             if (i >= 5) {
                 kechuangOneDayDataDetail.last5dayEndAvg = getLastAvg(kechuangList, i, 5);
+                kechuangOneDayDataDetail.last5dayBoDong = avgBoDong(kechuangList.subList(i - 5, i));
             }
             if (i >= 10) {
                 kechuangOneDayDataDetail.last10dayEndAvg = getLastAvg(kechuangList, i, 10);
