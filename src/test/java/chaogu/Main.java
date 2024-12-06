@@ -33,14 +33,15 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-11-21";
-    static String todayDate = "2024-11-22";
-    static boolean readDataByFile = true;
+    static String lastDate = "2024-12-05";
+    static String todayDate = "2024-12-06";
+    static boolean readDataByFile = false;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
     static boolean zhiDingJiHui = true;
     static boolean showJiHui = true;
     static boolean testJiHui = false;//测试机会模式
-    static double lastDapanStar2EndDiff = 1 / 100.0;
+    static boolean onlyTestKeChuang = false;
+    static double lastDapanStar2EndDiff = -1 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
 
@@ -69,9 +70,10 @@ public class Main {
 //        return twoDiff / (twoDiff + oneDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);
 //        return Math.abs(twoDiff * (twoDiff - oneDiff)) / bankuaiWithData.getBoDong() / bankuaiWithData.getBoDong() * (twoDiff < 0 ? -1 : 1);
 //        return (twoDiff - oneDiff / 2) * (oneDiff - bankuaiWithData.last2StartDiff / 2) / bankuaiWithData.getBoDong() / bankuaiWithData.getBoDong();
+//        return (bankuaiWithData.todayMinuteSort + bankuaiWithData.last2StartDiffSort - bankuaiWithData.lastDayZhangFuSort * 2);
 //常用的两个除系数，日常使用排序：todo **********
-//        return (oneDiff < 0 || defen < 0 ? -1 : 1) * Math.abs(oneDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
-        return oneDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
+        return (oneDiff < 0 || defen < 0 ? -1 : 1) * Math.abs(oneDiff) / Math.pow(bankuaiWithData.getBoDong(), 0.3);//得分排序
+//        return oneDiff / Math.pow(bankuaiWithData.getBoDong(), 0.3);//pow 第二个参数取值 0.1～-1 ;取值越小，波动大的越有优势
         //实际收益排序； todo ****** 考虑增加胜率的收益排序
 //        return getTodayDiffAfter1min(bankuaiWithData) / bankuaiWithData.getBoDong();//1分钟后收益统计
 //        return getTodayDiffAfter1min(bankuaiWithData) / Math.pow(bankuaiWithData.getTodayBoDong(), 0.5);//1分钟后收益统计
@@ -325,6 +327,11 @@ public class Main {
             fillGuiYihuaShouyi(bankuaiWithDataList);
         }
 //        testAfterOneMinuteJiHuiV2(bankuaiWithDataList);
+
+        if (onlyTestKeChuang) {
+            bankuaiWithDataList = bankuaiWithDataList.stream().filter(e -> e.getBoDong() > 0.02).collect(Collectors.toList());
+        }
+
         totalLength = bankuaiWithDataList.size();
         //填充归一化、比例
         bankuaiWithDataList.forEach(e -> {
@@ -349,6 +356,7 @@ public class Main {
         //过滤
         bankuaiWithDataList = bankuaiWithDataList.stream()
                 .filter(e -> !filterNoEtf || !StringUtils.isEmpty(e.banKuai.etfCode)).collect(Collectors.toList());
+
         //打印
         bankuaiWithDataList = bankuaiWithDataList.stream().filter(Main::filter).sorted((a, b) -> {
             return getSortValue(b) > getSortValue(a) ? 1 : -1;
@@ -468,34 +476,40 @@ public class Main {
         System.out.println("昨日收益对今天的影响：");
         bankuaiWithDataList.stream().collect(Collectors.groupingBy(e -> e.lastDayZhangFuSort / 10)).entrySet()
                 .stream().sorted(Comparator.comparingDouble(entry -> entry.getValue().stream().mapToDouble(e -> getTodayDiff(e) / e.getBoDong()).average().getAsDouble()))
-                .forEach(entry -> System.out.printf("昨日收益排名：%d, 平均收益：%.2f%%\n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiff(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100));
+                .forEach(entry -> System.out.printf("昨日收益排名：%d, 平均收益：%.2f%% ,平均波动：%.2f%% \n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiff(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100
+                        , entry.getValue().stream().mapToDouble(e -> e.getBoDong()).average().getAsDouble() * 100));
         System.out.println("---------");
         System.out.println("今日一分钟收益对今天的影响：");
         bankuaiWithDataList.stream().collect(Collectors.groupingBy(e -> e.todayMinuteSort / 10)).entrySet()
                 .stream().sorted(Comparator.comparingDouble(entry -> entry.getValue().stream().mapToDouble(e -> getTodayDiff(e) / e.getBoDong()).average().getAsDouble()))
-                .forEach(entry -> System.out.printf("今日一分钟收排名：%d, 平均收益：%.2f%%\n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiff(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100));
+                .forEach(entry -> System.out.printf("今日一分钟收排名：%d, 平均收益：%.2f%%,平均波动：%.2f%% \n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiff(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100
+                        , entry.getValue().stream().mapToDouble(e -> e.getBoDong()).average().getAsDouble() * 100));
         System.out.println("---------");
         System.out.println("今日开盘收益对今天的影响：");
         bankuaiWithDataList.stream().collect(Collectors.groupingBy(e -> e.last2StartDiffSort / 10)).entrySet()
                 .stream().sorted(Comparator.comparingDouble(entry -> entry.getValue().stream().mapToDouble(e -> getTodayDiff(e) / e.getBoDong()).average().getAsDouble()))
-                .forEach(entry -> System.out.printf("日开盘收益排名：%d, 平均收益：%.2f%%\n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiff(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100));
+                .forEach(entry -> System.out.printf("日开盘收益排名：%d, 平均收益：%.2f%%,平均波动：%.2f%% \n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiff(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100
+                        , entry.getValue().stream().mapToDouble(e -> e.getBoDong()).average().getAsDouble() * 100));
 
 
         System.out.println("---------");
         System.out.println("昨日收益对今天的影响：");
         bankuaiWithDataList.stream().collect(Collectors.groupingBy(e -> e.lastDayZhangFuSort / 10)).entrySet()
                 .stream().sorted(Comparator.comparingDouble(entry -> entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong()).average().getAsDouble()))
-                .forEach(entry -> System.out.printf("昨日收益排名：%d, 平均收益：%.2f%%\n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100));
+                .forEach(entry -> System.out.printf("昨日收益排名：%d, 平均收益：%.2f%%,平均波动：%.2f%% \n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100
+                        , entry.getValue().stream().mapToDouble(e -> e.getBoDong()).average().getAsDouble() * 100));
         System.out.println("---------");
         System.out.println("今日一分钟收益对今天的影响：");
         bankuaiWithDataList.stream().collect(Collectors.groupingBy(e -> e.todayMinuteSort / 10)).entrySet()
                 .stream().sorted(Comparator.comparingDouble(entry -> entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong()).average().getAsDouble()))
-                .forEach(entry -> System.out.printf("今日一分钟收益排名：%d, 平均收益：%.2f%%\n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100));
+                .forEach(entry -> System.out.printf("今日一分钟收益排名：%d, 平均收益：%.2f%%,平均波动：%.2f%% \n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100
+                        , entry.getValue().stream().mapToDouble(e -> e.getBoDong()).average().getAsDouble() * 100));
         System.out.println("---------");
         System.out.println("今日开盘收益对今天的影响：");
         bankuaiWithDataList.stream().collect(Collectors.groupingBy(e -> e.last2StartDiffSort / 10)).entrySet()
                 .stream().sorted(Comparator.comparingDouble(entry -> entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong()).average().getAsDouble()))
-                .forEach(entry -> System.out.printf("日开盘收益排名：%d, 平均收益：%.2f%%\n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100));
+                .forEach(entry -> System.out.printf("日开盘收益排名：%d, 平均收益：%.2f%%,平均波动：%.2f%% \n", entry.getKey(), entry.getValue().stream().mapToDouble(e -> getTodayDiffAfter1min(e) / e.getBoDong() * 0.015).average().getAsDouble() * 100
+                        , entry.getValue().stream().mapToDouble(e -> e.getBoDong()).average().getAsDouble() * 100));
 
     }
 
@@ -664,7 +678,10 @@ public class Main {
     private static void fillZuoRiZhangFuPaiMing(List<BankuaiWithData> bankuaiWithDataList) {
         //填充归一化排名
         AtomicInteger sort = new AtomicInteger(0);
-        bankuaiWithDataList.stream().sorted((a, b) -> (int) ((a.lastDayDetail.startEndDiff - b.lastDayDetail.startEndDiff) * 1000))
+        bankuaiWithDataList.stream().sorted((a, b) -> (int) ((a.lastDayDetail.getLasOneDayDataDetail().last2EndDiff - b.lastDayDetail.getLasOneDayDataDetail().last2EndDiff
+                        + a.lastDayDetail.startEndDiff - b.lastDayDetail.startEndDiff
+                ) * 1000))
+//        bankuaiWithDataList.stream().sorted((a, b) -> (int) ((a.lastDayDetail.startEndDiff - b.lastDayDetail.startEndDiff) * 1000))
                 .collect(Collectors.toList())
                 .forEach(e -> e.lastDayZhangFuSort = sort.incrementAndGet());
     }
@@ -786,8 +803,13 @@ public class Main {
 
     //一分钟后的涨跌
     static double getTodayDiffAfter1min(BankuaiWithData bankuaiWithData) {
-        return bankuaiWithData.last30DayInfoMap.get(todayDate).getStartEndDiff()
-                - bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+        try {
+            return bankuaiWithData.last30DayInfoMap.get(todayDate).getStartEndDiff()
+                    - bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
+        } catch (Exception e) {
+            System.out.println(bankuaiWithData.bankuaiName);
+            return 0;
+        }
     }
 
     //一分钟后的涨跌
@@ -886,7 +908,7 @@ public class Main {
             last30DayInfoWithoutTodyList = last30DayInfoWithoutTodyList.subList(0, last30DayInfoWithoutTodyList.size() - 1);
         }
         //todo 取 x 天试试
-        last30DayInfoWithoutTodyList = last30DayInfoWithoutTodyList.subList(last30DayInfoWithoutTodyList.size() - 10, last30DayInfoWithoutTodyList.size());
+        last30DayInfoWithoutTodyList = last30DayInfoWithoutTodyList.subList(last30DayInfoWithoutTodyList.size() - 29, last30DayInfoWithoutTodyList.size());
 
         List<Double> xiangDuiBiLiList = new ArrayList<>(last30DayInfoWithoutTodyList.size());
         Map<String, Double> xiangDuiBiLiMap = new HashMap<>(last30DayInfoWithoutTodyList.size());
@@ -907,7 +929,7 @@ public class Main {
         }
         xiangDuiBiLi30Day.xiangDuiBiLiMap = xiangDuiBiLiMap;
         xiangDuiBiLi30Day.avgXiangDuiBiLi = xiangDuiBiLiList.subList(0, xiangDuiBiLiList.size() - 1).stream().mapToDouble(d -> d).average().getAsDouble();
-        xiangDuiBiLi30Day.xiangDuiBiLiList10Day = xiangDuiBiLiList.subList(xiangDuiBiLiList.size() - 10, xiangDuiBiLiList.size());
+        xiangDuiBiLi30Day.xiangDuiBiLiList10Day = xiangDuiBiLiList.subList(Math.max(0, xiangDuiBiLiList.size() - 29), xiangDuiBiLiList.size());
         xiangDuiBiLi30Day.zuoRiGuiYiHua = zuoRiGuiYiHua(xiangDuiBiLiMap.get(lastDate), xiangDuiBiLi30Day.maxXiangDuiBiLi, xiangDuiBiLi30Day.minXiangDuiBiLi, xiangDuiBiLi30Day.avgXiangDuiBiLi);
         return xiangDuiBiLi30Day;
     }
@@ -1231,6 +1253,8 @@ public class Main {
 
         public double getBoDong() {
             return lastDayDetail.last20dayBoDong;
+//            return lastDayDetail.last10dayBoDong;
+//            return (lastDayDetail.last5dayBoDong + lastDayDetail.last20dayBoDong) / 2;
         }
 
         public double getTodayBoDong() {
