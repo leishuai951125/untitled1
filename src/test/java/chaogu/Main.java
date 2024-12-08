@@ -33,8 +33,8 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-12-03";
-    static String todayDate = "2024-12-04";
+    static String lastDate = "2024-12-04";
+    static String todayDate = "2024-12-05";
     static boolean readDataByFile = false;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
     static boolean zhiDingJiHui = true;
@@ -59,6 +59,9 @@ public class Main {
         double oneDiff = bankuaiWithData.getTodayMinuteDataList().get(1).startEndDiff;
         double twoDiff = bankuaiWithData.getTodayMinuteDataList().size() < 3 ? 0 : bankuaiWithData.getTodayMinuteDataList().get(2).startEndDiff;
         int defen = getDeFen(bankuaiWithData);
+//        return -(bankuaiWithData.getLastDayDetail().last2EndDiff + bankuaiWithData.getLastDayDetail().lasOneDayDataDetail.last2EndDiff +
+//                bankuaiWithData.getLastDayDetail().lasOneDayDataDetail.lasOneDayDataDetail.last2EndDiff
+//        ) / bankuaiWithData.getBoDong();
         //1分钟etf涨跌；
 //        return bankuaiWithData.getEtfBankuaiWithData() == null ? 0 : bankuaiWithData.etfBankuaiWithData.todayMinuteDataList.get(1).startEndDiff;
 //        return bankuaiWithData.testMinuteShouYiSum;
