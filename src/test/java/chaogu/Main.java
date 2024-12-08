@@ -33,14 +33,14 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-12-05";
-    static String todayDate = "2024-12-06";
+    static String lastDate = "2024-12-03";
+    static String todayDate = "2024-12-04";
     static boolean readDataByFile = false;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
     static boolean zhiDingJiHui = true;
     static boolean showJiHui = true;
     static boolean testJiHui = false;//测试机会模式
-    static boolean onlyTestKeChuang = false;
+    static boolean onlyTestKeChuang = true;
     static double lastDapanStar2EndDiff = -1 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易
@@ -125,113 +125,119 @@ public class Main {
 //        daZengDaJiang();
 
         bankuaiWithDataList.forEach(e -> {
-//            if (e.bankuaiName.contains("黄金股票")) { //打断点查问题
+            try {
+                if (e.bankuaiName.contains("黄金股票")) { //打断点查问题
 //                System.out.print("");
 //            }
-            int startIndex = 2;
-            int maxSpan = 2;
-            for (int i = startIndex; i < e.todayMinuteDataList.size() && i <= offsetForTest; i++) {
-                System.out.print("");
-                for (int t = 1; t <= maxSpan; t++) {
-                    if (i - t < startIndex - 1) {
-                        continue;
-                    }
-                    OneData bankuaiOneData = e.todayMinuteDataList.get(i);
+                    int startIndex = 2;
+                    int maxSpan = 2;
+                    for (int i = startIndex; i < e.todayMinuteDataList.size() && i <= offsetForTest; i++) {
+                        System.out.print("");
+                        for (int t = 1; t <= maxSpan; t++) {
+                            if (i - t < startIndex - 1) {
+                                continue;
+                            }
+                            OneData bankuaiOneData = e.todayMinuteDataList.get(i);
 //                OneData hushen300OneData = hushen300BanKuaiData.todayMinuteDataList.get(i);
-                    double bankuaiDiff = e.todayMinuteDataList.get(i).end / e.todayMinuteDataList.get(i - t).end - 1;
-                    double hushen300Diff = hushen300BanKuaiData.todayMinuteDataList.get(i).end / hushen300BanKuaiData.todayMinuteDataList.get(i - t).end - 1;
-                    double kechuang50Diff = KeChuang50BanKuaiData.todayMinuteDataList.get(i).end / KeChuang50BanKuaiData.todayMinuteDataList.get(i - t).end - 1;
-                    hushen300Diff = (hushen300Diff + kechuang50Diff) / 2;
-                    double dapanBodong = hushen300BanKuaiData.getBoDong() / 2 + KeChuang50BanKuaiData.getBoDong() / 2;
+                            double bankuaiDiff = e.todayMinuteDataList.get(i).end / e.todayMinuteDataList.get(i - t).end - 1;
+                            double hushen300Diff = hushen300BanKuaiData.todayMinuteDataList.get(i).end / hushen300BanKuaiData.todayMinuteDataList.get(i - t).end - 1;
+                            double kechuang50Diff = KeChuang50BanKuaiData.todayMinuteDataList.get(i).end / KeChuang50BanKuaiData.todayMinuteDataList.get(i - t).end - 1;
+                            hushen300Diff = (hushen300Diff + kechuang50Diff) / 2;
+                            double dapanBodong = hushen300BanKuaiData.getBoDong() / 2 + KeChuang50BanKuaiData.getBoDong() / 2;
 //                    double bankuaiBodong = i <= 5 ? e.getBoDong() : e.getTodayBoDongByMinutes(i);
-                    String fitDesc = null;
-                    double yuzhi = e.getBoDong() * (t <= 1 ? 0.3 : 0.35);
-                    if (hushen300Diff >= -0.00 && bankuaiDiff < -yuzhi) {
-                        fitDesc = ANSI_GREEN + "-条件1" + ANSI_RESET;
-                    } else if (hushen300Diff <= 0.00 && bankuaiDiff > yuzhi) {
-                        fitDesc = ANSI_RED + "+条件1" + ANSI_RESET;
-                    } else if (hushen300Diff > 0.00 && hushen300Diff < dapanBodong * 0.1 &&
-                            bankuaiDiff > yuzhi &&
-                            bankuaiDiff / e.getBoDong() / (hushen300Diff / dapanBodong) > 4) {
-                        //比大盘涨幅高4倍
-                        fitDesc = ANSI_RED + "+条件1.1" + ANSI_RESET;
-                    } else if (hushen300Diff <= 0.000 && bankuaiDiff > 0 && bankuaiDiff - hushen300Diff > yuzhi) {
+                            String fitDesc = null;
+                            double yuzhi = e.getBoDong() * (t <= 1 ? 0.3 : 0.35);
+                            if (hushen300Diff >= -0.00 && bankuaiDiff < -yuzhi) {
+                                fitDesc = ANSI_GREEN + "-条件1" + ANSI_RESET;
+                            } else if (hushen300Diff <= 0.00 && bankuaiDiff > yuzhi) {
+                                fitDesc = ANSI_RED + "+条件1" + ANSI_RESET;
+                            } else if (hushen300Diff > 0.00 && hushen300Diff < dapanBodong * 0.1 &&
+                                    bankuaiDiff > yuzhi &&
+                                    bankuaiDiff / e.getBoDong() / (hushen300Diff / dapanBodong) > 4) {
+                                //比大盘涨幅高4倍
+                                fitDesc = ANSI_RED + "+条件1.1" + ANSI_RESET;
+                            } else if (hushen300Diff <= 0.000 && bankuaiDiff > 0 && bankuaiDiff - hushen300Diff > yuzhi) {
 //                        fitDesc = ANSI_GREEN + "+条件2" + ANSI_RESET;
-                    } else if (hushen300Diff > 0 && bankuaiDiff - hushen300Diff > yuzhi &&
-                            bankuaiDiff / hushen300Diff >= 3) {
+                            } else if (hushen300Diff > 0 && bankuaiDiff - hushen300Diff > yuzhi &&
+                                    bankuaiDiff / hushen300Diff >= 3) {
 //                        fitDesc = "+条件3";//todo 合理的加入数据，考虑倍数; 目前测试发现该分支反例较多
-                    }
-                    if (fitDesc != null) {
-                        if (needFilterChongFuBankuai && allFitBanKuai.contains(e.bankuaiName + fitDesc.charAt(0))) {
-                            return;
-                        }
-                        allFitBanKuai.add(e.bankuaiName + fitDesc.charAt(0));//把符号带上
+                            }
+                            if (fitDesc != null) {
+                                if (needFilterChongFuBankuai && allFitBanKuai.contains(e.bankuaiName + fitDesc.charAt(0))) {
+                                    return;
+                                }
+                                allFitBanKuai.add(e.bankuaiName + fitDesc.charAt(0));//把符号带上
 
-                        //------颜色------
-                        double bankuaiDangQianShouYi = e.todayMinuteDataList.get(i).end / e.last30DayInfoMap.get(todayDate).start - 1;
-                        double bankuaiDangQianShouYi2 = e.todayMinuteDataList.get(i).end / e.last30DayInfoMap.get(lastDate).end - 1;
-                        double dapanDangQianShouYi = hushen300BanKuaiData.todayMinuteDataList.get(i).end / hushen300BanKuaiData.last30DayInfoMap.get(todayDate).start * 0.5 +
-                                KeChuang50BanKuaiData.todayMinuteDataList.get(i).end / KeChuang50BanKuaiData.last30DayInfoMap.get(todayDate).start * 0.5 - 1;
-                        double dapanDangQianShouYi2 = hushen300BanKuaiData.todayMinuteDataList.get(i).end / hushen300BanKuaiData.last30DayInfoMap.get(lastDate).end * 0.5 +
-                                KeChuang50BanKuaiData.todayMinuteDataList.get(i).end / KeChuang50BanKuaiData.last30DayInfoMap.get(lastDate).end * 0.5 - 1;
-                        String bankuaiShouYiColor = ANSI_RESET;
-                        if (bankuaiDiff > 0 &&
-                                (
-                                        isWeiXianShouYi(bankuaiDangQianShouYi, dapanDangQianShouYi, bankuaiDiff, i, e)
-                                                //todo 打印结果
-                                                || isWeiXianShouYi(bankuaiDangQianShouYi2, dapanDangQianShouYi2, bankuaiDiff, i, e)
-                                )
-                        ) {
-                            bankuaiShouYiColor = ANSI_GREEN;
-                        }
-                        String yifenzhongShouYiColor = ANSI_RESET;
-                        if (bankuaiDiff > 0 && bankuaiDiff > e.getBoDong() * 0.6) {
-                            yifenzhongShouYiColor = ANSI_GREEN;
-                        }
-                        String yifenDapanColor = ANSI_RESET;
-                        if (bankuaiDiff > 0 && hushen300Diff < -hushen300BanKuaiData.getBoDong() * 0.15) {
-                            yifenDapanColor = ANSI_GREEN;
-                        }
-                        String banKuaiColor = ANSI_RESET;
-                        if (bankuaiDiff > 0 && !Objects.equals(bankuaiShouYiColor, ANSI_GREEN)
-                                && !Objects.equals(yifenzhongShouYiColor, ANSI_GREEN) && !Objects.equals(yifenDapanColor, ANSI_GREEN)) {
-                            banKuaiColor = ANSI_RED;
-                        }
-                        String dapanShouYi = ANSI_RESET;
+                                //------颜色------
+                                double bankuaiDangQianShouYi = e.todayMinuteDataList.get(i).end / e.last30DayInfoMap.get(todayDate).start - 1;
+                                double bankuaiDangQianShouYi2 = e.todayMinuteDataList.get(i).end / e.last30DayInfoMap.get(lastDate).end - 1;
+                                double dapanDangQianShouYi = hushen300BanKuaiData.todayMinuteDataList.get(i).end / hushen300BanKuaiData.last30DayInfoMap.get(todayDate).start * 0.5 +
+                                        KeChuang50BanKuaiData.todayMinuteDataList.get(i).end / KeChuang50BanKuaiData.last30DayInfoMap.get(todayDate).start * 0.5 - 1;
+                                double dapanDangQianShouYi2 = hushen300BanKuaiData.todayMinuteDataList.get(i).end / hushen300BanKuaiData.last30DayInfoMap.get(lastDate).end * 0.5 +
+                                        KeChuang50BanKuaiData.todayMinuteDataList.get(i).end / KeChuang50BanKuaiData.last30DayInfoMap.get(lastDate).end * 0.5 - 1;
+                                String bankuaiShouYiColor = ANSI_RESET;
+                                if (bankuaiDiff > 0 &&
+                                        (
+                                                isWeiXianShouYi(bankuaiDangQianShouYi, dapanDangQianShouYi, bankuaiDiff, i, e)
+                                                        //todo 打印结果
+                                                        || isWeiXianShouYi(bankuaiDangQianShouYi2, dapanDangQianShouYi2, bankuaiDiff, i, e)
+                                        )
+                                ) {
+                                    bankuaiShouYiColor = ANSI_GREEN;
+                                }
+                                String yifenzhongShouYiColor = ANSI_RESET;
+                                if (bankuaiDiff > 0 && bankuaiDiff > e.getBoDong() * 0.6) {
+                                    yifenzhongShouYiColor = ANSI_GREEN;
+                                }
+                                String yifenDapanColor = ANSI_RESET;
+                                if (bankuaiDiff > 0 && hushen300Diff < -hushen300BanKuaiData.getBoDong() * 0.15) {
+                                    yifenDapanColor = ANSI_GREEN;
+                                }
+                                String banKuaiColor = ANSI_RESET;
+                                if (bankuaiDiff > 0 && !Objects.equals(bankuaiShouYiColor, ANSI_GREEN)
+                                        && !Objects.equals(yifenzhongShouYiColor, ANSI_GREEN) && !Objects.equals(yifenDapanColor, ANSI_GREEN)) {
+                                    banKuaiColor = ANSI_RED;
+                                }
+                                String dapanShouYi = ANSI_RESET;
 //                        if()
-                        //----颜色end----
-                        fitDesc += String.format("，时间:%s,统计 %d 分钟," +
+                                //----颜色end----
+                                fitDesc += String.format("，时间:%s,统计 %d 分钟," +
+                                                //板块名，波动
+                                                banKuaiColor + "板块:%s , etf:%s" + ANSI_RESET
+                                                + ",波动:%.2f%%,| " +
+                                                //板块
+                                                "涨幅：" + yifenzhongShouYiColor + "%.2f%%【%.0f%%】，" + yifenDapanColor + "%.2f%%" + ANSI_RESET + "，板块收盘涨幅：%.2f%% |" +
+                                                //大盘收盘
+                                                "大盘收盘涨幅：%.2f%% ,50收盘涨跌:%.2f%%，" +
+                                                "\n        板块开盘：%.2f%%，板块一分钟：%.2f%%, " +
+                                                bankuaiShouYiColor + "截止当前板块收益：%.2f%%【%.2f%%】" + ANSI_RESET +
+                                                ",截止当前大盘收益：%.2f%%【%.2f%%】\n",
+                                        bankuaiOneData.dateTime.substring(11), t,
                                         //板块名，波动
-                                        banKuaiColor + "板块:%s , etf:%s" + ANSI_RESET
-                                        + ",波动:%.2f%%,| " +
+                                        e.bankuaiName.substring(0, Math.min(5, e.bankuaiName.length())), e.banKuai.eftName,
+                                        e.getBoDong() * 100,
                                         //板块
-                                        "涨幅：" + yifenzhongShouYiColor + "%.2f%%【%.0f%%】，" + yifenDapanColor + "%.2f%%" + ANSI_RESET + "，板块收盘涨幅：%.2f%% |" +
+                                        bankuaiDiff * 100, bankuaiDiff / e.getBoDong() * 100, hushen300Diff * 100, e.last30DayInfoMap.get(todayDate).end / e.todayMinuteDataList.get(i).end * 100 - 100,
                                         //大盘收盘
-                                        "大盘收盘涨幅：%.2f%% ,50收盘涨跌:%.2f%%，" +
-                                        "\n        板块开盘：%.2f%%，板块一分钟：%.2f%%, " +
-                                        bankuaiShouYiColor + "截止当前板块收益：%.2f%%【%.2f%%】" + ANSI_RESET +
-                                        ",截止当前大盘收益：%.2f%%【%.2f%%】\n",
-                                bankuaiOneData.dateTime.substring(11), t,
-                                //板块名，波动
-                                e.bankuaiName.substring(0, Math.min(5, e.bankuaiName.length())), e.banKuai.eftName,
-                                e.getBoDong() * 100,
-                                //板块
-                                bankuaiDiff * 100, bankuaiDiff / e.getBoDong() * 100, hushen300Diff * 100, e.last30DayInfoMap.get(todayDate).end / e.todayMinuteDataList.get(i).end * 100 - 100,
-                                //大盘收盘
-                                hushen300BanKuaiData.last30DayInfoMap.get(todayDate).end / hushen300BanKuaiData.todayMinuteDataList.get(i).end * 100 - 100,
-                                KeChuang50BanKuaiData.last30DayInfoMap.get(todayDate).end / KeChuang50BanKuaiData.todayMinuteDataList.get(i).end * 100 - 100,
-                                //板块
-                                e.last2StartDiff * 100, e.todayMinuteDataList.get(1).startEndDiff * 100,
-                                //截止收益,todo 截止收益差距过大可能要排除，截止收益的定义需要清晰（是否包含开盘本身）
-                                bankuaiDangQianShouYi * 100, bankuaiDangQianShouYi2 * 100,
-                                dapanDangQianShouYi * 100, dapanDangQianShouYi2 * 100
-                        );
-                        time2desc.putIfAbsent(bankuaiOneData.dateTime, new ArrayList<>());
-                        time2desc.get(bankuaiOneData.dateTime).add(fitDesc);
-                        break;
+                                        hushen300BanKuaiData.last30DayInfoMap.get(todayDate).end / hushen300BanKuaiData.todayMinuteDataList.get(i).end * 100 - 100,
+                                        KeChuang50BanKuaiData.last30DayInfoMap.get(todayDate).end / KeChuang50BanKuaiData.todayMinuteDataList.get(i).end * 100 - 100,
+                                        //板块
+                                        e.last2StartDiff * 100, e.todayMinuteDataList.get(1).startEndDiff * 100,
+                                        //截止收益,todo 截止收益差距过大可能要排除，截止收益的定义需要清晰（是否包含开盘本身）
+                                        bankuaiDangQianShouYi * 100, bankuaiDangQianShouYi2 * 100,
+                                        dapanDangQianShouYi * 100, dapanDangQianShouYi2 * 100
+                                );
+                                time2desc.putIfAbsent(bankuaiOneData.dateTime, new ArrayList<>());
+                                time2desc.get(bankuaiOneData.dateTime).add(fitDesc);
+                                break;
+                            }
+                        }
                     }
                 }
+            } catch (Exception exception) {
+                System.out.println(e.bankuaiName + "错误");
             }
+//
         });
 
         if (time2desc.size() != 0) {
@@ -908,7 +914,7 @@ public class Main {
             last30DayInfoWithoutTodyList = last30DayInfoWithoutTodyList.subList(0, last30DayInfoWithoutTodyList.size() - 1);
         }
         //todo 取 x 天试试
-        last30DayInfoWithoutTodyList = last30DayInfoWithoutTodyList.subList(last30DayInfoWithoutTodyList.size() - 29, last30DayInfoWithoutTodyList.size());
+        last30DayInfoWithoutTodyList = last30DayInfoWithoutTodyList.subList(last30DayInfoWithoutTodyList.size() - 10, last30DayInfoWithoutTodyList.size());
 
         List<Double> xiangDuiBiLiList = new ArrayList<>(last30DayInfoWithoutTodyList.size());
         Map<String, Double> xiangDuiBiLiMap = new HashMap<>(last30DayInfoWithoutTodyList.size());
@@ -987,7 +993,7 @@ public class Main {
 //            System.out.println(e);
         }
         if (e.todayMinuteDataList.get(1).startEndDiff < e.last2StartDiff) {
-            //一分钟后涨幅不如开盘
+//            //一分钟后涨幅不如开盘
             return ANSI_GREEN;
         }
         if (e.todayMinuteDataList.get(1).startEndDiff > e.getBoDong() * 0.5) {
