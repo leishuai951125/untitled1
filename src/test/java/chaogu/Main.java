@@ -33,14 +33,14 @@ public class Main {
 
     RunMode runMode = RunMode.YuCe;
 
-    static String lastDate = "2024-12-04";
-    static String todayDate = "2024-12-05";
+    static String lastDate = "2024-12-09";
+    static String todayDate = "2024-12-10";
     static boolean readDataByFile = false;
     static boolean needFilterChongFuBankuai = true;//一分钟后的机会中去重
     static boolean zhiDingJiHui = true;
     static boolean showJiHui = true;
     static boolean testJiHui = false;//测试机会模式
-    static boolean onlyTestKeChuang = true;
+    static boolean onlyTestKeChuang = false;
     static double lastDapanStar2EndDiff = -1 / 100.0;
 
     //25min整结束集合竞价，30分整开始交易

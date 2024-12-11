@@ -136,25 +136,25 @@ public class ZhangTing {
         GuPiaoData kechuang50 = getLast30DayData("90.BK1036");
         List<Main.BanKuai> allBanKuai = Main.parseAllBanKuai();
         List<BanKuaiWithGuPiao> banKuaiWithGuPiaoList = new ArrayList<>(allBanKuai.size());
-//        banKuaiWithGuPiaoList.addAll(
-//                allBanKuai.subList(0, allBanKuai.size() / 2)
-//                        .parallelStream().map(banKuai -> {
-//                            return getBanKuaiWithGuPiao(banKuai);
-//                        }).collect(Collectors.toList()));
         banKuaiWithGuPiaoList.addAll(
-                allBanKuai.subList(allBanKuai.size() / 2, allBanKuai.size() - 2)
+                allBanKuai.subList(0, allBanKuai.size() / 2)
                         .parallelStream().map(banKuai -> {
                             return getBanKuaiWithGuPiao(banKuai);
                         }).collect(Collectors.toList()));
+//        banKuaiWithGuPiaoList.addAll(
+//                allBanKuai.subList(allBanKuai.size() / 2, allBanKuai.size() - 2)
+//                        .parallelStream().map(banKuai -> {
+//                            return getBanKuaiWithGuPiao(banKuai);
+//                        }).collect(Collectors.toList()));
 
-        test22(banKuaiWithGuPiaoList);
+//        test22(banKuaiWithGuPiaoList);
 
 //        System.out.println("================");
-//        int total = 10;
-//        for (int i = 1; i <= total; i++) {
-//            test(kechuang50, banKuaiWithGuPiaoList, i, total);
-//            System.out.println("end ================" + i + "/" + total);
-//        }
+        int total = 10;
+        for (int i = 5; i <= total; i++) {
+            test(kechuang50, banKuaiWithGuPiaoList, i, total);
+            System.out.println("end ================" + i + "/" + total);
+        }
     }
 
     private static void test(GuPiaoData kechuang50, List<BanKuaiWithGuPiao> banKuaiWithGuPiaoList, int offset, int total) {
@@ -177,6 +177,8 @@ public class ZhangTing {
             List<BanKuaiWithGuPiao> newList = banKuaiWithGuPiaoList.stream().sorted(Comparator.comparingDouble(tmp -> {
 //                return tmp.getZhangTingLv(date);
                 shangZheng.Main.OneDayDataDetail dayDataDetail = tmp.getBankuaiData().dayDataDetailMap.get(date);
+                shangZheng.Main.OneDayDataDetail _2 = dayDataDetail.lasOneDayDataDetail;
+//                return (-_2.startEndDiff - _2.lasOneDayDataDetail.startEndDiff + dayDataDetail.getStartEndDiff()) / dayDataDetail.getLast10dayBoDong();
                 return tmp.getZhangTingLv(date) / (dayDataDetail.last2EndDiff / dayDataDetail.last10dayBoDong);
             })).collect(Collectors.toList());
 //            BanKuaiWithGuPiao zuiYouBanKuai = newList.get(newList.size() * offset / 20 - 1);
@@ -329,8 +331,12 @@ public class ZhangTing {
                 return 0;
             }
 //            return (zhangDieTing.zhangTing - zhangDieTing.dieTing) * 1.0 / geguCode2Data.size();
-            return (zhangDieTing.zhangTingShiZhi + zhangDieTing.lianZhangShiZhi -
-                    zhangDieTing.dieTingShiZhi - zhangDieTing.lianDieShiZhi) / zongShiZhi;
+            return (
+//                    zhangDieTing.zhangTingShiZhi +
+                    zhangDieTing.lianZhangShiZhi
+//                            - zhangDieTing.dieTingShiZhi
+                            - zhangDieTing.lianDieShiZhi)
+                    / zongShiZhi;
         }
     }
 
@@ -364,7 +370,7 @@ public class ZhangTing {
 //        System.out.println("成功" + bankuaiCode);
         List<String> list = jsonArray.stream().map(e -> (String) e).collect(Collectors.toList());
         List<shangZheng.Main.OneDayDataDetail> detailList = Utils.parseDongFangCaiFuList(list);
-        detailList = detailList.subList(detailList.size() - 50, detailList.size());//todo
+        detailList = detailList.subList(detailList.size() - 100, detailList.size());//todo
         Map<String, shangZheng.Main.OneDayDataDetail> dayDataDetailMap = detailList.stream().collect(Collectors.toMap(e -> e.getDate(), e -> e));
         return new GuPiaoData(bankuaiCode, "", detailList, dayDataDetailMap);
     }
