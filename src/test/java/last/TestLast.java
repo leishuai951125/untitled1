@@ -34,7 +34,7 @@ public class TestLast {
         double sum2 = 1;
         int cnt2 = 0;
         double sum3 = 1;
-        for (int i = 10; i < doubleList.size(); i++) {
+        for (int i = 700; i < doubleList.size(); i++) {
             sum1 *= doubleList.get(i) + 1;
             cnt1++;
             if (doubleList.get(i - 1) > 0 && canBuy(doubleList, i, testCounnt, testBiLi)) {
@@ -58,7 +58,7 @@ public class TestLast {
 
     //看看策略是否还可用，可用为1，不可用-1
     static boolean canBuy(List<Double> doubleList, int i, int testCounnt, double testBiLi) {
-//        return 1;
+//        return true;
         if (i < 10) {
             return true;
         }
@@ -68,13 +68,6 @@ public class TestLast {
         double bodong = doubleList.subList(start, end).stream().mapToDouble(e -> Math.abs(e)).average().getAsDouble();
         double sum = doubleList.subList(start, end).stream().mapToDouble(e -> e).sum();
         return sum > testBiLi * bodong;
-//            int failCnt = 0;
-//        for (int lastDay = start; lastDay < end; lastDay++) {
-//            if (doubleList.get(lastDay) * doubleList.get(lastDay - 1) < 0) {
-//                failCnt++;
-//            }
-//        }
-//        return 1.0 * failCnt / count >= 0.0 ? -1 : 1;
     }
 
 }
