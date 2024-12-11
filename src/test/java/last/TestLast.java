@@ -34,7 +34,7 @@ public class TestLast {
         double sum2 = 1;
         int cnt2 = 0;
         double sum3 = 1;
-        for (int i = 1; i < doubleList.size(); i++) {
+        for (int i = 10; i < doubleList.size(); i++) {
             sum1 *= doubleList.get(i) + 1;
             cnt1++;
             if (doubleList.get(i - 1) > 0 && canBuy(doubleList, i, testCounnt, testBiLi)) {
