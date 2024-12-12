@@ -1,17 +1,25 @@
 package last;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
 import sun.security.x509.GeneralName;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TestLast {
+    static boolean shouxuei = false;
+
     public static void main(String[] args) throws IOException {
         String jsonBody = new String(Files.readAllBytes(Paths.get("/Users/leishuai/IdeaProjects/untitled1/src/test/java/last/tmp.txt")));
         List<Double> doubleList = JSON.parseArray(jsonBody, Double.class);
+//        doubleList = doubleList.stream().map(e -> e / 100).collect(Collectors.toList());
+//        doubleList = Lists.partition(doubleList, 5).stream().map(sub -> sub.stream().mapToDouble(e -> e).sum()).collect(Collectors.toList());
         double maxShouYi = 0;
         for (int i = 1; i <= 10; i++) {
             for (int j = -15; j <= -5; j++) {
@@ -39,7 +47,7 @@ public class TestLast {
             sum1 *= doubleList.get(i) + 1;
             cnt1++;
             if (doubleList.get(i - 1) > 0 && canBuy(doubleList, i, testCounnt, testBiLi)) {
-                if (lastBuy == i - 1) {
+                if (lastBuy == i - 1 || !shouxuei) {
                     sum2 *= doubleList.get(i) + 1;
                 } else {
                     sum2 *= doubleList.get(i) + 1 - 0.0003;
@@ -64,16 +72,16 @@ public class TestLast {
 
     //看看策略是否还可用，可用为1，不可用-1
     static boolean canBuy(List<Double> doubleList, int i, int testCounnt, double testBiLi) {
-//        return true;
-        if (i < 10) {
-            return true;
-        }
-        int count = testCounnt;
-        int start = Math.max(1, i - count);
-        int end = i;
-        double bodong = doubleList.subList(start, end).stream().mapToDouble(e -> Math.abs(e)).average().getAsDouble();
-        double sum = doubleList.subList(start, end).stream().mapToDouble(e -> e).sum();
-        return sum > testBiLi * bodong;
+        return true;
+//        if (i < 10) {
+//            return true;
+//        }
+//        int count = testCounnt;
+//        int start = Math.max(1, i - count);
+//        int end = i;
+//        double bodong = doubleList.subList(start, end).stream().mapToDouble(e -> Math.abs(e)).average().getAsDouble();
+//        double sum = doubleList.subList(start, end).stream().mapToDouble(e -> e).sum();
+//        return sum > testBiLi * bodong;
     }
 
 }
